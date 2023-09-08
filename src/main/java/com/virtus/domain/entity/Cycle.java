@@ -1,6 +1,6 @@
 package com.virtus.domain.entity;
 
-import com.virtus.common.domain.entity.BaseDefaultEntity;
+import com.virtus.common.domain.entity.BaseConfigurationEntity;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
@@ -12,7 +12,7 @@ import java.util.List;
 @Table(name = "ciclos", schema = "virtus")
 @Getter
 @Setter
-public class Cycle extends BaseDefaultEntity {
+public class Cycle extends BaseConfigurationEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence_generator")

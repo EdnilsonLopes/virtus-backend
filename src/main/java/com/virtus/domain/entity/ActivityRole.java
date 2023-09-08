@@ -6,16 +6,12 @@ import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
-@Table(name = "users", schema = "virtus")
+@Table(name = "activities_roles", schema = "virtus")
 @Getter
 @Setter
-public class User extends BaseEntity {
+public class ActivityRole {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence_generator")
@@ -28,33 +24,15 @@ public class User extends BaseEntity {
                     @org.hibernate.annotations.Parameter(name = "increment_size", value = "1")
             }
     )
-    @Column(name = "id_user")
+    @Column(name = "id_activity_role")
     private Integer id;
 
-    @Column(name = "name")
-    private String name;
-
-    @Column(name = "username")
-    private String username;
-
-    @Column(name = "password")
-    private String password;
-
-    @Column(name = "email")
-    private String email;
-
-    @Column(name = "mobile")
-    private String mobile;
+    @ManyToOne
+    @JoinColumn(name = "id_activity")
+    private Activity activity;
 
     @ManyToOne
     @JoinColumn(name = "id_role")
     private Role role;
-
-    @Column(name = "criado_em")
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    @Transient
-    private List<Role> roles = new ArrayList<>();
-
 
 }

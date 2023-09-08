@@ -1,21 +1,23 @@
 package com.virtus.domain.entity;
 
 import com.virtus.common.domain.entity.BaseEntity;
+import com.virtus.domain.enums.EntityInSystem;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Entity
-@Table(name = "users", schema = "virtus")
+@Table(name = "workflows", schema = "virtus")
 @Getter
 @Setter
-public class User extends BaseEntity {
+public class Workflow extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence_generator")
@@ -28,33 +30,30 @@ public class User extends BaseEntity {
                     @org.hibernate.annotations.Parameter(name = "increment_size", value = "1")
             }
     )
-    @Column(name = "id_user")
+    @Column(name = "id_workflow")
     private Integer id;
 
     @Column(name = "name")
     private String name;
 
-    @Column(name = "username")
-    private String username;
+    @Column(name = "description")
+    private String description;
 
-    @Column(name = "password")
-    private String password;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "entity_type")
+    private EntityInSystem entityType;
 
-    @Column(name = "email")
-    private String email;
+    @Column(name = "start_at")
+    private LocalDateTime startAt;
 
-    @Column(name = "mobile")
-    private String mobile;
+    @Column(name = "end_at")
+    private LocalDateTime endAt;
 
-    @ManyToOne
-    @JoinColumn(name = "id_role")
-    private Role role;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
-    @Column(name = "criado_em")
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    @Transient
-    private List<Role> roles = new ArrayList<>();
-
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "workflow")
+    private List<Activity> activities = new ArrayList<>();
 
 }
+

@@ -1,21 +1,21 @@
 package com.virtus.domain.entity;
 
+import javax.persistence.*;
+
 import com.virtus.common.domain.entity.BaseEntity;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "users", schema = "virtus")
+@Table(name = "activities", schema = "virtus")
 @Getter
 @Setter
-public class User extends BaseEntity {
+public class Activity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence_generator")
@@ -28,33 +28,33 @@ public class User extends BaseEntity {
                     @org.hibernate.annotations.Parameter(name = "increment_size", value = "1")
             }
     )
-    @Column(name = "id_user")
+    @Column(name = "id_activity")
     private Integer id;
 
-    @Column(name = "name")
-    private String name;
+    @Column(name = "start_at")
+    private LocalDateTime startAt;
 
-    @Column(name = "username")
-    private String username;
+    @Column(name = "end_at")
+    private LocalDateTime endAt;
 
-    @Column(name = "password")
-    private String password;
-
-    @Column(name = "email")
-    private String email;
-
-    @Column(name = "mobile")
-    private String mobile;
+    @Column(name = "expiration_time_days")
+    private Integer expirationTimeDays;
 
     @ManyToOne
-    @JoinColumn(name = "id_role")
-    private Role role;
+    @JoinColumn(name = "id_expiration_action")
+    private Action expirationAction;
 
-    @Column(name = "criado_em")
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @ManyToOne
+    @JoinColumn(name = "id_action")
+    private Action action;
 
-    @Transient
-    private List<Role> roles = new ArrayList<>();
+    @ManyToOne
+    @JoinColumn(name = "id_workflow")
+    private Workflow workflow;
 
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "activity")
+    private List<ActivityRole> activityRoles = new ArrayList<>();
 
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "activity")
+    private List<FeatureActivity> featuresActivities;
 }

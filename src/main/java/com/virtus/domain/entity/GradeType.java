@@ -1,6 +1,6 @@
 package com.virtus.domain.entity;
 
-import com.virtus.common.domain.entity.BaseDefaultEntity;
+import com.virtus.common.domain.entity.BaseConfigurationEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,7 +13,7 @@ import javax.persistence.*;
 @Getter
 @Setter
 @NoArgsConstructor
-public class GradeType extends BaseDefaultEntity {
+public class GradeType extends BaseConfigurationEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence_generator")

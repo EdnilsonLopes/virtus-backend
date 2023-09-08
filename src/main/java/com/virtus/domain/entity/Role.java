@@ -2,15 +2,20 @@ package com.virtus.domain.entity;
 
 import com.virtus.common.domain.entity.BaseEntity;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
-@Table(name = "role", schema = "virtus")
+@Table(name = "roles", schema = "virtus")
 @Getter
 @Setter
+@NoArgsConstructor
 public class Role extends BaseEntity {
 
     @Id
@@ -24,7 +29,7 @@ public class Role extends BaseEntity {
                     @org.hibernate.annotations.Parameter(name = "increment_size", value = "1")
             }
     )
-    @Column(name = "id")
+    @Column(name = "id_role")
     private Integer id;
 
     @Column(name = "name")
@@ -32,4 +37,14 @@ public class Role extends BaseEntity {
 
     @Column(name = "description")
     private String description;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "role")
+    private List<FeatureRole> features = new ArrayList<>();
+
+    public Role(Integer id) {
+        this.id = id;
+    }
 }

@@ -2,11 +2,14 @@ package com.virtus.service;
 
 import com.virtus.common.BaseService;
 import com.virtus.domain.dto.request.UserRequestDTO;
+import com.virtus.domain.dto.response.RoleResponseDTO;
 import com.virtus.domain.dto.response.UserResponseDTO;
+import com.virtus.domain.entity.Role;
 import com.virtus.domain.entity.User;
 import com.virtus.persistence.RoleRepository;
 import com.virtus.persistence.UserRepository;
 import com.virtus.translate.Translator;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManagerFactory;
@@ -25,7 +28,7 @@ public class UserService extends BaseService<User, UserRepository, UserRequestDT
             UserRepository userRepository,
             EntityManagerFactory entityManagerFactory, RoleRepository roleRepository
             //PasswordEncoder passwordEncoder
-    ) {
+            ) {
         super(repository, userRepository, entityManagerFactory);
         this.entityManagerFactory = entityManagerFactory;
         this.roleRepository = roleRepository;
@@ -38,20 +41,34 @@ public class UserService extends BaseService<User, UserRepository, UserRequestDT
         dto.setUsername(entity.getUsername());
         dto.setName(entity.getName());
         dto.setId(entity.getId());
+        dto.setEmail(entity.getEmail());
+        dto.setMobile(entity.getMobile());
+        dto.setRole(parseToRoleResponse(entity.getRole()));
         dto.setCreatedAt(entity.getCreatedAt());
         dto.setUpdatedAt(entity.getUpdatedAt());
         return dto;
     }
 
+    private RoleResponseDTO parseToRoleResponse(Role role) {
+        RoleResponseDTO response = new RoleResponseDTO();
+        response.setId(role.getId());
+        response.setDescription(role.getDescription());
+        response.setName(role.getName());
+        return response;
+    }
+
     @Override
     protected User parseToEntity(UserRequestDTO body) {
-        User user = new User();
-        user.setId(body.getId());
+        User user = body.getId() != null ? getRepository().findById(body.getId()).orElse(new User()) : new User();
         user.setName(body.getName());
         user.setUsername(body.getUsername());
+        user.setMobile(body.getMobile());
+        user.setEmail(body.getEmail());
         //user.setPassword(passwordEncoder.encode(body.getPassword()));
-        user.setPassword(body.getPassword());
-        //user.setRoles(Arrays.asList(roleRepository.findByName(body.getName()).get()));
+        if (Strings.isNotBlank(body.getPassword())) {
+            user.setPassword(body.getPassword());
+        }
+        user.setRole(body.getRole() != null ? roleRepository.findById(body.getRole().getId()).orElse(null) : null);
         return user;
     }
 

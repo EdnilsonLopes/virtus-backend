@@ -18,9 +18,6 @@ public class BaseDefaultEntity extends BaseEntity {
     @Column(name = "descricao")
     private String description;
 
-    @Column(name = "referencia")
-    private String reference;
-
     @Column(name = "criado_em")
     private LocalDateTime createdAt = LocalDateTime.now();
 

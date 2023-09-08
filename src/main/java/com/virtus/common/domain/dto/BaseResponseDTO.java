@@ -14,5 +14,6 @@ public class BaseResponseDTO {
     private Integer id;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private UserResponseDTO author;
 
 }

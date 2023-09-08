@@ -298,6 +298,16 @@ public abstract class BaseService<
         return response;
     }
 
+    protected StatusResponseDTO parseToStatusResponseDTO(Status status){
+        StatusResponseDTO response = new StatusResponseDTO();
+        response.setId(status.getId());
+        response.setName(status.getName());
+        response.setDescription(status.getDescription());
+        response.setStereotype(status.getStereotype());
+        response.setAuthor(parseToUserResponseDTO(status.getAuthor()));
+        return response;
+    }
+
     protected EnumDTO<Enum> parseToAverageTypeEnumResponseDTO(AverageType averageType) {
         return EnumDTO.builder()
                 .value(averageType)
