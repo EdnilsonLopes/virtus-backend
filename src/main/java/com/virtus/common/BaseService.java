@@ -157,7 +157,16 @@ public abstract class BaseService<
         dto.setUsername(user.getUsername());
         dto.setCreatedAt(user.getCreatedAt());
         dto.setUpdatedAt(user.getUpdatedAt());
+        dto.setRole(parseToRoleResponse(user.getRole()));
         return dto;
+    }
+
+    private RoleResponseDTO parseToRoleResponse(Role role) {
+        RoleResponseDTO response = new RoleResponseDTO();
+        response.setId(role.getId());
+        response.setName(role.getName());
+        response.setDescription(role.getDescription());
+        return response;
     }
 
     protected ElementResponseDTO parseToElementResponseDTO(Element entity, boolean detailed) {
