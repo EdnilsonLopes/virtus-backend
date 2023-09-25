@@ -6,6 +6,8 @@ import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "escritorios", schema = "virtus")
@@ -33,5 +35,11 @@ public class Office extends BaseDefaultEntity {
     @ManyToOne
     @JoinColumn(name = "id_chefe")
     private User boss;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "office", orphanRemoval = true)
+    private List<Jurisdiction> jurisdictions = new ArrayList<>();
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "office", orphanRemoval = true)
+    private List<Member> members = new ArrayList<>();
 
 }

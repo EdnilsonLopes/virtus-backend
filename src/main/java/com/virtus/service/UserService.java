@@ -2,14 +2,18 @@ package com.virtus.service;
 
 import com.virtus.common.BaseService;
 import com.virtus.domain.dto.request.UserRequestDTO;
+import com.virtus.domain.dto.request.UserUpdatePasswordRequestDTO;
 import com.virtus.domain.dto.response.RoleResponseDTO;
 import com.virtus.domain.dto.response.UserResponseDTO;
 import com.virtus.domain.entity.Role;
 import com.virtus.domain.entity.User;
+import com.virtus.domain.model.CurrentUser;
+import com.virtus.exception.VirtusException;
 import com.virtus.persistence.RoleRepository;
 import com.virtus.persistence.UserRepository;
 import com.virtus.translate.Translator;
 import org.apache.logging.log4j.util.Strings;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManagerFactory;
@@ -21,18 +25,18 @@ public class UserService extends BaseService<User, UserRepository, UserRequestDT
     @PersistenceUnit
     private final EntityManagerFactory entityManagerFactory;
     private final RoleRepository roleRepository;
-    //private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     public UserService(
             UserRepository repository,
             UserRepository userRepository,
-            EntityManagerFactory entityManagerFactory, RoleRepository roleRepository
-            //PasswordEncoder passwordEncoder
-            ) {
+            EntityManagerFactory entityManagerFactory, RoleRepository roleRepository,
+            PasswordEncoder passwordEncoder
+    ) {
         super(repository, userRepository, entityManagerFactory);
         this.entityManagerFactory = entityManagerFactory;
         this.roleRepository = roleRepository;
-        //this.passwordEncoder = passwordEncoder;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -64,10 +68,7 @@ public class UserService extends BaseService<User, UserRepository, UserRequestDT
         user.setUsername(body.getUsername());
         user.setMobile(body.getMobile());
         user.setEmail(body.getEmail());
-        //user.setPassword(passwordEncoder.encode(body.getPassword()));
-        if (Strings.isNotBlank(body.getPassword())) {
-            user.setPassword(body.getPassword());
-        }
+        user.setPassword(passwordEncoder.encode(body.getPassword()));
         user.setRole(body.getRole() != null ? roleRepository.findById(body.getRole().getId()).orElse(null) : null);
         return user;
     }
@@ -76,5 +77,17 @@ public class UserService extends BaseService<User, UserRepository, UserRequestDT
     @Override
     protected String getNotFoundMessage() {
         return Translator.translate("user.not.found");
+    }
+
+    public void updatePassword(CurrentUser currentUser, UserUpdatePasswordRequestDTO body) {
+        User user = getRepository().findById(body.getUserId())
+                .orElseThrow(() -> new VirtusException(Translator.translate("user.not.found")));
+
+        if (body.getPassword().equals(body.getRepeatedPassword())) {
+            user.setPassword(passwordEncoder.encode(body.getPassword()));
+        } else {
+            throw new VirtusException(Translator.translate("passwords.must.be.the.same"));
+        }
+        getRepository().save(user);
     }
 }

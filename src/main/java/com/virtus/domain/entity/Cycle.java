@@ -29,7 +29,7 @@ public class Cycle extends BaseConfigurationEntity {
     private Integer id;
     @Transient
     private int ordination;
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "cycle")
     private List<PillarCycle> pillarCycles;
 
 }

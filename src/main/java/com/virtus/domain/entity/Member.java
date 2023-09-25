@@ -1,19 +1,19 @@
 package com.virtus.domain.entity;
 
 import com.virtus.common.domain.entity.BaseEntity;
-import com.virtus.domain.enums.AverageType;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "pilares_ciclos", schema = "virtus")
+@Table(name = "membros", schema = "virtus")
 @Getter
 @Setter
-public class PillarCycle extends BaseEntity {
+public class Member extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence_generator")
@@ -26,25 +26,27 @@ public class PillarCycle extends BaseEntity {
                     @org.hibernate.annotations.Parameter(name = "increment_size", value = "1")
             }
     )
-    @Column(name = "id_pilar_ciclo")
+    @Column(name = "id_membro")
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "id_pilar")
-    private Pillar pillar;
+    @JoinColumn(name = "id_escritorio")
+    private Office office;
 
     @ManyToOne
-    @JoinColumn(name = "id_ciclo")
-    private Cycle cycle;
+    @JoinColumn(name = "id_usuario")
+    private User user;
 
-    @Enumerated(EnumType.ORDINAL)
-    @Column(name = "tipo_media")
-    private AverageType averageType;
+    @Column(name = "inicia_em")
+    private LocalDate startsAt;
 
-    @Column(name = "peso_padrao")
-    private Integer standardWeight;
+    @Column(name = "termina_em")
+    private LocalDate endsAt;
 
     @Column(name = "criado_em")
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt;
 
+    @ManyToOne
+    @JoinColumn(name = "id_status")
+    private Status status;
 }

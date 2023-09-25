@@ -1,5 +1,6 @@
 package com.virtus.common.domain.dto;
 
+import com.virtus.domain.dto.response.StatusResponseDTO;
 import com.virtus.domain.dto.response.UserResponseDTO;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,5 +16,6 @@ public class BaseResponseDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private UserResponseDTO author;
+    private StatusResponseDTO status;
 
 }
