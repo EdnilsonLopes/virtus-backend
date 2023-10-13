@@ -318,6 +318,9 @@ public abstract class BaseService<
     }
 
     protected EnumDTO<Enum> parseToAverageTypeEnumResponseDTO(AverageType averageType) {
+        if(averageType == null){
+            return EnumDTO.builder().build();
+        }
         return EnumDTO.builder()
                 .value(averageType)
                 .description(Translator.translate(averageType.getKey()))

@@ -16,7 +16,9 @@ public interface UserRepository extends BaseRepository<User> {
 
     Boolean existsByUsername(String username);
 
-    @Query("select c from User c where c.name LIKE %:filter%")
+    @Query("select u from User u where u.name LIKE %:filter%")
     Page<User> findAllByFilter(String filter, PageRequest pageRequest);
 
+    @Query("SELECT u FROM User u WHERE u not in (SELECT m.user from Member m) ORDER BY u.name")
+    Page<User> findAllNotMember(PageRequest of);
 }

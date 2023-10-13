@@ -3,6 +3,7 @@ package com.virtus.service;
 import com.virtus.common.BaseService;
 import com.virtus.domain.dto.request.UserRequestDTO;
 import com.virtus.domain.dto.request.UserUpdatePasswordRequestDTO;
+import com.virtus.domain.dto.response.PageableResponseDTO;
 import com.virtus.domain.dto.response.RoleResponseDTO;
 import com.virtus.domain.dto.response.UserResponseDTO;
 import com.virtus.domain.entity.Role;
@@ -13,11 +14,16 @@ import com.virtus.persistence.RoleRepository;
 import com.virtus.persistence.UserRepository;
 import com.virtus.translate.Translator;
 import org.apache.logging.log4j.util.Strings;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnit;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService extends BaseService<User, UserRepository, UserRequestDTO, UserResponseDTO> {
@@ -89,5 +95,18 @@ public class UserService extends BaseService<User, UserRepository, UserRequestDT
             throw new VirtusException(Translator.translate("passwords.must.be.the.same"));
         }
         getRepository().save(user);
+    }
+
+    public PageableResponseDTO<UserResponseDTO> findAllNotMember(CurrentUser currentUser, int page, int size) {
+
+        Page<User> userPage = getRepository().findAllNotMember(PageRequest.of(page, size));
+        List<UserResponseDTO> content = userPage.getContent().stream().map(c -> parseToResponseDTO(c, false)).collect(Collectors.toList());
+
+        return new PageableResponseDTO<>(
+                content,
+                userPage.getNumber(),
+                userPage.getSize(),
+                userPage.getTotalPages(),
+                userPage.getTotalElements());
     }
 }

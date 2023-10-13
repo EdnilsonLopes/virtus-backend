@@ -4,15 +4,13 @@ import com.virtus.common.BaseController;
 import com.virtus.common.annotation.LoggedUser;
 import com.virtus.domain.dto.request.UserRequestDTO;
 import com.virtus.domain.dto.request.UserUpdatePasswordRequestDTO;
+import com.virtus.domain.dto.response.PageableResponseDTO;
 import com.virtus.domain.dto.response.UserResponseDTO;
 import com.virtus.domain.entity.User;
 import com.virtus.domain.model.CurrentUser;
 import com.virtus.service.UserService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/users")
@@ -27,6 +25,14 @@ public class UserController extends BaseController<User, UserService, UserReques
 
         getService().updatePassword(currentUser, body);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/not-member")
+    public ResponseEntity<PageableResponseDTO<UserResponseDTO>> getAllNotMember(
+            @LoggedUser CurrentUser currentUser,
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "100") int size) {
+        return ResponseEntity.ok(getService().findAllNotMember(currentUser, page, size));
     }
 
 }

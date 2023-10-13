@@ -6,6 +6,8 @@ import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "entidades", schema = "virtus")
@@ -47,4 +49,10 @@ public class EntityVirtus extends BaseDefaultEntity {
     @ManyToOne
     @JoinColumn(name = "id_status")
     private Status status;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "entity")
+    private List<CycleEntity> cycleEntities = new ArrayList<>();
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "entity")
+    private List<Plan> plans = new ArrayList<>();
 }

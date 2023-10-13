@@ -4,6 +4,9 @@ import com.virtus.common.domain.dto.BaseRequestDTO;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Setter
 public class EntityVirtusRequestDTO extends BaseRequestDTO {
@@ -17,5 +20,7 @@ public class EntityVirtusRequestDTO extends BaseRequestDTO {
     private Boolean esi;
     private String city;
     private String uf;
+    private List<CycleEntityRequestDTO> cyclesEntity = new ArrayList<>();
+    private List<PlanRequestDTO> plans = new ArrayList<>();
 
 }
