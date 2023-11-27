@@ -50,4 +50,5 @@ public class OfficeController extends BaseController<Office, OfficeService, Offi
     public ResponseEntity<OfficeResponseDTO> updateMembers(@LoggedUser CurrentUser currentUser, @RequestBody OfficeRequestDTO body){
         return ResponseEntity.ok(getService().updateMembers(currentUser, body));
     }
+
 }

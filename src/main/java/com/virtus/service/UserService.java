@@ -13,10 +13,8 @@ import com.virtus.exception.VirtusException;
 import com.virtus.persistence.RoleRepository;
 import com.virtus.persistence.UserRepository;
 import com.virtus.translate.Translator;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -43,6 +41,13 @@ public class UserService extends BaseService<User, UserRepository, UserRequestDT
         this.entityManagerFactory = entityManagerFactory;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
+    }
+
+    @Override
+    protected void validate(VirtusException ex, User currentUser, User entity) throws VirtusException {
+        if (getRepository().existsByUsername(entity.getUsername())) {
+            ex.addError(Translator.translate("username.used"));
+        }
     }
 
     @Override

@@ -15,5 +15,6 @@ public class CycleResponseDTO extends BaseResponseDTO {
     private String description;
     private String reference;
     private List<CyclePillarResponseDTO> cyclePillars;
+    private List<EntityVirtusResponseDTO> entities;
 
 }

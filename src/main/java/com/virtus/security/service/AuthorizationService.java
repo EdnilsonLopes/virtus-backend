@@ -1,7 +1,9 @@
 package com.virtus.security.service;
 
+import com.virtus.domain.entity.User;
+import com.virtus.domain.model.UserDtl;
 import com.virtus.persistence.UserRepository;
-import org.springframework.security.core.userdetails.UserDetails;
+import com.virtus.translate.Translator;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -15,7 +17,17 @@ public class AuthorizationService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByUsername(username);
+    public UserDtl loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepository.findByUsername(username.trim())
+                .orElseThrow(() -> new UsernameNotFoundException(Translator.translate("user.not.found")));
+
+        return UserDtl.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .username(user.getUsername())
+                .password(user.getPassword())
+                .role(user.getRole().getName())
+                .build();
     }
 }

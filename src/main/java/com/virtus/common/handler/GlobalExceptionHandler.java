@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -37,6 +39,24 @@ public class GlobalExceptionHandler {
         } else {
             return builderErrorInfoResponse(400, e.getMessage());
         }
+    }
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ResponseBody
+    public ResponseEntity<ErrorInfoResponseDTO> handleUnauthorizedException(UsernameNotFoundException e) {
+        String errorMessage = e.getMessage();
+        log.info("handleUnauthorizedException, msg {}", errorMessage);
+        return ResponseEntity.badRequest().body(new ErrorInfoResponseDTO(HttpStatus.UNAUTHORIZED.value(), errorMessage));
+    }
+
+    @ExceptionHandler(InvalidGrantException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ResponseBody
+    public ResponseEntity<ErrorInfoResponseDTO> handleInvalidGrandException(InvalidGrantException e) {
+        String errorMessage = e.getMessage();
+        log.info("handleInvalidGrandException, msg {}", errorMessage);
+        return ResponseEntity.badRequest().body(new ErrorInfoResponseDTO(HttpStatus.UNAUTHORIZED.value(), errorMessage));
     }
 
     private ResponseEntity<ErrorInfoResponseDTO> builderErrorInfoResponse(

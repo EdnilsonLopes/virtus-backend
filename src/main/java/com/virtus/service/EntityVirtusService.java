@@ -4,24 +4,26 @@ import com.virtus.common.BaseService;
 import com.virtus.domain.dto.request.CycleEntityRequestDTO;
 import com.virtus.domain.dto.request.EntityVirtusRequestDTO;
 import com.virtus.domain.dto.request.PlanRequestDTO;
-import com.virtus.domain.dto.response.CycleEntityResponseDTO;
-import com.virtus.domain.dto.response.CycleResponseDTO;
-import com.virtus.domain.dto.response.EntityVirtusResponseDTO;
-import com.virtus.domain.dto.response.PlanResponseDTO;
+import com.virtus.domain.dto.response.*;
 import com.virtus.domain.entity.Cycle;
 import com.virtus.domain.entity.CycleEntity;
 import com.virtus.domain.entity.EntityVirtus;
 import com.virtus.domain.entity.Plan;
+import com.virtus.domain.model.CurrentUser;
 import com.virtus.persistence.CycleRepository;
 import com.virtus.persistence.EntityVirtusRepository;
 import com.virtus.persistence.UserRepository;
 import com.virtus.translate.Translator;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import javax.persistence.EntityManagerFactory;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -180,4 +182,5 @@ public class EntityVirtusService extends BaseService<EntityVirtus, EntityVirtusR
     protected String getNotFoundMessage() {
         return Translator.translate("entity.not.found");
     }
+
 }
