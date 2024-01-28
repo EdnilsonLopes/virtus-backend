@@ -4,14 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TeamMemberResponseDTO {
+public class TeamMemberDTO {
 
-    private Integer userId;
-    private String name;
-    private String role;
-    private Integer subordinationId;
-
+    private UserResponseDTO member;
+    private LocalDate startsAt;
+    private LocalDate endsAt;
 }

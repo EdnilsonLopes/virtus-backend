@@ -12,7 +12,7 @@ public interface UserRepository extends BaseRepository<User> {
 
     public Optional<User> findByUsername(String username);
 
-    Boolean existsByUsername(String username);
+    Boolean existsByUsernameAndIdNot(String username, Integer id);
 
     @Query("select u from User u where u.name LIKE %:filter%")
     Page<User> findAllByFilter(String filter, PageRequest pageRequest);

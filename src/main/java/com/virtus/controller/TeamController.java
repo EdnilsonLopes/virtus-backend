@@ -4,7 +4,7 @@ import com.virtus.common.annotation.LoggedUser;
 import com.virtus.domain.dto.request.TeamRequestDTO;
 import com.virtus.domain.dto.response.PageableResponseDTO;
 import com.virtus.domain.dto.response.SupervisorResponseDTO;
-import com.virtus.domain.dto.response.TeamMemberResponseDTO;
+import com.virtus.domain.dto.response.TeamMemberDTO;
 import com.virtus.domain.dto.response.TeamResponseDTO;
 import com.virtus.domain.model.CurrentUser;
 import com.virtus.service.TeamService;
@@ -33,19 +33,47 @@ public class TeamController {
     }
 
     public ResponseEntity<Void> updateTeam(@LoggedUser CurrentUser currentUser,
-                                                      @RequestBody TeamRequestDTO body){
+                                           @RequestBody TeamRequestDTO body) {
         service.updateTeam(currentUser, body);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/all-members-by-current-user")
-    public ResponseEntity<List<TeamMemberResponseDTO>> getAllTeamMembersByCurrentUser(@LoggedUser CurrentUser currentUser){
+    public ResponseEntity<List<TeamMemberDTO>> getAllTeamMembersByCurrentUser(@LoggedUser CurrentUser currentUser) {
         return ResponseEntity.ok(service.findAllTeamMembersByBoss(currentUser));
     }
 
     @GetMapping("/all-supervisors-by-current-user")
-    public ResponseEntity<List<SupervisorResponseDTO>> getAllSupervisorsByCurrentUser(@LoggedUser CurrentUser currentUser){
+    public ResponseEntity<List<SupervisorResponseDTO>> getAllSupervisorsByCurrentUser(@LoggedUser CurrentUser currentUser) {
         return ResponseEntity.ok(service.findAllSupervisorsByBoss(currentUser));
+    }
+
+    @PostMapping("/assign-team")
+    public ResponseEntity<TeamResponseDTO> assignTeam(@LoggedUser CurrentUser currentUser, @RequestBody TeamRequestDTO body) {
+        service.assignTeam(currentUser, body);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/supervisor")
+    public ResponseEntity<SupervisorResponseDTO> getSupervisor(@LoggedUser CurrentUser currentUser,
+                                                               @RequestParam Integer entityId,
+                                                               @RequestParam Integer cycleId) {
+        return ResponseEntity.ok(service.getSupervisorByEntityIdAndCycleId(entityId, cycleId));
+    }
+
+    @GetMapping("/team-members")
+    public ResponseEntity<List<TeamMemberDTO>> getTeamMembers(@LoggedUser CurrentUser currentUser,
+                                                              @RequestParam Integer entityId,
+                                                              @RequestParam Integer cycleId) {
+        return ResponseEntity.ok(service.getTeamMembersByEntityIdAndCycleId(entityId, cycleId));
+    }
+
+    @GetMapping("/validate/team-member")
+    public ResponseEntity<Void> validateUserSelectedAsTeamMember(@LoggedUser CurrentUser currentUser,
+                                                                 @RequestParam Integer cycleId,
+                                                                 @RequestParam Integer userTeamMemberId){
+        service.validateUserSelectedAsTeamMember(cycleId, userTeamMemberId);
+        return ResponseEntity.ok().build();
     }
 
 }
