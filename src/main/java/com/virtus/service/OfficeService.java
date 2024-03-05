@@ -154,13 +154,10 @@ public class OfficeService extends BaseService<Office, OfficeRepository, OfficeR
             int page,
             int size,
             Integer officeId) {
-
+        Office office = getRepository().findById(officeId).orElseThrow(() -> new VirtusException(getNotFoundMessage()));
         Page<Jurisdiction> jurisdictionPage;
-        if (Strings.isBlank(filter)) {
-            jurisdictionPage = jurisdictionRepository.findAll(PageRequest.of(page, size));
-        } else {
-            jurisdictionPage = jurisdictionRepository.findAllByFilter(filter, PageRequest.of(page, size));
-        }
+
+        jurisdictionPage = jurisdictionRepository.findByOffice(office, PageRequest.of(page, size));
 
         List<JurisdictionResponseDTO> content = jurisdictionPage.getContent().stream().map(jurisdiction -> {
             JurisdictionResponseDTO response = new JurisdictionResponseDTO();
@@ -184,13 +181,8 @@ public class OfficeService extends BaseService<Office, OfficeRepository, OfficeR
             int page,
             int size,
             Integer officeId) {
-
-        Page<Member> memberPage;
-        if (Strings.isBlank(filter)) {
-            memberPage = memberRepository.findAll(PageRequest.of(page, size));
-        } else {
-            memberPage = memberRepository.findAllByFilter(filter, PageRequest.of(page, size));
-        }
+        Office office = getRepository().findById(officeId).orElseThrow(() -> new VirtusException(getNotFoundMessage()));
+        Page<Member> memberPage = memberRepository.findAllByOffice(office, PageRequest.of(page, size));
 
         List<MemberResponseDTO> content = memberPage.getContent().stream().map(jurisdiction -> {
             MemberResponseDTO response = new MemberResponseDTO();

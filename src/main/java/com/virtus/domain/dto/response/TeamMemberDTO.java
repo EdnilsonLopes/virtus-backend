@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class TeamMemberDTO {
 
-    private UserResponseDTO member;
+    private MemberResponseDTO member;
     private LocalDate startsAt;
     private LocalDate endsAt;
 }

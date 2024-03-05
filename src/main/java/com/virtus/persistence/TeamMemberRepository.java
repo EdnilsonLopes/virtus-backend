@@ -4,6 +4,8 @@ import com.virtus.common.BaseRepository;
 import com.virtus.domain.entity.Cycle;
 import com.virtus.domain.entity.TeamMember;
 import com.virtus.domain.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -23,5 +25,9 @@ public interface TeamMemberRepository extends BaseRepository<TeamMember> {
 
     Optional<TeamMember> findByUser(User user);
 
-    Optional<TeamMember> findByUserAndCycle(User user, Cycle cycle);
+    @Query("SELECT b FROM CycleEntity a " +
+            "INNER JOIN TeamMember b ON a.cycle.id = b.cycle.id " +
+            "AND a.entity.id = b.entity.id " +
+            "WHERE a.endsAt >= GETDATE() AND b.user = ?1 ")
+    Optional<Page<TeamMember>> findByUserAndCycle(User user, Pageable pageable);
 }

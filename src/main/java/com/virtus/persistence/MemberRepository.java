@@ -2,8 +2,10 @@ package com.virtus.persistence;
 
 import com.virtus.common.BaseRepository;
 import com.virtus.domain.entity.Member;
+import com.virtus.domain.entity.Office;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
@@ -48,4 +50,5 @@ public interface MemberRepository extends BaseRepository<Member> {
                     "    nome_auditor")
     List<Object[]> findMembersByBoss(Integer bossId);
 
+    Page<Member> findAllByOffice(Office office, Pageable pageable);
 }

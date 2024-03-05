@@ -12,6 +12,7 @@ public class JurisdictionResponseDTO extends BaseResponseDTO {
 
     private Integer id;
     private EntityVirtusResponseDTO entity;
+    private OfficeResponseDTO office;
     private LocalDate startsAt;
     private LocalDate endsAt;
 }

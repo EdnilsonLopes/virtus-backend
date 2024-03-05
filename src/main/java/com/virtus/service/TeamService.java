@@ -122,17 +122,22 @@ public class TeamService {
         productComponentRepository.save(productComponent);
     }
 
-    public List<TeamMemberDTO> findAllTeamMembersByBoss(CurrentUser currentUser) {
+    public List<MemberResponseDTO> findAllTeamMembersByBoss(CurrentUser currentUser) {
 
         List<Object[]> objects = memberRepository.findMembersByBoss(currentUser.getId());
 
-        List<TeamMemberDTO> members = objects.stream().map(m -> {
+        List<MemberResponseDTO> members = objects.stream().map(m -> {
             UserResponseDTO userResponseDTO = new UserResponseDTO();
             userResponseDTO.setId(Integer.parseInt(m[0].toString()));
+            userResponseDTO.setName(m[1].toString());
+            RoleResponseDTO roleResponse = new RoleResponseDTO();
+            roleResponse.setName(m[2].toString());
+            userResponseDTO.setRole(roleResponse);
 
-            return new TeamMemberDTO(
-                    userResponseDTO
-                    , null, null);
+            return new MemberResponseDTO(
+                    userResponseDTO.getId(),
+                    userResponseDTO,
+                    null, null);
 
         }).collect(Collectors.toList());
         return members;
@@ -200,11 +205,18 @@ public class TeamService {
     private TeamMemberDTO parseToTeamMemberDto(TeamMember teamMember) {
         TeamMemberDTO dto = new TeamMemberDTO();
 
-        dto.setMember(parseToUserResponseDTO(teamMember.getUser()));
+        dto.setMember(parseToMemberResponseDTO(teamMember.getUser()));
         dto.setStartsAt(teamMember.getStartsAt());
         dto.setEndsAt(teamMember.getEndsAt());
 
         return dto;
+    }
+
+    private MemberResponseDTO parseToMemberResponseDTO(User user) {
+        MemberResponseDTO responseDTO = new MemberResponseDTO();
+        responseDTO.setId(user.getId());
+        responseDTO.setUser(parseToUserResponseDTO(user));
+        return responseDTO;
     }
 
     protected UserResponseDTO parseToUserResponseDTO(User user) {
@@ -232,17 +244,20 @@ public class TeamService {
 
     public void validateUserSelectedAsTeamMember(Integer idCycle, Integer userTeamMemberId) {
         User user = userRepository.findById(userTeamMemberId).orElseThrow(() -> ERROR_USER_NOT_FOUND);
-        Cycle cycle = new Cycle();
-        cycle.setId(idCycle);
-        TeamMember teamMember = teamMemberRepository.findByUserAndCycle(user, cycle).orElse(null);
-        if(teamMember != null){
-            User supervisor = cycleEntityRepository.findSupervisorByEntityIdAndCycleId(teamMember.getEntity().getId(), teamMember.getCycle().getId());
-            throw new VirtusException(Translator.translate("user.is.subordinate.by.supervisor",
-                    teamMember.getUser().getName(),
-                    teamMember.getUser().getRole().getName(),
-                    supervisor.getName(),
-                    supervisor.getRole().getName()
-                    ));
+        Page<TeamMember> pageTeamMember = teamMemberRepository.findByUserAndCycle(user, PageRequest.of(0, 1)).orElse(null);
+        if (!pageTeamMember.isEmpty()) {
+            TeamMember teamMember = pageTeamMember.getContent().get(0);
+            if (teamMember != null) {
+                User supervisor = cycleEntityRepository.findSupervisorByEntityIdAndCycleId(teamMember.getEntity().getId(), teamMember.getCycle().getId());
+                throw new VirtusException(Translator.translate("user.is.subordinate.by.supervisor",
+                        teamMember.getUser().getName(),
+                        teamMember.getUser().getRole().getName(),
+                        supervisor.getName(),
+                        supervisor.getRole().getName(),
+                        teamMember.getCycle().getName(),
+                        teamMember.getEntity().getName()
+                ));
+            }
         }
     }
 }

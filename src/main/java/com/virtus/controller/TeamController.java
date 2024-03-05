@@ -2,10 +2,7 @@ package com.virtus.controller;
 
 import com.virtus.common.annotation.LoggedUser;
 import com.virtus.domain.dto.request.TeamRequestDTO;
-import com.virtus.domain.dto.response.PageableResponseDTO;
-import com.virtus.domain.dto.response.SupervisorResponseDTO;
-import com.virtus.domain.dto.response.TeamMemberDTO;
-import com.virtus.domain.dto.response.TeamResponseDTO;
+import com.virtus.domain.dto.response.*;
 import com.virtus.domain.model.CurrentUser;
 import com.virtus.service.TeamService;
 import org.springframework.http.ResponseEntity;
@@ -39,7 +36,7 @@ public class TeamController {
     }
 
     @GetMapping("/all-members-by-current-user")
-    public ResponseEntity<List<TeamMemberDTO>> getAllTeamMembersByCurrentUser(@LoggedUser CurrentUser currentUser) {
+    public ResponseEntity<List<MemberResponseDTO>> getAllTeamMembersByCurrentUser(@LoggedUser CurrentUser currentUser) {
         return ResponseEntity.ok(service.findAllTeamMembersByBoss(currentUser));
     }
 
