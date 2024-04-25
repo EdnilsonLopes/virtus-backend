@@ -19,16 +19,7 @@ import java.util.List;
 public class Element extends BaseConfigurationEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence_generator")
-    @GenericGenerator(
-            name = "sequence_generator",
-            strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
-            parameters = {
-                    @Parameter(name = "sequence_name", value = "virtus.hibernate_sequence"),
-                    @Parameter(name = "initial_value", value = "1"),
-                    @Parameter(name = "increment_size", value = "1")
-            }
-    )
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_elemento")
     private Integer id;
 

@@ -67,6 +67,9 @@ public class UserService extends BaseService<User, UserRepository, UserRequestDT
     }
 
     private RoleResponseDTO parseToRoleResponse(Role role) {
+        if (role == null) {
+            return null;
+        }
         RoleResponseDTO response = new RoleResponseDTO();
         response.setId(role.getId());
         response.setDescription(role.getDescription());
