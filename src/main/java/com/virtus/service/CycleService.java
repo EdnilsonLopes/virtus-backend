@@ -175,11 +175,11 @@ public class CycleService extends BaseService<Cycle, CycleRepository, CycleReque
         removeProductCycles(cycle);
         removeProductPillar(cycle);
         removeProductComponent(cycle);
-        cycleEntities.forEach(cycleEntity -> {
+        for (CycleEntity cycleEntity : cycleEntities) {
             createProductCycle(current, cycleEntity.getEntity(), cycle);
             createProductPillar(current, cycleEntity.getEntity(), cycle);
             createProductComponent(current, cycleEntity.getEntity(), cycle);
-        });
+        }
         getRepository().save(cycle);
     }
 
@@ -201,16 +201,38 @@ public class CycleService extends BaseService<Cycle, CycleRepository, CycleReque
         }
     }
 
-    private ProductCycle createProductCycle(User user, EntityVirtus entity, Cycle cycle) {
-        ProductCycle productCycle = new ProductCycle();
-        productCycle.setEntity(entity);
-        productCycle.setCycle(cycle);
-        productCycle.setGrade(BigDecimal.ZERO);
-        productCycle.setAuthor(user);
-        return productCycleRepository.save(productCycle);
+    private void createProductCycle(User user, EntityVirtus entity, Cycle cycle) {
+        String query = "INSERT INTO virtus.produtos_ciclos ( " +
+                " id_entidade, " +
+                " id_ciclo, " +
+                " nota, " +
+                " id_tipo_pontuacao, " +
+                " id_author, " +
+                " criado_em ) " +
+                " OUTPUT INSERTED.id_produto_ciclo " +
+                " SELECT :entidadeId, " +
+                ":cicloId, " +
+                " 0 as nota, " +
+                " :gradeTypeId, " +
+                " :currentUserId, " +
+                " GETDATE() " +
+                " FROM virtus.ciclos_entidades a " +
+                " WHERE NOT EXISTS " +
+                "  (SELECT 1 " +
+                "   FROM virtus.produtos_ciclos b " +
+                "   WHERE b.id_entidade = a.id_entidade " +
+                "     AND b.id_ciclo = a.id_ciclo) ";
+
+        entityManager.createNativeQuery(query)
+                .setParameter("entidadeId", entity != null ? entity.getId() : null)
+                .setParameter("cicloId", cycle != null ? cycle.getId() : null)
+                .setParameter("gradeTypeId", null)
+                .setParameter("currentUserId", user != null ? user.getId() : null)
+                .getResultList();
     }
 
-    private int createProductComponent(User current, EntityVirtus entity, Cycle cycle) {
+    @Transactional
+    public void createProductComponent(User current, EntityVirtus entity, Cycle cycle) {
         String jpql =
                 "INSERT INTO virtus.produtos_componentes (id_entidade, id_ciclo, id_pilar, id_componente, peso, nota, id_tipo_pontuacao, id_author, criado_em) " +
                         "SELECT :entidadeId, :cicloId, a.id_pilar, b.id_componente, " +
@@ -223,7 +245,7 @@ public class CycleService extends BaseService<Cycle, CycleRepository, CycleReque
                         "(SELECT 1 FROM virtus.produtos_componentes pc WHERE pc.id_entidade = :entidadeId AND pc.id_ciclo = a.id_ciclo AND pc.id_pilar = a.id_pilar AND pc.id_componente = b.id_componente) " +
                         "GROUP BY a.id_ciclo, a.id_pilar, b.id_componente, c.peso_padrao ORDER BY 1, 2, 3, 4";
 
-        return entityManager.createNativeQuery(jpql)
+        entityManager.createNativeQuery(jpql)
                 .setParameter("entidadeId", entity != null ? entity.getId() : null)
                 .setParameter("cicloId", cycle != null ? cycle.getId() : null)
                 .setParameter("gradeTypeId", null)
@@ -232,20 +254,35 @@ public class CycleService extends BaseService<Cycle, CycleRepository, CycleReque
                 .executeUpdate();
     }
 
-    private ProductPillar createProductPillar(User current, EntityVirtus entity, Cycle cycle) {
-        ProductPillar productPillar = new ProductPillar();
-        productPillar.setEntity(entity);
-        productPillar.setCycle(cycle);
-        productPillar.setWeight(BigDecimal.ZERO);
-        productPillar.setGrade(BigDecimal.ZERO);
+    private void createProductPillar(User current, EntityVirtus entity, Cycle cycle) {
+        String query = "INSERT INTO virtus.produtos_pilares " +
+                " (id_entidade, id_ciclo, id_pilar, peso, nota, id_tipo_pontuacao, id_author, criado_em) " +
+                " OUTPUT INSERTED.id_produto_pilar " +
+                " SELECT " +
+                ":entidadeId, " +
+                ":cicloId, " +
+                " a.id_pilar, " +
+                " 0 as peso, " +
+                " 0 as nota, " +
+                " :gradeTypeId, " +
+                " :currentUser, " +
+                " GETDATE() " +
+                " FROM virtus.pilares_ciclos a " +
+                " WHERE NOT EXISTS " +
+                "  (SELECT 1 " +
+                "   FROM virtus.produtos_pilares b " +
+                "   WHERE b.id_entidade = :entidadeId "+
+                "     AND b.id_ciclo = a.id_ciclo " +
+                "     AND b.id_pilar = a.id_pilar)" +
+                " AND a.id_ciclo = :cicloId";
 
-        PillarCycle pillarCycle = pillarCycleRepository.findByNotExistsInProductPillar(entity, cycle).orElse(null);
-        if (pillarCycle != null) {
-            productPillar.setPillar(pillarCycle.getPillar());
-        }
-        productPillar.setAuthor(current);
 
-        return productPillarRepository.save(productPillar);
+        entityManager.createNativeQuery(query)
+                .setParameter("entidadeId", entity != null ? entity.getId() : null)
+                .setParameter("cicloId", cycle != null ? cycle.getId() : null)
+                .setParameter("gradeTypeId", null)
+                .setParameter("currentUser", current != null ? current.getId() : null)
+                .getResultList();
     }
 
 
@@ -266,11 +303,11 @@ public class CycleService extends BaseService<Cycle, CycleRepository, CycleReque
         return cycleEntity;
     }
 
-    public PageableResponseDTO<CycleResponseDTO> findCycleByEntityId(CurrentUser currentUser, Integer entityId, int page, int size){
+    public PageableResponseDTO<CycleResponseDTO> findCycleByEntityId(CurrentUser currentUser, Integer entityId, int page, int size) {
 
         Page<Cycle> cyclePage = getRepository().findValidCyclesByEntityId(entityId, LocalDate.now(), PageRequest.of(page, size));
 
-        List<CycleResponseDTO> content = cyclePage.getContent().stream().map( c ->parseToResponseDTO(c, false)).collect(Collectors.toList());
+        List<CycleResponseDTO> content = cyclePage.getContent().stream().map(c -> parseToResponseDTO(c, false)).collect(Collectors.toList());
 
         return new PageableResponseDTO<>(
                 content,

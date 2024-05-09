@@ -2,10 +2,7 @@ package com.virtus.service;
 
 import com.virtus.common.BaseService;
 import com.virtus.domain.dto.request.JurisdictionRequestDTO;
-import com.virtus.domain.dto.response.EntityVirtusResponseDTO;
-import com.virtus.domain.dto.response.JurisdictionResponseDTO;
-import com.virtus.domain.dto.response.OfficeResponseDTO;
-import com.virtus.domain.dto.response.PageableResponseDTO;
+import com.virtus.domain.dto.response.*;
 import com.virtus.domain.entity.EntityVirtus;
 import com.virtus.domain.entity.Jurisdiction;
 import com.virtus.domain.entity.Office;
@@ -19,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManagerFactory;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -106,5 +104,25 @@ public class JurisdictionService extends BaseService<Jurisdiction, JurisdictionR
     @Override
     protected String getNotFoundMessage() {
         return Translator.translate("jurisdiction.not.found");
+    }
+
+    public PageableResponseDTO<DistributeActivitiesResponseDTO> findEntidadeCiclosByUser(CurrentUser currentUser, int page, int size) {
+        List<Object[]> results = repository.findObjectsToDistributeActivitiesByUser(currentUser.getId());
+        List<DistributeActivitiesResponseDTO> dtos = new ArrayList<>();
+        for (Object[] result : results) {
+            DistributeActivitiesResponseDTO dto = new DistributeActivitiesResponseDTO();
+            dto.setCode((String) result[0]);
+            dto.setEntityId((Integer) result[1]);
+            dto.setName((String) result[2]);
+            dto.setAcronym((String) result[3]);
+            dtos.add(dto);
+        }
+
+        return new PageableResponseDTO<>(
+                dtos,
+                page,
+                size,
+                0,
+                0);
     }
 }

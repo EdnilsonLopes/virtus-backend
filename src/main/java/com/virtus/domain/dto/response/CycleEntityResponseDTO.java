@@ -14,6 +14,7 @@ import java.time.LocalDate;
 public class CycleEntityResponseDTO extends BaseResponseDTO {
 
     private CycleResponseDTO cycle;
+    private EntityVirtusResponseDTO entity;
     private EnumDTO averageType;
     private UserResponseDTO supervisor;
     private LocalDate startsAt;

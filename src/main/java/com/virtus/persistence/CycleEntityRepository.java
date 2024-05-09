@@ -1,12 +1,14 @@
 package com.virtus.persistence;
 
 import com.virtus.common.BaseRepository;
+import com.virtus.domain.dto.response.CycleEntityResponseDTO;
 import com.virtus.domain.entity.CycleEntity;
 import com.virtus.domain.entity.User;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface CycleEntityRepository extends BaseRepository<CycleEntity> {
@@ -28,4 +30,7 @@ public interface CycleEntityRepository extends BaseRepository<CycleEntity> {
     @Query(value = "select ce.supervisor from CycleEntity ce where ce.entity.id = :entityId and ce.cycle.id = :cycleId")
     User findSupervisorByEntityIdAndCycleId(@Param("entityId") Integer entityId,
                                             @Param("cycleId") Integer cycleId);
+
+    @Query("select ce from CycleEntity ce where ce.entity.id = ?1 order by ce.id desc")
+    List<CycleEntity> findByEntityId(@Param("entityId") Integer entityId);
 }

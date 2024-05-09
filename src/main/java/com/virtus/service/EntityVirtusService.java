@@ -10,12 +10,11 @@ import com.virtus.domain.entity.CycleEntity;
 import com.virtus.domain.entity.EntityVirtus;
 import com.virtus.domain.entity.Plan;
 import com.virtus.domain.model.CurrentUser;
+import com.virtus.persistence.CycleEntityRepository;
 import com.virtus.persistence.CycleRepository;
 import com.virtus.persistence.EntityVirtusRepository;
 import com.virtus.persistence.UserRepository;
 import com.virtus.translate.Translator;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -23,24 +22,29 @@ import org.springframework.util.CollectionUtils;
 import javax.persistence.EntityManagerFactory;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
 public class EntityVirtusService extends BaseService<EntityVirtus, EntityVirtusRepository, EntityVirtusRequestDTO, EntityVirtusResponseDTO> {
 
     private final CycleRepository cycleRepository;
+    private final CycleEntityRepository cycleEntityRepository;
 
     public EntityVirtusService(EntityVirtusRepository repository,
                                UserRepository userRepository,
                                EntityManagerFactory entityManagerFactory,
-                               CycleRepository cycleRepository) {
+                               CycleRepository cycleRepository,
+                               CycleEntityRepository cycleEntityRepository) {
         super(repository, userRepository, entityManagerFactory);
         this.cycleRepository = cycleRepository;
+        this.cycleEntityRepository = cycleEntityRepository;
     }
 
     @Override
     protected EntityVirtusResponseDTO parseToResponseDTO(EntityVirtus entity, boolean detailed) {
+        if(entity == null){
+            return null;
+        }
         EntityVirtusResponseDTO response = new EntityVirtusResponseDTO();
         response.setId(entity.getId());
         response.setDescription(entity.getDescription());
@@ -93,6 +97,7 @@ public class EntityVirtusService extends BaseService<EntityVirtus, EntityVirtusR
         CycleEntityResponseDTO response = new CycleEntityResponseDTO();
         response.setId(cycleEntity.getId());
         response.setCycle(parseToCycleResponse(cycleEntity.getCycle()));
+        response.setEntity(parseToResponseDTO(cycleEntity.getEntity(), false));
         response.setAverageType(parseToAverageTypeEnumResponseDTO(cycleEntity.getAverageType()));
         response.setSupervisor(parseToUserResponseDTO(cycleEntity.getSupervisor()));
         response.setAuthor(parseToUserResponseDTO(cycleEntity.getAuthor()));
@@ -181,6 +186,14 @@ public class EntityVirtusService extends BaseService<EntityVirtus, EntityVirtusR
     @Override
     protected String getNotFoundMessage() {
         return Translator.translate("entity.not.found");
+    }
+
+    public List<CycleEntityResponseDTO> findCyclesEntitiesByEntityId(CurrentUser currentUser, Integer entityId) {
+        List<CycleEntity> result = cycleEntityRepository.findByEntityId(entityId);
+        if (CollectionUtils.isEmpty(result)) {
+            return new ArrayList<>();
+        }
+        return result.stream().map(this::parseToCycleEntityResponse).collect(Collectors.toList());
     }
 
 }
