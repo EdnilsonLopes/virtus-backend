@@ -15,7 +15,7 @@ public class ComponentResponseDTO extends BaseResponseDTO {
     private int ordination;
     private String description;
     private String reference;
-    private boolean pga;
+    private Boolean pga;
     private List<ComponentElementResponseDTO> componentElements;
     private List<ComponentGradeTypeResponseDTO> componentGradeTypes;
 
