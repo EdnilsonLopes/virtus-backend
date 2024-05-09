@@ -15,8 +15,7 @@ import java.util.List;
 public class Cycle extends BaseConfigurationEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence_generator")
-    @SequenceGenerator(name = "sequence_generator", sequenceName = "id_ciclos_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_ciclo")
     private Integer id;
     @Transient
