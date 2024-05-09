@@ -223,7 +223,7 @@ public abstract class BaseService<
         response.setId(entity.getId());
         response.setName(entity.getName());
         response.setOrdination(entity.getOrdination());
-        response.setPga(entity.isPga());
+        response.setPga(entity.getPga());
         response.setDescription(entity.getDescription());
         response.setReference(entity.getReference());
         response.setCreatedAt(entity.getCreatedAt());

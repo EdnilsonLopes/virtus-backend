@@ -25,7 +25,7 @@ public class Component extends BaseConfigurationEntity {
     private int ordination;
 
     @Column(name = "pga")
-    private boolean pga;
+    private Boolean pga;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "component")
     private List<ElementComponent> elementComponents;
