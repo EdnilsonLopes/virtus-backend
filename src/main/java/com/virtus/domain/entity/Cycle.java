@@ -20,7 +20,7 @@ public class Cycle extends BaseConfigurationEntity {
     private Integer id;
     @Transient
     private int ordination;
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "cycle")
+    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.REMOVE}, orphanRemoval = true, mappedBy = "cycle", targetEntity = PillarCycle.class)
     private List<PillarCycle> pillarCycles;
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "cycle")
     private List<CycleEntity> cycleEntities;

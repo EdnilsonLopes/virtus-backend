@@ -25,7 +25,7 @@ public class PillarCycle extends BaseEntity {
     private Pillar pillar;
 
     @ManyToOne
-    @JoinColumn(name = "id_ciclo")
+    @JoinColumn(name = "id_ciclo", referencedColumnName = "id_ciclo")
     private Cycle cycle;
 
     @Enumerated(EnumType.ORDINAL)

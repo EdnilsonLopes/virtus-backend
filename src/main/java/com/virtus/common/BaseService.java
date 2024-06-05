@@ -98,7 +98,7 @@ public abstract class BaseService<
         entity.setCreatedAt(LocalDateTime.now());
         entity.setUpdatedAt(LocalDateTime.now());
         beforeCreate(entity);
-        save(entity);
+        entity = saveAndFlush(entity);
         afterCreate(entity);
         DTO response = parseToResponseDTO(entity, true);
         response.setCreatedAt(entity.getCreatedAt());
@@ -121,7 +121,7 @@ public abstract class BaseService<
         }
         entity.setUpdatedAt(LocalDateTime.now());
         beforeUpdate(entity);
-        save(entity);
+        entity = saveAndFlush(entity);
         afterUpdate(entity);
         DTO response = parseToResponseDTO(entity, true);
         response.setCreatedAt(entity.getCreatedAt());
