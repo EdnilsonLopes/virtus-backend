@@ -11,7 +11,7 @@
     <groupId>com.virtus</groupId>
     <artifactId>virtus-backend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
     <name>virtus-backend</name>
     <description>Backend da aplicação Virtus</description>
     <properties>
@@ -91,10 +91,9 @@
             </activation>
             <properties>
                 <!-- JDBC Configuration-->
-                <jdbc.url>jdbc:sqlserver://localhost:1433;encrypt=true;trustServerCertificate=true;databaseName=VIRTUS
-                </jdbc.url>
-                <jdbc.username>VIRTUS</jdbc.username>
-                <jdbc.password>VIRTUS</jdbc.password>
+                <jdbc.url>jdbc:sqlserver://localhost:1433;encrypt=true;trustServerCertificate=true;databaseName=VIRTUS</jdbc.url>
+                <jdbc.username>virtus</jdbc.username>
+                <jdbc.password>virtus</jdbc.password>
                 <jdbc.driver>com.microsoft.sqlserver.jdbc.SQLServerDriver</jdbc.driver>
                 <hibernate.dialect>org.hibernate.dialect.SQLServerDialect</hibernate.dialect>
                 <hibernate.dialect>org.hibernate.dialect.SQLServer2008Dialect</hibernate.dialect>
@@ -113,11 +112,9 @@
             <id>production</id>
             <properties>
                 <!-- JDBC Configuration-->
-                <jdbc.url>
-                    jdbc:sqlserver://localhost:1433;encrypt=true;trustServerCertificate=true;databaseName=virtus_dev
-                </jdbc.url>
-                <jdbc.username>sa</jdbc.username>
-                <jdbc.password>admindev</jdbc.password>
+                <jdbc.url>#{VIRTUS_DB_PROD_URL}#</jdbc.url>
+                <jdbc.username>#{VIRTUS_DB_PROD_USUARIO}#</jdbc.username>
+                <jdbc.password>#{VIRTUS_DB_PROD_SENHA}#</jdbc.password>
                 <jdbc.driver>com.microsoft.sqlserver.jdbc.SQLServerDriver</jdbc.driver>
                 <hibernate.dialect>org.hibernate.dialect.SQLServerDialect</hibernate.dialect>
                 <hibernate.dialect>org.hibernate.dialect.SQLServer2008Dialect</hibernate.dialect>

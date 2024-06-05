@@ -121,12 +121,6 @@ public class CycleService extends BaseService<Cycle, CycleRepository, CycleReque
     }
 
     @Override
-    protected void afterCreate(Cycle entity) {
-        entity.getCycleEntities().stream().forEach(cycleEntity -> cycleEntity.setCycle(entity));
-        pillarCycleRepository.saveAll(entity.getPillarCycles());
-    }
-
-    @Override
     protected Cycle parseToEntity(CycleRequestDTO body) {
         Cycle cycle = body.getId() != null ? getRepository().findById(body.getId()).orElse(new Cycle()) : new Cycle();
         cycle.setName(body.getName());
