@@ -27,10 +27,10 @@ public class Office extends BaseDefaultEntity {
     @JoinColumn(name = "id_chefe")
     private User boss;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "office", orphanRemoval = true)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "office")
     private List<Jurisdiction> jurisdictions = new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "office", orphanRemoval = true)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "office")
     private List<Member> members = new ArrayList<>();
 
 }

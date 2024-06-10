@@ -36,8 +36,7 @@ public class PillarService extends BaseService<Pillar, PillarRepository, PillarR
     }
 
     protected Pillar parseToEntity(PillarRequestDTO body) {
-        Pillar entity = new Pillar();
-        entity.setId(body.getId());
+        Pillar entity = body.getId() != null ? getRepository().findById(body.getId()).orElse(new Pillar()) : new Pillar();
         entity.setName(body.getName());
         entity.setDescription(body.getDescription());
         entity.setReference(body.getReference());

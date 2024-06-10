@@ -17,6 +17,7 @@ public interface CycleRepository extends BaseRepository<Cycle> {
             "FROM CycleEntity ce " +
             "LEFT JOIN ce.cycle c " +
             "WHERE ce.entity.id = ?1 " +
+            "AND ce.startsAt <= ?2 " +
             "AND ce.endsAt >= ?2 " +
             "ORDER BY ce.endsAt ASC")
     Page<Cycle> findValidCyclesByEntityId(Integer entityId, LocalDate currentDate, PageRequest pageRequest);

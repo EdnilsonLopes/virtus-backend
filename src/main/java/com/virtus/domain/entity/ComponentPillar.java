@@ -8,6 +8,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(name = "componentes_pilares", schema = "virtus")
@@ -42,4 +43,16 @@ public class ComponentPillar extends BaseEntity {
     @Column(name = "criado_em")
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ComponentPillar that = (ComponentPillar) o;
+        return id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

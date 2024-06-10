@@ -36,9 +36,9 @@ public class DistributeActivitiesController {
         return ResponseEntity.ok(jurisdictionService.findEntidadeCiclosByUser(currentUser, page, size));
     }
 
-    @GetMapping("/by-entity-id")
-    public ResponseEntity<List<DistributeActivitiesTreeResponseDTO>> getDistributeActivitiesTree(@LoggedUser CurrentUser currentUser, @RequestParam Integer entityId) {
-        return ResponseEntity.ok(service.findDistributeActivitiesTree(currentUser, entityId));
+    @GetMapping("/by-entity-and-cycle-id")
+    public ResponseEntity<DistributeActivitiesTreeResponseDTO> getDistributeActivitiesTree(@LoggedUser CurrentUser currentUser, @RequestParam Integer entityId, @RequestParam Integer cycleId) {
+        return ResponseEntity.ok(service.findDistributeActivitiesTree(currentUser, entityId, cycleId));
     }
 
 }

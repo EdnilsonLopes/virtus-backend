@@ -32,7 +32,7 @@ public class Role extends BaseEntity {
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "role")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "role")
     private List<FeatureRole> features = new ArrayList<>();
 
     public Role(Integer id) {

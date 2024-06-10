@@ -25,31 +25,28 @@ public class DistributeActivitiesService {
         this.cycleEntityRepository = cycleEntityRepository;
     }
 
-    public List<DistributeActivitiesTreeResponseDTO> findDistributeActivitiesTree(CurrentUser currentUser, Integer entityId) {
-        List<CycleEntity> cycleEntities = cycleEntityRepository.findByEntityId(entityId);
-
-        return groupCyclesByEntity(cycleEntities);
-    }
-
-    public List<DistributeActivitiesTreeResponseDTO> groupCyclesByEntity(List<CycleEntity> data) {
-        Map<Integer, DistributeActivitiesTreeResponseDTO> entityMap = new HashMap<>();
-
-        for (CycleEntity item : data) {
-            Integer entityId = item.getEntity() != null ? item.getEntity().getId() : null;
-            Cycle cycle = item.getCycle();
-            if (entityId != null) {
-                if (!entityMap.containsKey(entityId)) {
-                    entityMap.put(entityId,
-                            new DistributeActivitiesTreeResponseDTO(parseToEntityResponseDTO(
-                                    item.getEntity(),
-                                    true),
-                                    new ArrayList<>()));
-                }
-                entityMap.get(entityId).getCycles().add(parseToCycleResponse(cycle));
-            }
+    public DistributeActivitiesTreeResponseDTO findDistributeActivitiesTree(CurrentUser currentUser, Integer entityId, Integer cycleId) {
+        CycleEntity cycleEntity = cycleEntityRepository.findByEntityIdAndCycleId(entityId, cycleId).orElse(null);
+        if (cycleEntity == null) {
+            return null;
         }
 
-        return new ArrayList<>(entityMap.values());
+        return groupCyclesByEntity(cycleEntity);
+    }
+
+    public DistributeActivitiesTreeResponseDTO groupCyclesByEntity(CycleEntity cycleEntity) {
+        DistributeActivitiesTreeResponseDTO response = new DistributeActivitiesTreeResponseDTO();
+
+        Integer entityId = cycleEntity.getEntity() != null ? cycleEntity.getEntity().getId() : null;
+        Cycle cycle = cycleEntity.getCycle();
+        if (entityId != null) {
+            response.setEntity(parseToEntityResponseDTO(
+                            cycleEntity.getEntity(),
+                            false));
+            response.setCycle(parseToCycleEntityResponse(cycleEntity));
+        }
+
+        return response;
     }
 
     protected EntityVirtusResponseDTO parseToEntityResponseDTO(EntityVirtus entity, boolean detailed) {

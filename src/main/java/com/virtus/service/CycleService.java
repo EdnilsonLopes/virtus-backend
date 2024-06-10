@@ -138,8 +138,7 @@ public class CycleService extends BaseService<Cycle, CycleRepository, CycleReque
     }
 
     private PillarCycle parseToCyclePillar(CyclePillarRequestDTO dto, Cycle cycle) {
-        PillarCycle pillarCycle = new PillarCycle();
-        pillarCycle.setId(dto.getId());
+        PillarCycle pillarCycle = dto.getId() != null ? pillarCycleRepository.findById(dto.getId()).orElse(new PillarCycle()) : new PillarCycle();
         pillarCycle.setAuthor(getLoggedUser());
         pillarCycle.setAverageType(dto.getAverageType().getValue());
         pillarCycle.setStandardWeight(dto.getStandardWeight());
@@ -181,6 +180,11 @@ public class CycleService extends BaseService<Cycle, CycleRepository, CycleReque
             createProductComponent(current, cycleEntity.getEntity(), cycle);
         }
         getRepository().save(cycle);
+    }
+
+    @Override
+    protected void afterUpdate(Cycle entity) {
+        pillarCycleRepository.deleteByCycleId(null);
     }
 
     private void removeProductCycles(Cycle cycle) {
@@ -287,21 +291,26 @@ public class CycleService extends BaseService<Cycle, CycleRepository, CycleReque
 
 
     private CycleEntity parseToCycleEntity(EntityVirtusResponseDTO entityVirtus, Cycle cycle, LocalDate startsAt, LocalDate endsAt) {
-        CycleEntity cycleEntity = new CycleEntity();
+        CycleEntity cycleEntity = cycle.getCycleEntities()
+                .stream()
+                .filter(ce -> entityVirtus.getId().equals(ce.getEntity().getId()))
+                .findFirst()
+                .orElseGet(() -> {
+                    CycleEntity newEntity = new CycleEntity();
+                    newEntity.setEntity(entityVirtusRepository.findById(entityVirtus.getId()).orElse(null));
+                    return newEntity;
+                });
+
         cycleEntity.setStartsAt(startsAt);
         cycleEntity.setEndsAt(endsAt);
-        cycleEntity.setEntity(entityVirtusRepository.findById(entityVirtus.getId()).orElse(null));
         cycleEntity.setCycle(cycle);
         cycleEntity.setCreatedAt(LocalDateTime.now());
         cycleEntity.setUpdatedAt(LocalDateTime.now());
         cycleEntity.setAuthor(getLoggedUser());
 
-        CycleEntity persisted = cycle.getCycleEntities().stream().filter(ce -> entityVirtus.getId().equals(ce.getEntity().getId())).findFirst().orElse(null);
-        if (persisted != null) {
-            cycleEntity.setId(persisted.getId());
-        }
         return cycleEntity;
     }
+
 
     public PageableResponseDTO<CycleResponseDTO> findCycleByEntityId(CurrentUser currentUser, Integer entityId, int page, int size) {
 

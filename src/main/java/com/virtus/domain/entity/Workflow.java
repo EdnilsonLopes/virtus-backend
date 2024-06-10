@@ -43,7 +43,7 @@ public class Workflow extends BaseEntity {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "workflow")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "workflow")
     private List<Activity> activities = new ArrayList<>();
 
 }

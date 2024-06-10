@@ -43,9 +43,9 @@ public class Activity {
     @JoinColumn(name = "id_workflow")
     private Workflow workflow;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "activity")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "activity")
     private List<ActivityRole> activityRoles = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "activity")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "activity")
     private List<FeatureActivity> featuresActivities;
 }

@@ -26,7 +26,7 @@ public class Element extends BaseConfigurationEntity {
     @Column(name = "peso")
     private int ordination;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "element")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "element")
     private List<ElementItem> items = new ArrayList<>();
 
     public Element(Integer id) {

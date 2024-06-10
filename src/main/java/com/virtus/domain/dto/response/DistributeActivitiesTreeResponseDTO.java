@@ -12,6 +12,6 @@ import java.util.List;
 public class DistributeActivitiesTreeResponseDTO {
 
     private EntityVirtusResponseDTO entity;
-    private List<CycleResponseDTO> cycles;
+    private CycleEntityResponseDTO cycle;
 
 }
