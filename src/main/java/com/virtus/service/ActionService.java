@@ -54,4 +54,5 @@ public class ActionService extends BaseService<Action, ActionRepository, ActionR
     protected String getNotFoundMessage() {
         return Translator.translate("action.not.found");
     }
+
 }

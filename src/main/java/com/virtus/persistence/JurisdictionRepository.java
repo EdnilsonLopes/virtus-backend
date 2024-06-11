@@ -10,7 +10,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public interface JurisdictionRepository extends BaseRepository<Jurisdiction> {
 
@@ -38,5 +40,6 @@ public interface JurisdictionRepository extends BaseRepository<Jurisdiction> {
                     "AND e.termina_em > GETDATE()")
     List<Object[]> findObjectsToDistributeActivitiesByUser(Integer userId);
 
-
+    @Query("select j from Jurisdiction j where j.entity.id = :entityId")
+    List<Jurisdiction> findByEntityId(Integer entityId);
 }

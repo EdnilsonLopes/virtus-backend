@@ -7,12 +7,13 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ProductComponentRepository extends BaseRepository<ProductComponent> {
 
-    @Query("select pc from ProductComponent pc where pc.entity.id = ?1 and pc.cycle.id = ?2")
-    Optional<ProductComponent> findByEntityIdAndCycleId(Integer entityId, Integer cycleId);
+    @Query("select pc from ProductComponent pc where pc.entity.id = ?1 and pc.cycle.id = ?2 order by pc.component.name")
+    Optional<List<ProductComponent>> findByEntityIdAndCycleId(Integer entityId, Integer cycleId);
 
     @Modifying
     @Query(value = "UPDATE virtus.produtos_componentes" +
@@ -23,4 +24,6 @@ public interface ProductComponentRepository extends BaseRepository<ProductCompon
             @Param("supervisorId") Integer supervisorId,
             @Param("entityId") Integer entityId,
             @Param("cycleId") Integer cycleId);
+
+
 }

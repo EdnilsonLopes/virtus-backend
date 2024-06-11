@@ -1,4 +1,4 @@
-package com.virtus.domain.dto.response;
+package com.virtus.domain.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -6,13 +6,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
-public class SupervisorResponseDTO {
+@AllArgsConstructor
+@NoArgsConstructor
+public class AuditorDTO {
 
     private Integer userId;
     private String name;
-    private String role;
 
 }

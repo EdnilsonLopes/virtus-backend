@@ -8,6 +8,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(name = "pilares_ciclos", schema = "virtus")
@@ -21,11 +22,11 @@ public class PillarCycle extends BaseEntity {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "id_pilar")
+    @JoinColumn(name = "id_pilar", referencedColumnName = "id_pilar")
     private Pillar pillar;
 
     @ManyToOne
-    @JoinColumn(name = "id_ciclo")
+    @JoinColumn(name = "id_ciclo", referencedColumnName = "id_ciclo")
     private Cycle cycle;
 
     @Enumerated(EnumType.ORDINAL)
@@ -38,4 +39,16 @@ public class PillarCycle extends BaseEntity {
     @Column(name = "criado_em")
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PillarCycle that = (PillarCycle) o;
+        return id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

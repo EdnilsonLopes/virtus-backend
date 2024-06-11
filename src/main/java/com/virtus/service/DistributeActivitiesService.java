@@ -1,28 +1,41 @@
 package com.virtus.service;
 
+import com.virtus.domain.dto.AuditorDTO;
 import com.virtus.domain.dto.EnumDTO;
+import com.virtus.domain.dto.request.ActivitiesByProductComponentRequestDto;
 import com.virtus.domain.dto.response.*;
 import com.virtus.domain.entity.*;
 import com.virtus.domain.enums.AverageType;
 import com.virtus.domain.model.CurrentUser;
-import com.virtus.persistence.CycleEntityRepository;
+import com.virtus.exception.VirtusException;
+import com.virtus.persistence.*;
 import com.virtus.translate.Translator;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 public class DistributeActivitiesService {
 
     private final CycleEntityRepository cycleEntityRepository;
+    private final TeamMemberRepository teamMemberRepository;
+    private final JurisdictionRepository jurisdictionRepository;
+    private final ProductComponentRepository productComponentRepository;
+    private final UserRepository userRepository;
 
-    public DistributeActivitiesService(CycleEntityRepository cycleEntityRepository) {
+    public DistributeActivitiesService(CycleEntityRepository cycleEntityRepository,
+                                       TeamMemberRepository teamMemberRepository,
+                                       JurisdictionRepository jurisdictionRepository,
+                                       ProductComponentRepository productComponentRepository,
+                                       UserRepository userRepository) {
         this.cycleEntityRepository = cycleEntityRepository;
+        this.teamMemberRepository = teamMemberRepository;
+        this.jurisdictionRepository = jurisdictionRepository;
+        this.productComponentRepository = productComponentRepository;
+        this.userRepository = userRepository;
     }
 
     public DistributeActivitiesTreeResponseDTO findDistributeActivitiesTree(CurrentUser currentUser, Integer entityId, Integer cycleId) {
@@ -30,23 +43,90 @@ public class DistributeActivitiesService {
         if (cycleEntity == null) {
             return null;
         }
-
-        return groupCyclesByEntity(cycleEntity);
-    }
-
-    public DistributeActivitiesTreeResponseDTO groupCyclesByEntity(CycleEntity cycleEntity) {
         DistributeActivitiesTreeResponseDTO response = new DistributeActivitiesTreeResponseDTO();
+        List<ProductComponent> productComponents = productComponentRepository
+                .findByEntityIdAndCycleId(entityId, cycleId).orElse(new ArrayList<>());
 
-        Integer entityId = cycleEntity.getEntity() != null ? cycleEntity.getEntity().getId() : null;
-        Cycle cycle = cycleEntity.getCycle();
-        if (entityId != null) {
-            response.setEntity(parseToEntityResponseDTO(
-                            cycleEntity.getEntity(),
-                            false));
-            response.setCycle(parseToCycleEntityResponse(cycleEntity));
+        if (CollectionUtils.isEmpty(productComponents)) {
+            throw new VirtusException("Não existem Produtos Componente, tente iniciar o ciclo novamente.");
+        }
+        List<TeamMember> auditors = teamMemberRepository.findAuditorsByEntityIdAndCycleId(entityId, cycleId);
+        List<Jurisdiction> jurisdictions = jurisdictionRepository.findByEntityId(entityId);
+
+        response.setAuditors(parseToAuditorsResponse(auditors));
+        response.getAuditors().add(parseAuditor(cycleEntity.getSupervisor()));
+        if (!CollectionUtils.isEmpty(jurisdictions)) {
+            User boss = jurisdictions.get(0).getOffice().getBoss();
+            if (response.getAuditors().stream().filter(auditorDTO -> auditorDTO.getUserId().equals(boss.getId())).findAny().isEmpty()) {
+                response.getAuditors().add(parseAuditor(boss));
+            }
         }
 
+        response.setProducts(productComponents.stream().map(p -> parseToProductComponentResponse(p, cycleEntity)).collect(Collectors.toList()));
         return response;
+    }
+
+    private ProductComponentResponseDTO parseToProductComponentResponse(ProductComponent productComponent, CycleEntity cycleEntity) {
+        ProductComponentResponseDTO dto = new ProductComponentResponseDTO();
+        dto.setId(productComponent.getId());
+        dto.setComponent(parseToComponentResponse(productComponent.getComponent()));
+        dto.setPillar(parseToPillarResponse(productComponent.getPillar()));
+        dto.setCycle(parseToCycleEntityResponse(cycleEntity));
+        dto.setEntity(parseToEntityResponseDTO(productComponent.getEntity(), false));
+        if (productComponent.getAuditor() != null)
+            dto.setAuditor(AuditorDTO.builder()
+                    .userId(productComponent.getAuditor().getId())
+                    .name(productComponent.getAuditor().getName())
+                    .build());
+        if (productComponent.getSupervisor() != null) {
+            dto.setSupervisor(SupervisorResponseDTO
+                    .builder()
+                    .userId(productComponent.getSupervisor().getId())
+                    .name(productComponent.getSupervisor().getName())
+                    .role(productComponent.getSupervisor().getRole().getName())
+                    .build());
+        } else {
+            dto.setSupervisor(SupervisorResponseDTO
+                    .builder()
+                    .userId(cycleEntity.getSupervisor().getId())
+                    .name(cycleEntity.getSupervisor().getName())
+                    .role(cycleEntity.getSupervisor().getRole().getName())
+                    .build());
+        }
+        dto.setStartsAt(productComponent.getStartsAt() != null ? productComponent.getStartsAt() : cycleEntity.getStartsAt());
+        dto.setEndsAt(productComponent.getEndsAt() != null ? productComponent.getEndsAt() : cycleEntity.getEndsAt());
+        return dto;
+    }
+
+    private List<AuditorDTO> parseToAuditorsResponse(List<TeamMember> auditors) {
+        if (CollectionUtils.isEmpty(auditors)) {
+            return new ArrayList<>();
+        }
+        return auditors.stream().map(teamMember -> parseAuditor(teamMember.getUser())).collect(Collectors.toList());
+    }
+
+    private AuditorDTO parseAuditor(User user) {
+        return AuditorDTO.builder()
+                .userId(user.getId())
+                .name(user.getName())
+                .build();
+    }
+
+    private TeamMemberDTO parseToTeamMemberResponse(TeamMember teamMember) {
+        TeamMemberDTO dto = new TeamMemberDTO();
+
+        dto.setMember(parseToMemberResponseDTO(teamMember.getUser()));
+        dto.setStartsAt(teamMember.getStartsAt());
+        dto.setEndsAt(teamMember.getEndsAt());
+
+        return dto;
+    }
+
+    private MemberResponseDTO parseToMemberResponseDTO(User user) {
+        MemberResponseDTO responseDTO = new MemberResponseDTO();
+        responseDTO.setId(user.getId());
+        responseDTO.setUser(parseToUserResponseDTO(user));
+        return responseDTO;
     }
 
     protected EntityVirtusResponseDTO parseToEntityResponseDTO(EntityVirtus entity, boolean detailed) {
@@ -218,5 +298,20 @@ public class DistributeActivitiesService {
                 .value(averageType)
                 .description(Translator.translate(averageType.getKey()))
                 .build();
+    }
+
+    public void distributeActivities(CurrentUser currentUser, List<ActivitiesByProductComponentRequestDto> body) {
+        List<ProductComponent> update = new ArrayList<>();
+        for (ActivitiesByProductComponentRequestDto activity : body) {
+            ProductComponent productComponent = productComponentRepository.findById(activity.getProductComponentId()).orElseThrow(() -> new VirtusException("Produto componente não encontrado!"));
+            productComponent.setSupervisor(userRepository.findById(activity.getSupervisorId()).orElse(null));
+            productComponent.setAuditor(userRepository.findById(activity.getAuditorId()).orElse(null));
+            productComponent.setEndsAt(activity.getEndsAt());
+            productComponent.setStartsAt(activity.getStartsAt());
+            update.add(productComponent);
+        }
+        if (!CollectionUtils.isEmpty(update)) {
+            productComponentRepository.saveAllAndFlush(update);
+        }
     }
 }

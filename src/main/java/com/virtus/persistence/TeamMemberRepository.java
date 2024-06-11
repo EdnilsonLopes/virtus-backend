@@ -23,6 +23,9 @@ public interface TeamMemberRepository extends BaseRepository<TeamMember> {
     @Query("select tm from TeamMember tm where tm.entity.id = :entityId and tm.cycle.id = :cycleId")
     List<TeamMember> findByEntityIdAndCycleId(@Param("entityId") Integer entityId, @Param("cycleId") Integer cycleId);
 
+    @Query("select tm from TeamMember tm where tm.entity.id = :entityId and tm.cycle.id = :cycleId and tm.user.role.id = 4")
+    List<TeamMember> findAuditorsByEntityIdAndCycleId(@Param("entityId") Integer entityId, @Param("cycleId") Integer cycleId);
+
     Optional<TeamMember> findByUser(User user);
 
     @Query("SELECT b FROM CycleEntity a " +

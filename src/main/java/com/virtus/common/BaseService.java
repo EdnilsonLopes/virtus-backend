@@ -228,6 +228,7 @@ public abstract class BaseService<
         response.setReference(entity.getReference());
         response.setCreatedAt(entity.getCreatedAt());
         response.setUpdatedAt(entity.getUpdatedAt());
+        response.setAuthor(parseToUserResponseDTO(entity.getAuthor()));
         if (detailed) {
             response.setComponentElements(parseToComponentElementsResponse(entity.getElementComponents()));
             response.setComponentGradeTypes(parseToComponentGradeTypesResponse(entity.getGradeTypeComponents()));

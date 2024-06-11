@@ -14,6 +14,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,6 +33,9 @@ public class TeamService {
 
     public final VirtusException ERROR_USER_NOT_FOUND =
             new VirtusException(Translator.translate("user.not.found"));
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public TeamService(OfficeRepository officeRepository, EntityVirtusRepository entityRepository, UserRepository userRepository,
                        CycleRepository cycleRepository,
@@ -111,15 +116,15 @@ public class TeamService {
         CycleEntity cycleEntity = cycleEntityRepository
                 .findByEntityIdAndCycleId(body.getEntity().getId(), body.getCycle().getId())
                 .orElseThrow(() -> new VirtusException(Translator.translate("cycle.entity.not.found")));
-        ProductComponent productComponent = productComponentRepository
+        List<ProductComponent> productComponent = productComponentRepository
                 .findByEntityIdAndCycleId(body.getEntity().getId(), body.getCycle().getId())
                 .orElseThrow(() -> new VirtusException(Translator.translate("product.component.not.found")));
 
         cycleEntity.setSupervisor(supervisor);
-        productComponent.setSupervisor(supervisor);
+        productComponent.stream().forEach(p -> p.setSupervisor(supervisor));
 
-        cycleEntityRepository.save(cycleEntity);
-        productComponentRepository.save(productComponent);
+        cycleEntityRepository.saveAndFlush(cycleEntity);
+        productComponentRepository.saveAllAndFlush(productComponent);
     }
 
     public List<MemberResponseDTO> findAllTeamMembersByBoss(CurrentUser currentUser) {
@@ -157,27 +162,33 @@ public class TeamService {
     @Transactional
     public void assignTeam(CurrentUser currentUser, TeamRequestDTO body) {
         if (body.getSupervisor() != null) {
-            User user = userRepository.findById(body.getSupervisor().getUserId()).orElseThrow(() -> new VirtusException(Translator.translate("user.not.found")));
+            User user = userRepository.findById(body.getSupervisor().getUserId())
+                    .orElseThrow(() -> new VirtusException(Translator.translate("user.not.found")));
             cycleEntityRepository.updateSupervisorByEntityIdAndCycleId(user.getId(), body.getEntity().getId(), body.getCycle().getId());
             productComponentRepository.updateSupervisorByEntityIdAndCycleId(user.getId(), body.getEntity().getId(), body.getCycle().getId());
             updateTeamMembers(body);
+        } else {
+            throw new VirtusException("O Supervisor deve ser informado");
         }
     }
 
-    @Transactional
     private void updateTeamMembers(TeamRequestDTO body) {
-        teamMemberRepository.deleteByEntityIdAndCycleId(body.getEntity().getId(), body.getCycle().getId());
-        List<TeamMember> teamMembers = body.getTeamMembers().stream().map(req -> parseToTeamMember(body, req)).collect(Collectors.toList());
-        teamMemberRepository.saveAll(teamMembers);
+        List<TeamMember> persisted = teamMemberRepository.findByEntityIdAndCycleId(body.getEntity().getId(), body.getCycle().getId());
+        persisted = persisted.stream().filter(teamMember -> body.getTeamMembers().stream().filter(teamMemberDTO -> teamMemberDTO.getId().equals(teamMember.getId())).findAny().isEmpty()).collect(Collectors.toList());
+        teamMemberRepository.deleteAll(persisted);
+        teamMemberRepository.flush();
+
+        List<TeamMember> teamMembers = body.getTeamMembers().stream()
+                .map(req -> parseToTeamMember(body, req))
+                .collect(Collectors.toList());
+        teamMemberRepository.saveAllAndFlush(teamMembers);
     }
 
     private TeamMember parseToTeamMember(TeamRequestDTO teamDto, TeamMemberDTO teamMemberDto) {
-        TeamMember teamMember = new TeamMember();
-        Cycle cycle = new Cycle();
-        cycle.setId(teamDto.getCycle().getId());
+        TeamMember teamMember = teamMemberDto.getId() != null ? teamMemberRepository.findById(teamMemberDto.getId()).orElse(new TeamMember()) : new TeamMember();
+        Cycle cycle = cycleRepository.findById(teamDto.getCycle().getId()).orElse(null);
         teamMember.setCycle(cycle);
-        EntityVirtus entity = new EntityVirtus();
-        entity.setId(teamDto.getEntity().getId());
+        EntityVirtus entity = entityRepository.findById(teamDto.getEntity().getId()).orElse(null);
         teamMember.setEntity(entity);
         teamMember.setUser(userRepository.findById(teamMemberDto
                         .getMember().getId())
@@ -204,7 +215,7 @@ public class TeamService {
 
     private TeamMemberDTO parseToTeamMemberDto(TeamMember teamMember) {
         TeamMemberDTO dto = new TeamMemberDTO();
-
+        dto.setId(teamMember.getId());
         dto.setMember(parseToMemberResponseDTO(teamMember.getUser()));
         dto.setStartsAt(teamMember.getStartsAt());
         dto.setEndsAt(teamMember.getEndsAt());

@@ -36,8 +36,8 @@ public class ComponentService extends BaseService<Component, ComponentRepository
 
     @Override
     protected Component parseToEntity(ComponentRequestDTO body) {
-        Component component = new Component();
-        component.setId(body.getId());
+        Component component = body.getId() != null ? getRepository().findById(body.getId()).orElse(new Component()) : new Component();
+        if (component.getAuthor() == null) component.setAuthor(getLoggedUser());
         component.setName(body.getName());
         component.setPga(body.isPga());
         component.setReference(body.getReference());

@@ -8,6 +8,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Entity
 @Table(name = "integrantes", schema = "virtus")
@@ -42,4 +43,20 @@ public class TeamMember extends BaseEntity {
     @Column(name = "motivacao")
     private String motivation;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TeamMember that = (TeamMember) o;
+        if (this.id == null || that.id == null) return super.equals(o);
+        return id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        if (id == null) {
+            return super.hashCode();
+        }
+        return Objects.hash(id);
+    }
 }

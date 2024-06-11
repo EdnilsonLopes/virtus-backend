@@ -7,6 +7,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -73,10 +74,10 @@ public class ProductComponent extends BaseEntity {
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(name = "inicia_em")
-    private LocalDateTime startsAt;
+    private LocalDate startsAt;
 
     @Column(name = "termina_em")
-    private LocalDateTime endsAt;
+    private LocalDate endsAt;
 
     @ManyToOne
     @JoinColumn(name = "id_status")
