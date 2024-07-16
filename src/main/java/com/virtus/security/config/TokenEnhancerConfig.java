@@ -32,7 +32,7 @@ public class TokenEnhancerConfig implements TokenEnhancer {
         additionalInfo.put("iss", securityProperties.getJwt().getIss());
         if (oAuth2Authentication.getPrincipal() instanceof UserDtl) {
             UserDtl user = (UserDtl) oAuth2Authentication.getPrincipal();
-            additionalInfo.put("role", user.getRole().toUpperCase());
+            additionalInfo.put("role", user.getRole());
             additionalInfo.put("name", user.getName());
             additionalInfo.put("id", user.getId());
             additionalInfo.put("username", user.getUsername());
