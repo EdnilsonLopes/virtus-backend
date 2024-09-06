@@ -2,9 +2,8 @@ package com.virtus.controller;
 
 import com.virtus.common.annotation.LoggedUser;
 import com.virtus.domain.dto.request.ActivitiesByProductComponentRequestDto;
-import com.virtus.domain.dto.response.DistributeActivitiesResponseDTO;
-import com.virtus.domain.dto.response.DistributeActivitiesTreeResponseDTO;
-import com.virtus.domain.dto.response.PageableResponseDTO;
+import com.virtus.domain.dto.request.UpdateConfigPlanRequestDTO;
+import com.virtus.domain.dto.response.*;
 import com.virtus.domain.model.CurrentUser;
 import com.virtus.service.DistributeActivitiesService;
 import com.virtus.service.JurisdictionService;
@@ -46,6 +45,34 @@ public class DistributeActivitiesController {
     @GetMapping("/by-entity-and-cycle-id")
     public ResponseEntity<DistributeActivitiesTreeResponseDTO> getDistributeActivitiesTree(@LoggedUser CurrentUser currentUser, @RequestParam Integer entityId, @RequestParam Integer cycleId) {
         return ResponseEntity.ok(service.findDistributeActivitiesTree(currentUser, entityId, cycleId));
+    }
+
+    @GetMapping("/config-plans")
+    public ResponseEntity<List<PlanResponseDTO>> listConfigPlans(
+            @LoggedUser CurrentUser currentUser,
+            @RequestParam Integer entityId,
+            @RequestParam Integer cycleId,
+            @RequestParam Integer pillarId,
+            @RequestParam boolean pga){
+        return ResponseEntity.ok(service.listPlansToConfig(currentUser, entityId, cycleId, pillarId, pga));
+    }
+
+    @GetMapping("/configured-plans")
+    public ResponseEntity<List<ProductPlanResponseDTO>> listConfiguredPlans(
+            @LoggedUser CurrentUser currentUser,
+            @RequestParam Integer entityId,
+            @RequestParam Integer cycleId,
+            @RequestParam Integer pillarId,
+            @RequestParam Integer componentId){
+        return ResponseEntity.ok(service.listConfiguredPlans( entityId, cycleId, pillarId, componentId));
+    }
+
+    @PostMapping("/config-plans")
+    public ResponseEntity<Void> listConfigPlans(
+            @LoggedUser CurrentUser currentUser,
+            @RequestBody UpdateConfigPlanRequestDTO body){
+        service.updateConfigPlans(currentUser, body);
+        return ResponseEntity.ok().build();
     }
 
 }

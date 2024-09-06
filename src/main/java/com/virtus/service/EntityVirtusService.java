@@ -10,10 +10,7 @@ import com.virtus.domain.entity.CycleEntity;
 import com.virtus.domain.entity.EntityVirtus;
 import com.virtus.domain.entity.Plan;
 import com.virtus.domain.model.CurrentUser;
-import com.virtus.persistence.CycleEntityRepository;
-import com.virtus.persistence.CycleRepository;
-import com.virtus.persistence.EntityVirtusRepository;
-import com.virtus.persistence.UserRepository;
+import com.virtus.persistence.*;
 import com.virtus.translate.Translator;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -29,20 +26,23 @@ public class EntityVirtusService extends BaseService<EntityVirtus, EntityVirtusR
 
     private final CycleRepository cycleRepository;
     private final CycleEntityRepository cycleEntityRepository;
+    private final PlanRepository planRepository;
 
     public EntityVirtusService(EntityVirtusRepository repository,
                                UserRepository userRepository,
                                EntityManagerFactory entityManagerFactory,
                                CycleRepository cycleRepository,
-                               CycleEntityRepository cycleEntityRepository) {
+                               CycleEntityRepository cycleEntityRepository,
+                               PlanRepository planRepository) {
         super(repository, userRepository, entityManagerFactory);
         this.cycleRepository = cycleRepository;
         this.cycleEntityRepository = cycleEntityRepository;
+        this.planRepository = planRepository;
     }
 
     @Override
     protected EntityVirtusResponseDTO parseToResponseDTO(EntityVirtus entity, boolean detailed) {
-        if(entity == null){
+        if (entity == null) {
             return null;
         }
         EntityVirtusResponseDTO response = new EntityVirtusResponseDTO();
@@ -75,6 +75,7 @@ public class EntityVirtusService extends BaseService<EntityVirtus, EntityVirtusR
     private PlanResponseDTO parseToPlanResponse(Plan plan) {
         PlanResponseDTO response = new PlanResponseDTO();
         response.setId(plan.getId());
+        response.setName(plan.getName());
         response.setCreatedAt(plan.getCreatedAt());
         response.setUpdatedAt(plan.getUpdatedAt());
         response.setAuthor(parseToUserResponseDTO(plan.getAuthor()));
@@ -118,8 +119,7 @@ public class EntityVirtusService extends BaseService<EntityVirtus, EntityVirtusR
 
     @Override
     protected EntityVirtus parseToEntity(EntityVirtusRequestDTO body) {
-        EntityVirtus entity = new EntityVirtus();
-        entity.setId(body.getId());
+        EntityVirtus entity = body.getId() != null ? getRepository().findById(body.getId()).orElse(new EntityVirtus()) : new EntityVirtus();
         entity.setDescription(body.getDescription());
         entity.setUf(body.getUf());
         entity.setName(body.getName());
@@ -128,12 +128,9 @@ public class EntityVirtusService extends BaseService<EntityVirtus, EntityVirtusR
         entity.setCode(body.getCode());
         entity.setEsi(body.getEsi());
         entity.setSituation(body.getSituation());
-        if (!CollectionUtils.isEmpty(body.getCyclesEntity())) {
-            entity.setCycleEntities(parseToCyclesEntity(body.getCyclesEntity(), entity));
-        }
-        if (!CollectionUtils.isEmpty(body.getPlans())) {
-            entity.setPlans(parseToPlans(body.getPlans(), entity));
-        }
+        entity.setCycleEntities(parseToCyclesEntity(body.getCyclesEntity(), entity));
+        entity.setCycleEntities(new ArrayList<>());
+        entity.setPlans(parseToPlans(body.getPlans(), entity));
         return entity;
     }
 
@@ -145,8 +142,12 @@ public class EntityVirtusService extends BaseService<EntityVirtus, EntityVirtusR
     }
 
     private Plan parseToPlan(PlanRequestDTO request, EntityVirtus entity) {
-        Plan plan = new Plan();
-        plan.setId(request.getId());
+        Plan plan;
+        if (!CollectionUtils.isEmpty(entity.getPlans())) {
+            plan = entity.getPlans().stream().filter(plan1 -> plan1.getId().equals(request.getId())).findFirst().orElse(new Plan());
+        } else {
+            plan = new Plan();
+        }
         plan.setCnpb(request.getCnpb());
         plan.setLegislation(request.getLegislation());
         plan.setModality(request.getModality());
@@ -166,7 +167,12 @@ public class EntityVirtusService extends BaseService<EntityVirtus, EntityVirtusR
     }
 
     private CycleEntity parseToCycleEntity(CycleEntityRequestDTO cycle, EntityVirtus entity) {
-        CycleEntity cycleEntity = new CycleEntity();
+        CycleEntity cycleEntity;
+        if (!CollectionUtils.isEmpty(entity.getCycleEntities())) {
+            cycleEntity = entity.getCycleEntities().stream().filter(c -> c.getId().equals(cycle.getId())).findFirst().orElse(new CycleEntity());
+        } else {
+            cycleEntity = new CycleEntity();
+        }
         cycleEntity.setId(cycle.getId());
         cycleEntity.setEntity(entity);
         cycleEntity.setStartsAt(cycle.getStartsAt());

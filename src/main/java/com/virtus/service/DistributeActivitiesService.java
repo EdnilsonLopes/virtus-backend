@@ -3,6 +3,7 @@ package com.virtus.service;
 import com.virtus.domain.dto.AuditorDTO;
 import com.virtus.domain.dto.EnumDTO;
 import com.virtus.domain.dto.request.ActivitiesByProductComponentRequestDto;
+import com.virtus.domain.dto.request.UpdateConfigPlanRequestDTO;
 import com.virtus.domain.dto.response.*;
 import com.virtus.domain.entity.*;
 import com.virtus.domain.enums.AverageType;
@@ -11,6 +12,7 @@ import com.virtus.exception.VirtusException;
 import com.virtus.persistence.*;
 import com.virtus.translate.Translator;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
@@ -25,17 +27,36 @@ public class DistributeActivitiesService {
     private final JurisdictionRepository jurisdictionRepository;
     private final ProductComponentRepository productComponentRepository;
     private final UserRepository userRepository;
+    private final PlanRepository planRepository;
+    private final ProductPlanRepository productPlanRepository;
+    private final ProductGradeTypeRepository productGradeTypeRepository;
+    private final ProductElementRepository productElementRepository;
+    private final ProductItemRepository productItemRepository;
+    private final ProductPillarRepository productPillarRepository;
+    private final ProductCycleRepository productCycleRepository;
 
     public DistributeActivitiesService(CycleEntityRepository cycleEntityRepository,
                                        TeamMemberRepository teamMemberRepository,
                                        JurisdictionRepository jurisdictionRepository,
                                        ProductComponentRepository productComponentRepository,
-                                       UserRepository userRepository) {
+                                       UserRepository userRepository,
+                                       PlanRepository planRepository, ProductPlanRepository productPlanRepository,
+                                       ProductGradeTypeRepository productGradeTypeRepository, ProductElementRepository productElementRepository,
+                                       ProductItemRepository productItemRepository,
+                                       ProductPillarRepository productPillarRepository,
+                                       ProductCycleRepository productCycleRepository) {
         this.cycleEntityRepository = cycleEntityRepository;
         this.teamMemberRepository = teamMemberRepository;
         this.jurisdictionRepository = jurisdictionRepository;
         this.productComponentRepository = productComponentRepository;
         this.userRepository = userRepository;
+        this.planRepository = planRepository;
+        this.productPlanRepository = productPlanRepository;
+        this.productGradeTypeRepository = productGradeTypeRepository;
+        this.productElementRepository = productElementRepository;
+        this.productItemRepository = productItemRepository;
+        this.productPillarRepository = productPillarRepository;
+        this.productCycleRepository = productCycleRepository;
     }
 
     public DistributeActivitiesTreeResponseDTO findDistributeActivitiesTree(CurrentUser currentUser, Integer entityId, Integer cycleId) {
@@ -163,6 +184,7 @@ public class DistributeActivitiesService {
     private PlanResponseDTO parseToPlanResponse(Plan plan) {
         PlanResponseDTO response = new PlanResponseDTO();
         response.setId(plan.getId());
+        response.setName(plan.getName());
         response.setCreatedAt(plan.getCreatedAt());
         response.setUpdatedAt(plan.getUpdatedAt());
         response.setAuthor(parseToUserResponseDTO(plan.getAuthor()));
@@ -309,9 +331,129 @@ public class DistributeActivitiesService {
             productComponent.setEndsAt(activity.getEndsAt());
             productComponent.setStartsAt(activity.getStartsAt());
             update.add(productComponent);
+            //Gerar
         }
         if (!CollectionUtils.isEmpty(update)) {
             productComponentRepository.saveAllAndFlush(update);
         }
+    }
+
+    public List<PlanResponseDTO> listPlansToConfig(CurrentUser currentUser, Integer entityId, Integer cycleId, Integer pillarId, boolean pga) {
+        return planRepository.findByEntityId(entityId).stream().map(this::parseToPlanResponse).collect(Collectors.toList());
+    }
+
+    public List<ProductPlanResponseDTO> listConfiguredPlans(Integer entidadeId, Integer cicloId, Integer pilarId, Integer componenteId) {
+        return productPlanRepository.listarConfigPlanos(entidadeId, cicloId, pilarId, componenteId);
+    }
+
+    @Transactional
+    public void updateConfigPlans(CurrentUser currentUser, UpdateConfigPlanRequestDTO body) {
+        registrarProdutoPlano(currentUser, body);
+    }
+
+    private void registrarProdutoPlano(CurrentUser currentUser, UpdateConfigPlanRequestDTO body) {
+        final List<ProductPlanResponseDTO> configuracaoAnterior = listConfiguredPlans(body.getEntityId(),
+                body.getCycleId(),
+                body.getPillarId(),
+                body.getComponentId());
+        final String motivacao = "TESTE";
+
+        body.getPlans().forEach(planDTO -> {
+            productPlanRepository.inserirProdutosPlanos(
+                    body.getEntityId(),
+                    body.getCycleId(),
+                    body.getPillarId(),
+                    body.getComponentId(),
+                    planDTO.getId(),
+                    1,
+                    currentUser.getId());
+            atualizarPesoPlanos(body, planDTO, currentUser);
+
+        });
+        productGradeTypeRepository.registrarConfigPlanosHistorico(
+                body.getEntityId(),
+                body.getCycleId(),
+                body.getPillarId(),
+                body.getComponentId(),
+                currentUser,
+                configuracaoAnterior.stream().map(productPlanResponseDTO -> productPlanResponseDTO.getPlanId()).toArray().toString(),
+                motivacao);
+    }
+
+    private void atualizarPesoPlanos(UpdateConfigPlanRequestDTO body, PlanResponseDTO planDTO, CurrentUser currentUser) {
+        productGradeTypeRepository.inserirProdutosTiposNotas(
+                body.getEntityId(),
+                body.getCycleId(),
+                body.getPillarId(),
+                body.getComponentId(),
+                planDTO.getId(),
+                1,
+                currentUser.getId());
+        productElementRepository.inserirProdutosElementos(
+                body.getEntityId(),
+                body.getCycleId(),
+                body.getPillarId(),
+                body.getComponentId(),
+                planDTO.getId(),
+                1,
+                currentUser.getId()
+        );
+        productItemRepository.inserirProdutosItens(
+                body.getEntityId(),
+                body.getCycleId(),
+                body.getPillarId(),
+                body.getComponentId(),
+                planDTO.getId(),
+                currentUser.getId()
+        );
+
+        atualizarPesoComponentes(body);
+        atualizarComponenteNota(body);
+        atualizarPilarNota(body);
+        atualizarCicloNota(body);
+        atualizarPesoTiposNotas(body, planDTO);
+    }
+
+    private void atualizarPesoComponentes(UpdateConfigPlanRequestDTO body) {
+        productComponentRepository.atualizarPesoComponente(
+                body.getEntityId(),
+                body.getCycleId(),
+                body.getPillarId(),
+                body.getComponentId()
+        );
+    }
+
+    private void atualizarComponenteNota(UpdateConfigPlanRequestDTO body) {
+        productComponentRepository.atualizarComponenteNota(
+                body.getEntityId(),
+                body.getCycleId(),
+                body.getPillarId(),
+                body.getComponentId()
+        );
+    }
+
+    private void atualizarPilarNota(UpdateConfigPlanRequestDTO body) {
+        productPillarRepository.atualizarPilarNota(
+                body.getEntityId(),
+                body.getCycleId(),
+                body.getPillarId()
+        );
+    }
+
+    private void atualizarCicloNota(UpdateConfigPlanRequestDTO body) {
+        productCycleRepository.atualizarCicloNota(
+                body.getEntityId(),
+                body.getCycleId()
+        );
+    }
+
+    private void atualizarPesoTiposNotas(UpdateConfigPlanRequestDTO body, PlanResponseDTO planDTO) {
+        productGradeTypeRepository.atualizarPesosTiposNotas(
+                body.getEntityId(),
+                body.getCycleId(),
+                body.getPillarId(),
+                body.getComponentId(),
+                planDTO.getId()
+        );
     }
 }
