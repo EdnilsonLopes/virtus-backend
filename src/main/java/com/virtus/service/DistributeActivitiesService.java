@@ -370,13 +370,16 @@ public class DistributeActivitiesService {
             atualizarPesoPlanos(body, planDTO, currentUser);
 
         });
+        String configuracaoAnteriorStr = configuracaoAnterior.stream()
+                .map(productPlanResponseDTO -> productPlanResponseDTO.getId().toString()) // Converte para String
+                .collect(Collectors.joining(","));
         productGradeTypeRepository.registrarConfigPlanosHistorico(
                 body.getEntityId(),
                 body.getCycleId(),
                 body.getPillarId(),
                 body.getComponentId(),
                 currentUser,
-                configuracaoAnterior.stream().map(productPlanResponseDTO -> productPlanResponseDTO.getPlanId()).toArray().toString(),
+                configuracaoAnteriorStr,
                 motivacao);
     }
 
