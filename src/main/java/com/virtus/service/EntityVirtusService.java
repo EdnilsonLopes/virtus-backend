@@ -4,6 +4,7 @@ import com.virtus.common.BaseService;
 import com.virtus.domain.dto.request.CycleEntityRequestDTO;
 import com.virtus.domain.dto.request.EntityVirtusRequestDTO;
 import com.virtus.domain.dto.request.PlanRequestDTO;
+import com.virtus.domain.dto.request.StartCycleRequestDTO;
 import com.virtus.domain.dto.response.*;
 import com.virtus.domain.entity.Cycle;
 import com.virtus.domain.entity.CycleEntity;
@@ -12,7 +13,6 @@ import com.virtus.domain.entity.Plan;
 import com.virtus.domain.model.CurrentUser;
 import com.virtus.persistence.*;
 import com.virtus.translate.Translator;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -28,16 +28,37 @@ public class EntityVirtusService extends BaseService<EntityVirtus, EntityVirtusR
     private final CycleEntityRepository cycleEntityRepository;
     private final PlanRepository planRepository;
 
+    private final CycleService cycleService;
+
     public EntityVirtusService(EntityVirtusRepository repository,
                                UserRepository userRepository,
                                EntityManagerFactory entityManagerFactory,
                                CycleRepository cycleRepository,
                                CycleEntityRepository cycleEntityRepository,
-                               PlanRepository planRepository) {
+                               PlanRepository planRepository, CycleService cycleService) {
         super(repository, userRepository, entityManagerFactory);
         this.cycleRepository = cycleRepository;
         this.cycleEntityRepository = cycleEntityRepository;
         this.planRepository = planRepository;
+        this.cycleService = cycleService;
+    }
+
+    @Override
+    protected void afterCreate(EntityVirtus entity) {
+        if (!CollectionUtils.isEmpty(entity.getCycleEntities())) {
+            cycleService.startCycle(getLoggedUser() != null
+                    ? CurrentUser.builder().id(getLoggedUser().getId()).build()
+                    : null, entity.getCycleEntities());
+        }
+    }
+
+    @Override
+    protected void afterUpdate(EntityVirtus entity) {
+        if (!CollectionUtils.isEmpty(entity.getCycleEntities())) {
+            cycleService.startCycle(getLoggedUser() != null
+                    ? CurrentUser.builder().id(getLoggedUser().getId()).build()
+                    : null, entity.getCycleEntities());
+        }
     }
 
     @Override

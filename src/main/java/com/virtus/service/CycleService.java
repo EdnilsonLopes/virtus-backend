@@ -182,6 +182,26 @@ public class CycleService extends BaseService<Cycle, CycleRepository, CycleReque
         getRepository().save(cycle);
     }
 
+    @Transactional
+    public void startCycle(CurrentUser currentUser, List<CycleEntity> cycleEntities) {
+        User user = null;
+        if (currentUser != null && currentUser.getId() != null) {
+            user = findUserById(currentUser.getId());
+        }
+        setLoggedUser(user);
+
+        final User current = user;
+        for (CycleEntity cycleEntity : cycleEntities) {
+            removeProductCycles(cycleEntity.getCycle());
+            removeProductPillar(cycleEntity.getCycle());
+            removeProductComponent(cycleEntity.getCycle());
+            createProductCycle(current, cycleEntity.getEntity(), cycleEntity.getCycle());
+            createProductPillar(current, cycleEntity.getEntity(), cycleEntity.getCycle());
+            createProductComponent(current, cycleEntity.getEntity(), cycleEntity.getCycle());
+            getRepository().save(cycleEntity.getCycle());
+        }
+    }
+
     @Override
     protected void afterUpdate(Cycle entity) {
         pillarCycleRepository.deleteByCycleId(null);
