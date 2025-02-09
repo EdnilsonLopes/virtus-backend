@@ -58,8 +58,8 @@ public class EntityVirtusService extends BaseService<EntityVirtus, EntityVirtusR
         response.setAuthor(parseToUserResponseDTO(entity.getAuthor()));
         response.setCreatedAt(entity.getCreatedAt());
         response.setUpdatedAt(entity.getUpdatedAt());
+        response.setCyclesEntity(parseToCyclesEntityResponse(entity.getCycleEntities()));
         if (detailed) {
-            response.setCyclesEntity(parseToCyclesEntityResponse(entity.getCycleEntities()));
             response.setPlans(parseToPlansResponse(entity.getPlans()));
         }
         return response;
@@ -98,7 +98,7 @@ public class EntityVirtusService extends BaseService<EntityVirtus, EntityVirtusR
         CycleEntityResponseDTO response = new CycleEntityResponseDTO();
         response.setId(cycleEntity.getId());
         response.setCycle(parseToCycleResponse(cycleEntity.getCycle()));
-        response.setEntity(parseToResponseDTO(cycleEntity.getEntity(), false));
+        //response.setEntity(parseToResponseDTO(cycleEntity.getEntity(), false));
         response.setAverageType(parseToAverageTypeEnumResponseDTO(cycleEntity.getAverageType()));
         response.setSupervisor(parseToUserResponseDTO(cycleEntity.getSupervisor()));
         response.setAuthor(parseToUserResponseDTO(cycleEntity.getAuthor()));
@@ -129,7 +129,6 @@ public class EntityVirtusService extends BaseService<EntityVirtus, EntityVirtusR
         entity.setEsi(body.getEsi());
         entity.setSituation(body.getSituation());
         entity.setCycleEntities(parseToCyclesEntity(body.getCyclesEntity(), entity));
-        entity.setCycleEntities(new ArrayList<>());
         entity.setPlans(parseToPlans(body.getPlans(), entity));
         return entity;
     }
