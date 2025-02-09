@@ -1,6 +1,5 @@
 package com.virtus.service;
 
-import com.virtus.common.BaseService;
 import com.virtus.domain.dto.request.TeamRequestDTO;
 import com.virtus.domain.dto.response.*;
 import com.virtus.domain.entity.*;
@@ -253,13 +252,16 @@ public class TeamService {
         return response;
     }
 
-    public void validateUserSelectedAsTeamMember(Integer idCycle, Integer userTeamMemberId) {
+    public void validateUserSelectedAsTeamMember(Integer idCycle, Integer userTeamMemberId, Integer supervisorId) {
+        if(supervisorId == null){
+            throw new VirtusException("O Supervisor deve ser informado!");
+        }
         User user = userRepository.findById(userTeamMemberId).orElseThrow(() -> ERROR_USER_NOT_FOUND);
         Page<TeamMember> pageTeamMember = teamMemberRepository.findByUserAndCycle(user, PageRequest.of(0, 1)).orElse(null);
         if (!pageTeamMember.isEmpty()) {
             TeamMember teamMember = pageTeamMember.getContent().get(0);
             if (teamMember != null) {
-                User supervisor = cycleEntityRepository.findSupervisorByEntityIdAndCycleId(teamMember.getEntity().getId(), teamMember.getCycle().getId());
+                User supervisor = userRepository.findById(supervisorId).orElseThrow(() -> new VirtusException("Supervisor não encontrado!"));
                 throw new VirtusException(Translator.translate("user.is.subordinate.by.supervisor",
                         teamMember.getUser().getName(),
                         teamMember.getUser().getRole().getName(),

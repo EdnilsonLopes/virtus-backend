@@ -68,8 +68,9 @@ public class TeamController {
     @GetMapping("/validate/team-member")
     public ResponseEntity<Void> validateUserSelectedAsTeamMember(@LoggedUser CurrentUser currentUser,
                                                                  @RequestParam Integer cycleId,
-                                                                 @RequestParam Integer userTeamMemberId){
-        service.validateUserSelectedAsTeamMember(cycleId, userTeamMemberId);
+                                                                 @RequestParam Integer userTeamMemberId,
+                                                                 @RequestParam Integer supervisorId){
+        service.validateUserSelectedAsTeamMember(cycleId, userTeamMemberId, supervisorId);
         return ResponseEntity.ok().build();
     }
 
