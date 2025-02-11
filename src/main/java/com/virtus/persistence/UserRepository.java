@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends BaseRepository<User> {
@@ -19,4 +20,7 @@ public interface UserRepository extends BaseRepository<User> {
 
     @Query("SELECT u FROM User u WHERE u not in (SELECT m.user from Member m) ORDER BY u.name")
     Page<User> findAllNotMember(PageRequest of);
+
+    @Query("SELECT u FROM User u WHERE u.role.id = :roleId")
+    List<User> findByRoleId(Integer roleId);
 }

@@ -12,7 +12,7 @@ import java.util.Optional;
 
 public interface ProductComponentRepository extends BaseRepository<ProductComponent> {
 
-    @Query("select pc from ProductComponent pc where pc.entity.id = ?1 and pc.cycle.id = ?2 order by pc.component.name")
+    @Query("select pc from ProductComponent pc where pc.entity.id = ?1 and pc.cycle.id = ?2 order by pc.component.id asc")
     Optional<List<ProductComponent>> findByEntityIdAndCycleId(Integer entityId, Integer cycleId);
 
     @Modifying

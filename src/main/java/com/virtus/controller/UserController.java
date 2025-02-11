@@ -12,6 +12,8 @@ import com.virtus.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/users")
 public class UserController extends BaseController<User, UserService, UserRequestDTO, UserResponseDTO> {
@@ -33,6 +35,13 @@ public class UserController extends BaseController<User, UserService, UserReques
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "100") int size) {
         return ResponseEntity.ok(getService().findAllNotMember(currentUser, page, size));
+    }
+
+    @GetMapping("/by-role")
+    public ResponseEntity<List<UserResponseDTO>> getAllByRole(
+            @LoggedUser CurrentUser currentUser,
+            @RequestParam int roleId) {
+        return ResponseEntity.ok(getService().findAllByRole(currentUser, roleId));
     }
 
 }

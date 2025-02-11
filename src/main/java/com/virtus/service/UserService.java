@@ -121,4 +121,8 @@ public class UserService extends BaseService<User, UserRepository, UserRequestDT
                 userPage.getTotalPages(),
                 userPage.getTotalElements());
     }
+
+    public List<UserResponseDTO> findAllByRole(CurrentUser currentUser, Integer roleId) {
+        return getRepository().findByRoleId(roleId).stream().map(user -> parseToResponseDTO(user, true)).collect(Collectors.toList());
+    }
 }
