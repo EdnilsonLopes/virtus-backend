@@ -327,7 +327,9 @@ public class DistributeActivitiesService {
         for (ActivitiesByProductComponentRequestDto activity : body) {
             ProductComponent productComponent = productComponentRepository.findById(activity.getProductComponentId()).orElseThrow(() -> new VirtusException("Produto componente não encontrado!"));
             productComponent.setSupervisor(userRepository.findById(activity.getSupervisorId()).orElse(null));
-            productComponent.setAuditor(userRepository.findById(activity.getAuditorId()).orElse(null));
+            if(activity != null && activity.getAuditorId() != null){
+                productComponent.setAuditor(userRepository.findById(activity.getAuditorId()).orElse(null));
+            }
             productComponent.setEndsAt(activity.getEndsAt());
             productComponent.setStartsAt(activity.getStartsAt());
             update.add(productComponent);
