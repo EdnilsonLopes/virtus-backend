@@ -15,5 +15,6 @@ public class UpdateConfigPlanRequestDTO {
     private Integer entityId;
     private Integer pillarId;
     private List<PlanResponseDTO> plans;
+    private String motivation;
 
 }

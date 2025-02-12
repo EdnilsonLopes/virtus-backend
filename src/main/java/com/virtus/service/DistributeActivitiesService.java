@@ -358,7 +358,7 @@ public class DistributeActivitiesService {
                 body.getCycleId(),
                 body.getPillarId(),
                 body.getComponentId());
-        final String motivacao = "TESTE";
+        final String motivacao = body.getMotivation();
 
         body.getPlans().forEach(planDTO -> {
             productPlanRepository.inserirProdutosPlanos(
