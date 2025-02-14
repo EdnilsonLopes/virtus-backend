@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -19,5 +20,6 @@ public class ProductComponentResponseDTO {
     private AuditorDTO auditor;
     private LocalDate startsAt;
     private LocalDate endsAt;
+    private List<ProductPlanResponseDTO> plans;
 
 }

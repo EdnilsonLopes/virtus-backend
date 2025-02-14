@@ -83,7 +83,11 @@ public class DistributeActivitiesService {
             }
         }
 
-        response.setProducts(productComponents.stream().map(p -> parseToProductComponentResponse(p, cycleEntity)).collect(Collectors.toList()));
+        response.setProducts(productComponents.stream().map(p -> {
+            ProductComponentResponseDTO responsePc = parseToProductComponentResponse(p, cycleEntity);
+            responsePc.setPlans(listConfiguredPlans(entityId, cycleId, p.getPillar().getId(), p.getComponent().getId()));
+            return responsePc;
+        }).collect(Collectors.toList()));
         return response;
     }
 
@@ -327,7 +331,7 @@ public class DistributeActivitiesService {
         for (ActivitiesByProductComponentRequestDto activity : body) {
             ProductComponent productComponent = productComponentRepository.findById(activity.getProductComponentId()).orElseThrow(() -> new VirtusException("Produto componente não encontrado!"));
             productComponent.setSupervisor(userRepository.findById(activity.getSupervisorId()).orElse(null));
-            if(activity != null && activity.getAuditorId() != null){
+            if (activity != null && activity.getAuditorId() != null) {
                 productComponent.setAuditor(userRepository.findById(activity.getAuditorId()).orElse(null));
             }
             productComponent.setEndsAt(activity.getEndsAt());
@@ -353,12 +357,25 @@ public class DistributeActivitiesService {
         registrarProdutoPlano(currentUser, body);
     }
 
-    private void registrarProdutoPlano(CurrentUser currentUser, UpdateConfigPlanRequestDTO body) {
-        final List<ProductPlanResponseDTO> configuracaoAnterior = listConfiguredPlans(body.getEntityId(),
+    @Transactional
+    public void registrarProdutoPlano(CurrentUser currentUser, UpdateConfigPlanRequestDTO body) {
+        final String configuracaoAnterior = productPlanRepository.loadConfigPlanosConfigAnterior(
+                body.getEntityId(),
+                body.getCycleId(),
+                body.getPillarId(),
+                body.getComponentId()
+        );
+        inserirProdutosPlanos(body, currentUser);
+
+        registrarConfigPlanosHistorico(body, currentUser, configuracaoAnterior);
+    }
+
+    @Transactional
+    public void inserirProdutosPlanos(UpdateConfigPlanRequestDTO body, CurrentUser currentUser) {
+        productPlanRepository.deletarProdutosPlanos(body.getEntityId(),
                 body.getCycleId(),
                 body.getPillarId(),
                 body.getComponentId());
-        final String motivacao = body.getMotivation();
 
         body.getPlans().forEach(planDTO -> {
             productPlanRepository.inserirProdutosPlanos(
@@ -368,21 +385,26 @@ public class DistributeActivitiesService {
                     body.getComponentId(),
                     planDTO.getId(),
                     1,
-                    currentUser.getId());
+                    currentUser.getId()
+            );
             atualizarPesoPlanos(body, planDTO, currentUser);
-
         });
-        String configuracaoAnteriorStr = configuracaoAnterior.stream()
-                .map(productPlanResponseDTO -> productPlanResponseDTO.getId().toString()) // Converte para String
-                .collect(Collectors.joining(","));
+    }
+
+    @Transactional
+    public void registrarConfigPlanosHistorico(UpdateConfigPlanRequestDTO body, CurrentUser currentUser, String configuracaoAnterior) {
+
+        final String motivacao = body.getMotivation();
+
         productGradeTypeRepository.registrarConfigPlanosHistorico(
                 body.getEntityId(),
                 body.getCycleId(),
                 body.getPillarId(),
                 body.getComponentId(),
                 currentUser,
-                configuracaoAnteriorStr,
-                motivacao);
+                configuracaoAnterior,
+                motivacao
+        );
     }
 
     private void atualizarPesoPlanos(UpdateConfigPlanRequestDTO body, PlanResponseDTO planDTO, CurrentUser currentUser) {

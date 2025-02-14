@@ -1,7 +1,7 @@
 package com.virtus.persistence;
 
 import com.virtus.domain.dto.response.ProductPlanResponseDTO;
-import com.virtus.domain.entity.ProductPlan;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -67,6 +67,17 @@ public class ProductPlanRepository {
         return jdbcTemplate.update(sql, tipoPontuacao, authorId, entidadeId, cicloId, pilarId, componenteId, planId);
     }
 
+    public int deletarProdutosPlanos(Integer entidadeId, Integer cicloId, Integer pilarId, Integer componenteId) {
+        String sql = "DELETE FROM virtus.produtos_planos " +
+                "WHERE id_entidade = ? " +
+                "AND id_ciclo = ? " +
+                "AND id_pilar = ? " +
+                "AND id_componente = ?";
+
+        return jdbcTemplate.update(sql, entidadeId, cicloId, pilarId, componenteId);
+    }
+
+
     public List<ProductPlanResponseDTO> listarConfigPlanos(Integer entidadeId, Integer cicloId, Integer pilarId, Integer componenteId) {
         String sql = "SELECT " +
                 " a.id_produto_plano, " +
@@ -89,5 +100,19 @@ public class ProductPlanRepository {
                 });
     }
 
+    public String loadConfigPlanosConfigAnterior(Integer entidadeId, Integer cicloId, Integer pilarId, Integer componenteId) {
+        String sql = "SELECT string_agg(b.cnpb, ', ') AS planos_configurados " +
+                "FROM virtus.produtos_planos a " +
+                "INNER JOIN virtus.planos b ON a.id_plano = b.id_plano " +
+                "WHERE a.id_entidade = ? AND a.id_ciclo = ? " +
+                "AND a.id_pilar = ? AND a.id_componente = ? " +
+                "GROUP BY a.id_componente";
+
+        try {
+            return jdbcTemplate.queryForObject(sql, new Object[]{entidadeId, cicloId, pilarId, componenteId}, String.class);
+        } catch (EmptyResultDataAccessException e) {
+            return "";
+        }
+    }
 
 }
