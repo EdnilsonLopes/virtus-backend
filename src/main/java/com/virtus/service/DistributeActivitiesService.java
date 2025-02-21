@@ -12,6 +12,7 @@ import com.virtus.exception.VirtusException;
 import com.virtus.persistence.*;
 import com.virtus.translate.Translator;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
@@ -378,17 +379,22 @@ public class DistributeActivitiesService {
                 body.getComponentId());
 
         body.getPlans().forEach(planDTO -> {
-            productPlanRepository.inserirProdutosPlanos(
-                    body.getEntityId(),
-                    body.getCycleId(),
-                    body.getPillarId(),
-                    body.getComponentId(),
-                    planDTO.getId(),
-                    1,
-                    currentUser.getId()
-            );
+            inserirProdutoPlano(body, planDTO, currentUser);
             atualizarPesoPlanos(body, planDTO, currentUser);
         });
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void inserirProdutoPlano(UpdateConfigPlanRequestDTO body, PlanResponseDTO planDTO, CurrentUser currentUser) {
+        productPlanRepository.inserirProdutosPlanos(
+                body.getEntityId(),
+                body.getCycleId(),
+                body.getPillarId(),
+                body.getComponentId(),
+                planDTO.getId(),
+                1,
+                currentUser.getId()
+        );
     }
 
     @Transactional
@@ -407,7 +413,8 @@ public class DistributeActivitiesService {
         );
     }
 
-    private void atualizarPesoPlanos(UpdateConfigPlanRequestDTO body, PlanResponseDTO planDTO, CurrentUser currentUser) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void atualizarPesoPlanos(UpdateConfigPlanRequestDTO body, PlanResponseDTO planDTO, CurrentUser currentUser) {
         productGradeTypeRepository.inserirProdutosTiposNotas(
                 body.getEntityId(),
                 body.getCycleId(),
@@ -426,8 +433,8 @@ public class DistributeActivitiesService {
                 currentUser.getId()
         );
         productItemRepository.inserirProdutosItens(
-                body.getEntityId(),
                 body.getCycleId(),
+                body.getEntityId(),
                 body.getPillarId(),
                 body.getComponentId(),
                 planDTO.getId(),
