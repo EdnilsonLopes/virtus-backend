@@ -33,4 +33,11 @@ public interface CycleEntityRepository extends BaseRepository<CycleEntity> {
 
     @Query("select ce from CycleEntity ce where ce.entity.id = ?1 order by ce.id desc")
     List<CycleEntity> findByEntityId(@Param("entityId") Integer entityId);
+
+    @Query(nativeQuery = true, value = "SELECT a.* " +
+            " FROM virtus.ciclos_entidades a " +
+            " LEFT JOIN virtus.ciclos b ON a.id_ciclo = b.id_ciclo " +
+            " WHERE a.id_entidade = :idEntidade " +
+            " ORDER BY a.criado_em desc")
+    List<CycleEntity> listEntidadesCiclos(@Param("idEntidade") Integer idEntidade);
 }

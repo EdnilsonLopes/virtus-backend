@@ -3,6 +3,7 @@ package com.virtus.persistence;
 import com.virtus.common.BaseRepository;
 import com.virtus.domain.entity.Office;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -29,5 +30,16 @@ public interface OfficeRepository extends BaseRepository<Office> {
                     "ORDER BY    " +
                     "    nome_usuario")
     List<Object[]> findAllSupervisorsByBossId(Integer bossId);
+
+    @Query(nativeQuery = true, value = "SELECT DISTINCT d.codigo, b.id_entidade, d.nome, a.abreviatura " +
+            " FROM virtus.escritorios a " +
+            " LEFT JOIN virtus.jurisdicoes b ON a.id_escritorio = b.id_escritorio " +
+            " LEFT JOIN virtus.membros c ON c.id_escritorio = b.id_escritorio " +
+            " LEFT JOIN virtus.entidades d ON d.id_entidade = b.id_entidade " +
+            " LEFT JOIN virtus.users u ON u.id_user = c.id_usuario " +
+            " INNER JOIN virtus.ciclos_entidades e ON e.id_entidade = b.id_entidade " +
+            " INNER JOIN virtus.produtos_planos f ON (f.id_entidade = e.id_entidade AND f.id_ciclo = e.id_ciclo) " +
+            " WHERE (c.id_usuario = :idUsuario AND u.id_role in (3,4)) OR (a.id_chefe = :idUsuario)")
+    List<Object[]> listAvaliarPlanos(@Param("idUsuario") Integer idUsuario);
 
 }
