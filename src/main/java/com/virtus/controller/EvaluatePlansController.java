@@ -2,7 +2,7 @@ package com.virtus.controller;
 
 import com.virtus.common.annotation.LoggedUser;
 import com.virtus.domain.dto.response.EntityVirtusResponseDTO;
-import com.virtus.domain.dto.response.EvaluatePlansTreeResponseDTO;
+import com.virtus.domain.dto.response.EvaluatePlansTreeNode;
 import com.virtus.domain.model.CurrentUser;
 import com.virtus.service.EvaluatePlansService;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +27,7 @@ public class EvaluatePlansController {
     }
 
     @GetMapping("/by-entity-and-cycle-id")
-    public ResponseEntity<List<EvaluatePlansTreeResponseDTO>> getDistributeActivitiesTree(@LoggedUser CurrentUser currentUser, @RequestParam Integer entityId, @RequestParam Integer cycleId) {
+    public ResponseEntity<List<EvaluatePlansTreeNode>> getEvaluatePlansTree(@LoggedUser CurrentUser currentUser, @RequestParam Integer entityId, @RequestParam Integer cycleId) {
         return ResponseEntity.ok(service.findEvaluatePlansTree(currentUser, entityId, cycleId));
     }
 

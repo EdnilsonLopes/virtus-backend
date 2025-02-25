@@ -1,6 +1,6 @@
 package com.virtus.persistence;
 
-import com.virtus.domain.dto.response.EvaluatePlansTreeResponseDTO;
+import com.virtus.domain.model.EvaluatePlansConsultModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -15,12 +15,12 @@ public class EvaluatePlansRepository {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    public List<EvaluatePlansTreeResponseDTO> findPlansByEntityAndCycle(Integer entidadeId, Integer cicloId) {
+    public List<EvaluatePlansConsultModel> findPlansByEntityAndCycle(Integer entidadeId, Integer cicloId) {
         String sql = EVALUATE_PLANS_TREE_QUERY;
 
         return jdbcTemplate.query(sql, new Object[]{entidadeId, cicloId},
                 (rs, rowNum) -> {
-                    EvaluatePlansTreeResponseDTO evaluatePlan = EvaluatePlansTreeResponseDTO.builder()
+                    EvaluatePlansConsultModel evaluatePlan = EvaluatePlansConsultModel.builder()
                             .entidadeId(rs.getInt("id_entidade"))
                             .entidadeNome(rs.getString("entidade_nome"))
                             .cicloId(rs.getInt("id_ciclo"))
