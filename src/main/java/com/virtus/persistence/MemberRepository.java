@@ -50,5 +50,6 @@ public interface MemberRepository extends BaseRepository<Member> {
                     "    nome_auditor")
     List<Object[]> findMembersByBoss(Integer bossId);
 
-    Page<Member> findAllByOffice(Office office, Pageable pageable);
+    @Query("select m from Member m where m.office = :office AND (:filter IS NULL OR m.user.name LIKE %:filter%)")
+    Page<Member> findAllByOffice(Office office, String filter, Pageable pageable);
 }

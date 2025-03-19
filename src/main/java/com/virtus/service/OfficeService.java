@@ -1,29 +1,39 @@
 package com.virtus.service;
 
-import com.virtus.common.BaseService;
-import com.virtus.domain.dto.request.JurisdictionRequestDTO;
-import com.virtus.domain.dto.request.MemberRequestDTO;
-import com.virtus.domain.dto.request.OfficeRequestDTO;
-import com.virtus.domain.dto.response.*;
-import com.virtus.domain.entity.EntityVirtus;
-import com.virtus.domain.entity.Jurisdiction;
-import com.virtus.domain.entity.Member;
-import com.virtus.domain.entity.Office;
-import com.virtus.domain.model.CurrentUser;
-import com.virtus.exception.VirtusException;
-import com.virtus.persistence.*;
-import com.virtus.translate.Translator;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.persistence.EntityManagerFactory;
+
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import javax.persistence.EntityManagerFactory;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.virtus.common.BaseService;
+import com.virtus.domain.dto.request.JurisdictionRequestDTO;
+import com.virtus.domain.dto.request.MemberRequestDTO;
+import com.virtus.domain.dto.request.OfficeRequestDTO;
+import com.virtus.domain.dto.response.EntityVirtusResponseDTO;
+import com.virtus.domain.dto.response.JurisdictionResponseDTO;
+import com.virtus.domain.dto.response.MemberResponseDTO;
+import com.virtus.domain.dto.response.OfficeResponseDTO;
+import com.virtus.domain.dto.response.PageableResponseDTO;
+import com.virtus.domain.entity.EntityVirtus;
+import com.virtus.domain.entity.Jurisdiction;
+import com.virtus.domain.entity.Member;
+import com.virtus.domain.entity.Office;
+import com.virtus.domain.model.CurrentUser;
+import com.virtus.exception.VirtusException;
+import com.virtus.persistence.EntityVirtusRepository;
+import com.virtus.persistence.JurisdictionRepository;
+import com.virtus.persistence.MemberRepository;
+import com.virtus.persistence.OfficeRepository;
+import com.virtus.persistence.UserRepository;
+import com.virtus.translate.Translator;
 
 @Service
 public class OfficeService extends BaseService<Office, OfficeRepository, OfficeRequestDTO, OfficeResponseDTO> {
@@ -156,9 +166,10 @@ public class OfficeService extends BaseService<Office, OfficeRepository, OfficeR
             Integer officeId) {
         Office office = getRepository().findById(officeId).orElseThrow(() -> new VirtusException(getNotFoundMessage()));
         Page<Jurisdiction> jurisdictionPage;
-
-        jurisdictionPage = jurisdictionRepository.findByOffice(office, PageRequest.of(page, size));
-
+        if(Strings.isBlank(filter)){
+            filter = null;
+        }
+        jurisdictionPage = jurisdictionRepository.findByOffice(office, filter, PageRequest.of(page, size));
         List<JurisdictionResponseDTO> content = jurisdictionPage.getContent().stream().map(jurisdiction -> {
             JurisdictionResponseDTO response = new JurisdictionResponseDTO();
             response.setId(jurisdiction.getId());
@@ -182,7 +193,10 @@ public class OfficeService extends BaseService<Office, OfficeRepository, OfficeR
             int size,
             Integer officeId) {
         Office office = getRepository().findById(officeId).orElseThrow(() -> new VirtusException(getNotFoundMessage()));
-        Page<Member> memberPage = memberRepository.findAllByOffice(office, PageRequest.of(page, size));
+        if(Strings.isBlank(filter)){
+            filter = null;
+        }        
+        Page<Member> memberPage = memberRepository.findAllByOffice(office, filter, PageRequest.of(page, size));
 
         List<MemberResponseDTO> content = memberPage.getContent().stream().map(jurisdiction -> {
             MemberResponseDTO response = new MemberResponseDTO();
