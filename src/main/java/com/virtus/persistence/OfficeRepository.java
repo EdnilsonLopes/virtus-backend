@@ -1,13 +1,21 @@
 package com.virtus.persistence;
 
 import com.virtus.common.BaseRepository;
+import com.virtus.domain.entity.Member;
 import com.virtus.domain.entity.Office;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
 public interface OfficeRepository extends BaseRepository<Office> {
+    
+    @Override
+    @Query("select o from Office o where o.name LIKE %:filter% OR o.abbreviation LIKE %:filter% OR o.description LIKE %:filter%")
+    Page<Office> findAllByFilter(String filter, PageRequest pageRequest);
 
     @Query(nativeQuery = true, value =
             "SELECT    " +
