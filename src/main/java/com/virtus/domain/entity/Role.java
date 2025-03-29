@@ -1,6 +1,7 @@
 package com.virtus.domain.entity;
 
 import com.virtus.common.domain.entity.BaseEntity;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,10 +17,10 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
+@EqualsAndHashCode(of = {"id"})
 public class Role extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_role")
     private Integer id;
 
@@ -32,10 +33,7 @@ public class Role extends BaseEntity {
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "role")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "role", orphanRemoval = true)
     private List<FeatureRole> features = new ArrayList<>();
 
-    public Role(Integer id) {
-        this.id = id;
-    }
 }

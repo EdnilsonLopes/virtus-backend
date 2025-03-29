@@ -1,6 +1,7 @@
 package com.virtus.domain.entity;
 
 import com.virtus.common.domain.entity.BaseDefaultEntity;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
@@ -13,10 +14,10 @@ import java.util.List;
 @Table(name = "escritorios", schema = "virtus")
 @Getter
 @Setter
+@EqualsAndHashCode(of = {"id"})
 public class Office extends BaseDefaultEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_escritorio")
     private Integer id;
 

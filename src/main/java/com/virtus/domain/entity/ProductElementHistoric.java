@@ -1,6 +1,7 @@
 package com.virtus.domain.entity;
 
 import com.virtus.common.domain.entity.BaseEntity;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
@@ -13,10 +14,10 @@ import java.time.LocalDateTime;
 @Table(name = "produtos_elementos_historicos", schema = "virtus")
 @Getter
 @Setter
+@EqualsAndHashCode(of = {"id"})
 public class ProductElementHistoric extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_produto_elemento_historico")
     private Integer id;
 

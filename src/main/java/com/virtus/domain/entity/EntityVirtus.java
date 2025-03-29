@@ -1,6 +1,7 @@
 package com.virtus.domain.entity;
 
 import com.virtus.common.domain.entity.BaseDefaultEntity;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
@@ -14,10 +15,10 @@ import java.util.Objects;
 @Table(name = "entidades", schema = "virtus")
 @Getter
 @Setter
+@EqualsAndHashCode(of = {"id"})
 public class EntityVirtus extends BaseDefaultEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_entidade")
     private Integer id;
 
@@ -42,10 +43,10 @@ public class EntityVirtus extends BaseDefaultEntity {
     @JoinColumn(name = "id_status")
     private Status status;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "entity")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "entity", orphanRemoval = true)
     private List<CycleEntity> cycleEntities = new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "entity")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "entity", orphanRemoval = true)
     private List<Plan> plans = new ArrayList<>();
 
     @Override

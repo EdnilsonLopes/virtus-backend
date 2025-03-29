@@ -7,6 +7,8 @@ import com.virtus.domain.dto.request.ComponentRequestDTO;
 import com.virtus.domain.dto.response.ComponentResponseDTO;
 import com.virtus.domain.entity.*;
 import com.virtus.persistence.ComponentRepository;
+import com.virtus.persistence.ElementComponentRepository;
+import com.virtus.persistence.GradeTypeComponentRepository;
 import com.virtus.persistence.UserRepository;
 import com.virtus.translate.Translator;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,10 +26,16 @@ public class ComponentService extends BaseService<Component, ComponentRepository
 
     @PersistenceUnit
     private final EntityManagerFactory entityManagerFactory;
+    private final ElementComponentRepository elementComponentRepository;
+    private final GradeTypeComponentRepository gradeTypeComponentRepository;
 
-    public ComponentService(ComponentRepository repository, UserRepository userRepository, EntityManagerFactory entityManagerFactory) {
+    public ComponentService(ComponentRepository repository, UserRepository userRepository, EntityManagerFactory entityManagerFactory,
+                            ElementComponentRepository elementComponentRepository,
+                            GradeTypeComponentRepository gradeTypeComponentRepository) {
         super(repository, userRepository, entityManagerFactory);
         this.entityManagerFactory = entityManagerFactory;
+        this.elementComponentRepository = elementComponentRepository;
+        this.gradeTypeComponentRepository = gradeTypeComponentRepository;
     }
 
     @Override
@@ -42,9 +51,10 @@ public class ComponentService extends BaseService<Component, ComponentRepository
         component.setPga(body.isPga());
         component.setReference(body.getReference());
         component.setDescription(body.getDescription());
-
-        component.setElementComponents(parseToComponentElements(body.getComponentElements(), component));
-        component.setGradeTypeComponents(parseToComponentGradeTypes(body.getComponentGradeTypes(), component));
+        component.getElementComponents().clear();
+        component.getGradeTypeComponents().clear();
+        component.getElementComponents().addAll(parseToComponentElements(body.getComponentElements(), component));
+        component.getGradeTypeComponents().addAll(parseToComponentGradeTypes(body.getComponentGradeTypes(), component));
         return component;
     }
 
@@ -79,6 +89,26 @@ public class ComponentService extends BaseService<Component, ComponentRepository
         elementComponent.setGradeType(new GradeType(dto.getGradeType().getId()));
         elementComponent.setElement(new Element(dto.getElement().getId()));
         return elementComponent;
+    }
+
+    @Override
+    protected void completeDetails(Component entity) {
+        if (!CollectionUtils.isEmpty(entity.getElementComponents())) {
+            AtomicReference<Integer> maxId = new AtomicReference<>(elementComponentRepository.findMaxId());
+            entity.getElementComponents().forEach(elementComponent -> {
+                if (elementComponent.getId() == null) {
+                    elementComponent.setId(maxId.updateAndGet(v -> v + 1));
+                }
+            });
+        }
+        if (!CollectionUtils.isEmpty(entity.getGradeTypeComponents())) {
+            AtomicReference<Integer> maxId = new AtomicReference<>(gradeTypeComponentRepository.findMaxId());
+            entity.getGradeTypeComponents().forEach(gradeTypeComponent -> {
+                if (gradeTypeComponent.getId() == null) {
+                    gradeTypeComponent.setId(maxId.updateAndGet(v -> v + 1));
+                }
+            });
+        }
     }
 
     @Override

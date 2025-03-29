@@ -1,6 +1,7 @@
 package com.virtus.domain.entity;
 
 import com.virtus.common.domain.entity.BaseDefaultEntity;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
@@ -11,10 +12,10 @@ import javax.persistence.*;
 @Table(name = "planos", schema = "virtus")
 @Getter
 @Setter
+@EqualsAndHashCode(of = {"id"})
 public class Plan extends BaseDefaultEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_plano")
     private Integer id;
 

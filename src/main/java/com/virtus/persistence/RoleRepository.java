@@ -16,4 +16,6 @@ public interface RoleRepository extends BaseRepository<Role> {
     @Query("select c from Role c where c.name LIKE %:filter% OR c.description LIKE %:filter%")
     Page<Role> findAllByFilter(String filter, PageRequest pageRequest);
 
+    Optional<Role> findTopByOrderByIdDesc();
+
 }

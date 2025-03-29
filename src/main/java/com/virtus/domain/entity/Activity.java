@@ -3,6 +3,7 @@ package com.virtus.domain.entity;
 import javax.persistence.*;
 
 import com.virtus.common.domain.entity.BaseEntity;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
@@ -15,10 +16,10 @@ import java.util.List;
 @Table(name = "activities", schema = "virtus")
 @Getter
 @Setter
+@EqualsAndHashCode(of = {"id"})
 public class Activity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_activity")
     private Integer id;
 
@@ -43,9 +44,9 @@ public class Activity {
     @JoinColumn(name = "id_workflow")
     private Workflow workflow;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "activity")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "activity", orphanRemoval = true)
     private List<ActivityRole> activityRoles = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "activity")
-    private List<FeatureActivity> featuresActivities;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "activity", orphanRemoval = true)
+    private List<FeatureActivity> featuresActivities = new ArrayList<>();
 }

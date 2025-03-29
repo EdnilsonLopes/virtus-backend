@@ -28,6 +28,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Service
@@ -126,7 +127,8 @@ public class CycleService extends BaseService<Cycle, CycleRepository, CycleReque
         cycle.setName(body.getName());
         cycle.setReference(body.getReference());
         cycle.setDescription(body.getDescription());
-        cycle.setPillarCycles(parseToCyclePillars(body.getCyclePillars(), cycle));
+        cycle.getPillarCycles().clear();
+        cycle.getPillarCycles().addAll(parseToCyclePillars(body.getCyclePillars(), cycle));
         return cycle;
     }
 
@@ -199,6 +201,27 @@ public class CycleService extends BaseService<Cycle, CycleRepository, CycleReque
             createProductPillar(current, cycleEntity.getEntity(), cycleEntity.getCycle());
             createProductComponent(current, cycleEntity.getEntity(), cycleEntity.getCycle());
             getRepository().save(cycleEntity.getCycle());
+        }
+    }
+
+    @Override
+    protected void beforeCreate(Cycle entity) {
+        setDetailsId(entity);
+    }
+
+    @Override
+    protected void beforeUpdate(Cycle entity) {
+        setDetailsId(entity);
+    }
+
+    private void setDetailsId(Cycle entity) {
+        if (!CollectionUtils.isEmpty(entity.getPillarCycles())) {
+            AtomicReference<Integer> maxId = new AtomicReference<>(pillarCycleRepository.findMaxId());
+            entity.getPillarCycles().forEach(pillarCycle -> {
+                if (pillarCycle.getId() == null) {
+                    pillarCycle.setId(maxId.updateAndGet(v -> v + 1));
+                }
+            });
         }
     }
 

@@ -3,6 +3,7 @@ package com.virtus.domain.entity;
 import com.virtus.common.domain.entity.BaseEntity;
 import com.virtus.domain.enums.EntityInSystem;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
@@ -17,10 +18,10 @@ import java.util.List;
 @Table(name = "workflows", schema = "virtus")
 @Getter
 @Setter
+@EqualsAndHashCode(of = {"id"})
 public class Workflow extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_workflow")
     private Integer id;
 
@@ -43,7 +44,7 @@ public class Workflow extends BaseEntity {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "workflow")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "workflow", orphanRemoval = true)
     private List<Activity> activities = new ArrayList<>();
 
 }

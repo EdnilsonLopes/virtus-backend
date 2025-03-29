@@ -5,7 +5,9 @@ import com.virtus.domain.dto.request.RoleRequestDTO;
 import com.virtus.domain.dto.response.FeatureResponseDTO;
 import com.virtus.domain.dto.response.FeatureRoleResponseDTO;
 import com.virtus.domain.dto.response.RoleResponseDTO;
-import com.virtus.domain.entity.*;
+import com.virtus.domain.entity.Feature;
+import com.virtus.domain.entity.FeatureRole;
+import com.virtus.domain.entity.Role;
 import com.virtus.exception.VirtusException;
 import com.virtus.persistence.FeatureRepository;
 import com.virtus.persistence.RoleRepository;
@@ -17,6 +19,7 @@ import org.springframework.util.CollectionUtils;
 import javax.persistence.EntityManagerFactory;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Service
@@ -69,11 +72,12 @@ public class RoleService extends BaseService<Role, RoleRepository, RoleRequestDT
 
     @Override
     protected Role parseToEntity(RoleRequestDTO body) {
-        Role role = new Role();
+        Role role = body.getId() != null ? getRepository().findById(body.getId()).orElse(new Role()): new Role();
         role.setId(body.getId());
         role.setName(body.getName());
         role.setDescription(body.getDescription());
-        role.setFeatures(parseToFeatureRole(body, role));
+        role.getFeatures().clear();
+        role.getFeatures().addAll(parseToFeatureRole(body, role));
         return role;
     }
 
@@ -96,23 +100,23 @@ public class RoleService extends BaseService<Role, RoleRepository, RoleRequestDT
     }
 
     @Override
-    protected void beforeUpdate(Role entity) {
-        Role persisted = findById(entity.getId()).orElseThrow(() -> new VirtusException(getNotFoundMessage()));
-        verifyFeaturesRolesAreUpdated(entity, persisted);
+    protected void beforeCreate(Role entity) {
+        setDetailsId(entity);
     }
 
-    private static void verifyFeaturesRolesAreUpdated(Role entity, Role persistedRole) {
-        if (!CollectionUtils.isEmpty(entity.getFeatures()) && !CollectionUtils.isEmpty(persistedRole.getFeatures())) {
-            entity.getFeatures().forEach(feature -> {
-                FeatureRole persistedFeatureRole = persistedRole.getFeatures()
-                        .stream()
-                        .filter(pa -> pa.getFeature().getId().equals(feature.getFeature().getId()))
-                        .findFirst()
-                        .orElse(null);
-                if (persistedFeatureRole != null) {
-                    feature.setId(persistedFeatureRole.getId());
+    private void setDetailsId(Role entity) {
+        if (!CollectionUtils.isEmpty(entity.getFeatures())) {
+            AtomicReference<Integer> maxId = new AtomicReference<>(featureRepository.findMaxId());
+            entity.getFeatures().forEach(featureRole -> {
+                if (featureRole.getId() == null) {
+                    featureRole.setId(maxId.updateAndGet(v -> v + 1));
                 }
             });
         }
+    }
+
+    @Override
+    protected void beforeUpdate(Role entity) {
+        setDetailsId(entity);
     }
 }

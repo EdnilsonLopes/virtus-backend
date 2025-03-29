@@ -23,6 +23,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 
@@ -308,7 +309,7 @@ public abstract class BaseService<
         return response;
     }
 
-    protected StatusResponseDTO parseToStatusResponseDTO(Status status){
+    protected StatusResponseDTO parseToStatusResponseDTO(Status status) {
         StatusResponseDTO response = new StatusResponseDTO();
         response.setId(status.getId());
         response.setName(status.getName());
@@ -319,7 +320,7 @@ public abstract class BaseService<
     }
 
     protected EnumDTO<Enum> parseToAverageTypeEnumResponseDTO(AverageType averageType) {
-        if(averageType == null){
+        if (averageType == null) {
             return EnumDTO.builder().build();
         }
         return EnumDTO.builder()
@@ -338,12 +339,16 @@ public abstract class BaseService<
 
     protected abstract String getNotFoundMessage();
 
-    protected void beforeCreate(T entity) {
+    protected void completeDetails(T entity) {
         //Optional
     }
 
+    protected void beforeCreate(T entity) {
+        completeDetails(entity);
+    }
+
     protected void beforeUpdate(T entity) {
-        //Optional
+        completeDetails(entity);
     }
 
     protected void beforeDelete(Integer entity) {
@@ -372,6 +377,9 @@ public abstract class BaseService<
 
     @Transactional
     protected T save(T entity) {
+        if (entity.getId() == null) {
+            entity.setId(getRepository().findMaxId() + 1);
+        }
         return getRepository().save(entity);
     }
 
@@ -380,6 +388,9 @@ public abstract class BaseService<
     }
 
     protected T saveAndFlush(T entity) {
+        if (entity.getId() == null) {
+            entity.setId(getRepository().findMaxId() + 1);
+        }
         return getRepository().saveAndFlush(entity);
     }
 

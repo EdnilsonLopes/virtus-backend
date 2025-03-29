@@ -1,6 +1,7 @@
 package com.virtus.domain.entity;
 
 import com.virtus.common.domain.entity.BaseConfigurationEntity;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
@@ -13,15 +14,15 @@ import java.util.Objects;
 @Table(name = "ciclos", schema = "virtus")
 @Getter
 @Setter
+@EqualsAndHashCode(of = {"id"})
 public class Cycle extends BaseConfigurationEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_ciclo")
     private Integer id;
     @Transient
     private int ordination;
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "cycle")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "cycle", orphanRemoval = true)
     private List<PillarCycle> pillarCycles;
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "cycle")
     private List<CycleEntity> cycleEntities;

@@ -2,6 +2,7 @@ package com.virtus.domain.entity;
 
 import com.virtus.common.domain.entity.BaseEntity;
 import com.virtus.domain.enums.AverageType;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
@@ -14,11 +15,11 @@ import java.util.Objects;
 @Table(name = "componentes_pilares", schema = "virtus")
 @Getter
 @Setter
+@EqualsAndHashCode(of = {"id"})
 public class ComponentPillar extends BaseEntity {
 
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_componente_pilar")
     private Integer id;
 

@@ -6,6 +6,7 @@ import com.virtus.domain.dto.request.ElementRequestDTO;
 import com.virtus.domain.dto.response.ElementResponseDTO;
 import com.virtus.domain.entity.Element;
 import com.virtus.domain.entity.ElementItem;
+import com.virtus.persistence.ElementItemRepository;
 import com.virtus.persistence.ElementRepository;
 import com.virtus.persistence.UserRepository;
 import com.virtus.translate.Translator;
@@ -16,6 +17,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,10 +25,13 @@ public class ElementService extends BaseService<Element, ElementRepository, Elem
 
     @PersistenceUnit
     private final EntityManagerFactory entityManagerFactory;
+    private final ElementItemRepository elementItemRepository;
 
-    public ElementService(ElementRepository repository, UserRepository userRepository, EntityManagerFactory entityManagerFactory) {
+    public ElementService(ElementRepository repository, UserRepository userRepository, EntityManagerFactory entityManagerFactory,
+                          ElementItemRepository elementItemRepository) {
         super(repository, userRepository, entityManagerFactory);
         this.entityManagerFactory = entityManagerFactory;
+        this.elementItemRepository = elementItemRepository;
     }
 
     @Override
@@ -36,14 +41,14 @@ public class ElementService extends BaseService<Element, ElementRepository, Elem
 
     @Override
     protected Element parseToEntity(ElementRequestDTO body) {
-        Element element = new Element();
+        Element element = body.getId() == null ? new Element() : getRepository().findById(body.getId()).orElse(new Element());
         element.setId(body.getId());
         element.setName(body.getName());
         element.setDescription(body.getDescription());
         element.setDescription(body.getDescription());
         element.setReference(body.getReference());
-
-        element.setItems(parseToCreateItemsEntity(body.getItems(), element));
+        element.getItems().clear();
+        element.getItems().addAll(parseToCreateItemsEntity(body.getItems(), element));
         return element;
     }
 
@@ -62,6 +67,18 @@ public class ElementService extends BaseService<Element, ElementRepository, Elem
         item.setDescription(itemRequestDTO.getDescription());
         item.setReference(itemRequestDTO.getReference());
         return item;
+    }
+
+    @Override
+    protected void completeDetails(Element entity) {
+        if (!CollectionUtils.isEmpty(entity.getItems())) {
+            AtomicReference<Integer> maxId = new AtomicReference<>(elementItemRepository.findMaxId());
+            entity.getItems().forEach(elementComponent -> {
+                if (elementComponent.getId() == null) {
+                    elementComponent.setId(maxId.updateAndGet(v -> v + 1));
+                }
+            });
+        }
     }
 
     @Override

@@ -3,7 +3,6 @@ package com.virtus.service;
 import com.virtus.common.BaseService;
 import com.virtus.domain.dto.EnumDTO;
 import com.virtus.domain.dto.request.ActivityRequestDTO;
-import com.virtus.domain.dto.request.FeatureActivityRequestDTO;
 import com.virtus.domain.dto.request.WorkflowRequestDTO;
 import com.virtus.domain.dto.response.*;
 import com.virtus.domain.entity.*;
@@ -16,6 +15,7 @@ import org.springframework.util.CollectionUtils;
 import javax.persistence.EntityManagerFactory;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,6 +25,8 @@ public class WorkflowService extends BaseService<Workflow, WorkflowRepository, W
     private final ActivityRepository activityRepository;
     private final FeatureRepository featureRepository;
     private final RoleRepository roleRepository;
+    private final ActivityRoleRepository activityRoleRepository;
+    private final FeatureActivityRepository featureActivityRepository;
 
     public WorkflowService(WorkflowRepository repository,
                            UserRepository userRepository,
@@ -32,12 +34,16 @@ public class WorkflowService extends BaseService<Workflow, WorkflowRepository, W
                            ActionRepository actionRepository,
                            ActivityRepository activityRepository,
                            FeatureRepository featureRepository,
-                           RoleRepository roleRepository) {
+                           RoleRepository roleRepository,
+                           ActivityRoleRepository activityRoleRepository,
+                           FeatureActivityRepository featureActivityRepository) {
         super(repository, userRepository, entityManagerFactory);
         this.actionRepository = actionRepository;
         this.activityRepository = activityRepository;
         this.featureRepository = featureRepository;
         this.roleRepository = roleRepository;
+        this.activityRoleRepository = activityRoleRepository;
+        this.featureActivityRepository = featureActivityRepository;
     }
 
     @Override
@@ -50,6 +56,7 @@ public class WorkflowService extends BaseService<Workflow, WorkflowRepository, W
         response.setStartAt(entity.getStartAt());
         response.setEndAt(entity.getEndAt());
         response.setCreatedAt(entity.getCreatedAt());
+        response.setAuthor(parseToUserResponseDTO(entity.getAuthor()));
         if (detailed)
             response.setActivities(parseToActivitiesResponseDTO(entity.getActivities()));
         return response;
@@ -163,15 +170,15 @@ public class WorkflowService extends BaseService<Workflow, WorkflowRepository, W
 
     @Override
     protected Workflow parseToEntity(WorkflowRequestDTO body) {
-        Workflow workflow = new Workflow();
+        Workflow workflow = body.getId() != null ? getRepository().findById(body.getId()).orElse(new Workflow()) : new Workflow();
 
-        workflow.setId(body.getId());
         workflow.setName(body.getName());
         workflow.setDescription(body.getDescription());
         workflow.setStartAt(body.getStartAt());
         workflow.setEndAt(body.getEndAt());
         workflow.setEntityType(body.getEntityType() != null ? body.getEntityType().getValue() : null);
-        workflow.setActivities(parseToActivities(body.getActivities(), workflow));
+        workflow.getActivities().clear();
+        workflow.getActivities().addAll(parseToActivities(body.getActivities(), workflow));
 
         return workflow;
     }
@@ -194,8 +201,10 @@ public class WorkflowService extends BaseService<Workflow, WorkflowRepository, W
             activity.setAction(actionRepository.findById(requestDTO.getActionId()).orElse(null));
         if (requestDTO.getExpirationActionId() != null)
             activity.setExpirationAction(actionRepository.findById(requestDTO.getExpirationActionId()).orElse(null));
-        activity.setActivityRoles(parseToActivityRoles(requestDTO, activity));
-        activity.setFeaturesActivities(parseToFeaturesActivities(requestDTO, activity));
+        activity.getActivityRoles().clear();
+        activity.getActivityRoles().addAll(parseToActivityRoles(requestDTO, activity));
+        activity.getFeaturesActivities().clear();
+        activity.getFeaturesActivities().addAll(parseToFeaturesActivities(requestDTO, activity));
         return activity;
     }
 
@@ -236,15 +245,43 @@ public class WorkflowService extends BaseService<Workflow, WorkflowRepository, W
     }
 
     @Override
+    protected void beforeCreate(Workflow entity) {
+        setDetailsId(entity);
+    }
+
+    private void setDetailsId(Workflow entity) {
+        if (!CollectionUtils.isEmpty(entity.getActivities())) {
+            AtomicReference<Integer> maxId = new AtomicReference<>(activityRepository.findMaxId());
+
+            AtomicReference<Integer> maxIdActivityRole = new AtomicReference<>(activityRoleRepository.findMaxId());
+            AtomicReference<Integer> maxIdFeatureActivity = new AtomicReference<>(featureActivityRepository.findMaxId());
+
+            entity.getActivities().forEach(activity -> {
+                if (activity.getId() == null) {
+                    activity.setId(maxId.updateAndGet(v -> v + 1));
+                }
+                if (!CollectionUtils.isEmpty(activity.getFeaturesActivities())) {
+                    activity.getFeaturesActivities().forEach(featureActivity -> {
+                        if (featureActivity.getId() == null) {
+                            featureActivity.setId(maxIdFeatureActivity.updateAndGet(v -> v + 1));
+                        }
+                    });
+                }
+                if (!CollectionUtils.isEmpty(activity.getActivityRoles())) {
+                    activity.getActivityRoles().forEach(activityRole -> {
+                        if (activityRole.getId() == null) {
+                            activityRole.setId(maxIdActivityRole.updateAndGet(v -> v + 1));
+                        }
+                    });
+                }
+            });
+        }
+    }
+
+    @Override
     protected void beforeUpdate(Workflow entity) {
-        Workflow persisted = findById(entity.getId()).orElseThrow(() -> new VirtusException(getNotFoundMessage()));
-        if (CollectionUtils.isEmpty(persisted.getActivities()) || CollectionUtils.isEmpty(entity.getActivities())) {
-            return;
-        }
-        for (Activity persistedActivity : persisted.getActivities()) {
-            verifyFeaturesActivitiesAreUpdated(entity, persistedActivity);
-            verifyActivitiesRolesAreUpdated(entity, persistedActivity);
-        }
+
+        setDetailsId(entity);
     }
 
     private static void verifyFeaturesActivitiesAreUpdated(Workflow entity, Activity persistedActivity) {

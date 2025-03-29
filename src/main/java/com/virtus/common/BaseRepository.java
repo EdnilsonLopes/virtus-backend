@@ -13,6 +13,6 @@ public interface BaseRepository<T extends BaseEntity> extends JpaRepository<T, I
     @Query("SELECT t FROM #{#entityName} t")
     Page<T> findAllByFilter(String filter, PageRequest pageRequest);
 
-    @Query("SELECT COALESCE(MAX(t.id), 0) FROM #{#entityName} t")
-    int findMaxId();
+    @Query("SELECT COALESCE(MAX(e.id), 0) FROM #{#entityName} e")
+    Integer findMaxId();
 }

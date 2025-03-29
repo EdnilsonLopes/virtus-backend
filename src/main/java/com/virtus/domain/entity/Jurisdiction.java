@@ -4,6 +4,7 @@ package com.virtus.domain.entity;
 import com.virtus.common.domain.entity.BaseConfigurationEntity;
 import com.virtus.common.domain.entity.BaseDefaultEntity;
 import com.virtus.common.domain.entity.BaseEntity;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
@@ -16,10 +17,10 @@ import java.time.LocalDateTime;
 @Table(name = "jurisdicoes", schema = "virtus")
 @Getter
 @Setter
+@EqualsAndHashCode(of = {"id"})
 public class Jurisdiction extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_jurisdicao")
     private Integer id;
 

@@ -22,4 +22,12 @@ public class BaseEntity {
     @JoinColumn(name = "id_author", updatable = false)
     private User author;
 
+    public void setId(Integer id){
+
+    }
+
+    public Integer getId(){
+        return null;
+    }
+
 }

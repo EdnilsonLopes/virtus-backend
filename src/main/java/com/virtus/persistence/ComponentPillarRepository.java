@@ -12,4 +12,7 @@ public interface ComponentPillarRepository extends JpaRepository<ComponentPillar
 
     @Query("select cp from ComponentPillar cp where cp.pillar.id = :id")
     List<ComponentPillar> findByPillarId(Integer id);
+
+    @Query("SELECT COALESCE(MAX(e.id), 0) FROM ComponentPillar e")
+    Integer findMaxId();
 }

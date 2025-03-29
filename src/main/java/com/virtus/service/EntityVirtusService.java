@@ -6,10 +6,7 @@ import com.virtus.domain.dto.request.EntityVirtusRequestDTO;
 import com.virtus.domain.dto.request.PlanRequestDTO;
 import com.virtus.domain.dto.request.StartCycleRequestDTO;
 import com.virtus.domain.dto.response.*;
-import com.virtus.domain.entity.Cycle;
-import com.virtus.domain.entity.CycleEntity;
-import com.virtus.domain.entity.EntityVirtus;
-import com.virtus.domain.entity.Plan;
+import com.virtus.domain.entity.*;
 import com.virtus.domain.model.CurrentUser;
 import com.virtus.persistence.*;
 import com.virtus.translate.Translator;
@@ -19,6 +16,7 @@ import org.springframework.util.CollectionUtils;
 import javax.persistence.EntityManagerFactory;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Service
@@ -149,8 +147,10 @@ public class EntityVirtusService extends BaseService<EntityVirtus, EntityVirtusR
         entity.setCode(body.getCode());
         entity.setEsi(body.getEsi());
         entity.setSituation(body.getSituation());
-        entity.setCycleEntities(parseToCyclesEntity(body.getCyclesEntity(), entity));
-        entity.setPlans(parseToPlans(body.getPlans(), entity));
+        entity.getCycleEntities().clear();
+        entity.getCycleEntities().addAll(parseToCyclesEntity(body.getCyclesEntity(), entity));
+        entity.getPlans().clear();
+        entity.getPlans().addAll(parseToPlans(body.getPlans(), entity));
         return entity;
     }
 
@@ -207,6 +207,26 @@ public class EntityVirtusService extends BaseService<EntityVirtus, EntityVirtusR
             cycleEntity.setCycle(cycleRepository.findById(cycle.getCycle().getId()).orElse(null));
         }
         return cycleEntity;
+    }
+
+    @Override
+    protected void completeDetails(EntityVirtus entity) {
+        if (!CollectionUtils.isEmpty(entity.getCycleEntities())) {
+            AtomicReference<Integer> maxId = new AtomicReference<>(cycleEntityRepository.findMaxId());
+            entity.getCycleEntities().forEach(elementComponent -> {
+                if (elementComponent.getId() == null) {
+                    elementComponent.setId(maxId.updateAndGet(v -> v + 1));
+                }
+            });
+        }
+        if (!CollectionUtils.isEmpty(entity.getPlans())) {
+            AtomicReference<Integer> maxId = new AtomicReference<>(planRepository.findMaxId());
+            entity.getPlans().forEach(gradeTypeComponent -> {
+                if (gradeTypeComponent.getId() == null) {
+                    gradeTypeComponent.setId(maxId.updateAndGet(v -> v + 1));
+                }
+            });
+        }
     }
 
     @Override

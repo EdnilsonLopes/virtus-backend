@@ -12,4 +12,7 @@ public interface PlanRepository extends JpaRepository<Plan, Integer> {
 
     @Query(value = "select p from Plan p where p.entity.id = :entityId")
     List<Plan> findByEntityId(@Param("entityId") Integer entityId);
+
+    @Query("SELECT COALESCE(MAX(e.id), 0) FROM Plan e")
+    Integer findMaxId();
 }
