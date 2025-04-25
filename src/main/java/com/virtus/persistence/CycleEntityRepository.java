@@ -1,15 +1,15 @@
 package com.virtus.persistence;
 
-import com.virtus.common.BaseRepository;
-import com.virtus.domain.dto.response.CycleEntityResponseDTO;
-import com.virtus.domain.entity.CycleEntity;
-import com.virtus.domain.entity.User;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
-import java.util.Optional;
+import com.virtus.common.BaseRepository;
+import com.virtus.domain.entity.CycleEntity;
+import com.virtus.domain.entity.User;
 
 public interface CycleEntityRepository extends BaseRepository<CycleEntity> {
 
