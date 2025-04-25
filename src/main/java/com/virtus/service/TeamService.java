@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Service
@@ -173,13 +174,20 @@ public class TeamService {
 
     private void updateTeamMembers(TeamRequestDTO body) {
         List<TeamMember> persisted = teamMemberRepository.findByEntityIdAndCycleId(body.getEntity().getId(), body.getCycle().getId());
-        persisted = persisted.stream().filter(teamMember -> body.getTeamMembers().stream().filter(teamMemberDTO -> teamMemberDTO.getId().equals(teamMember.getId())).findAny().isEmpty()).collect(Collectors.toList());
+        persisted = persisted.stream().filter(teamMember -> body.getTeamMembers().stream().filter(teamMemberDTO -> teamMemberDTO.getId() != null && teamMemberDTO.getId().equals(teamMember.getId())).findAny().isEmpty()).collect(Collectors.toList());
         teamMemberRepository.deleteAll(persisted);
         teamMemberRepository.flush();
 
         List<TeamMember> teamMembers = body.getTeamMembers().stream()
                 .map(req -> parseToTeamMember(body, req))
                 .collect(Collectors.toList());
+        AtomicReference<Integer> maxId = new AtomicReference<>(teamMemberRepository.findMaxId());
+        teamMembers.forEach(teamMember -> {
+            if (teamMember.getId() == null) {
+                maxId.set(maxId.get() + 1);
+                teamMember.setId(maxId.get());
+            }
+        });
         teamMemberRepository.saveAllAndFlush(teamMembers);
     }
 
@@ -253,7 +261,7 @@ public class TeamService {
     }
 
     public void validateUserSelectedAsTeamMember(Integer idCycle, Integer userTeamMemberId, Integer supervisorId) {
-        if(supervisorId == null){
+        if (supervisorId == null) {
             throw new VirtusException("O Supervisor deve ser informado!");
         }
         User user = userRepository.findById(userTeamMemberId).orElseThrow(() -> ERROR_USER_NOT_FOUND);
