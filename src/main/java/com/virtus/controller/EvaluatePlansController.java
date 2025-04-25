@@ -22,8 +22,8 @@ public class EvaluatePlansController {
     private final EvaluatePlansService service;
 
     @GetMapping("/list")
-    public ResponseEntity<List<EntityVirtusResponseDTO>> listAvaliarPlanos(@LoggedUser CurrentUser currentUser) {
-        return ResponseEntity.ok(service.listAvaliarPlanos(currentUser));
+    public ResponseEntity<List<EntityVirtusResponseDTO>> listAvaliarPlanos(@LoggedUser CurrentUser currentUser, @RequestParam(value = "filter", required = false) String filter) {
+        return ResponseEntity.ok(service.listAvaliarPlanos(currentUser, filter));
     }
 
     @GetMapping("/by-entity-and-cycle-id")

@@ -12,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface OfficeRepository extends BaseRepository<Office> {
-    
+
     @Override
     @Query("select o from Office o where o.name LIKE %:filter% OR o.abbreviation LIKE %:filter% OR o.description LIKE %:filter%")
     Page<Office> findAllByFilter(String filter, PageRequest pageRequest);
@@ -40,14 +40,19 @@ public interface OfficeRepository extends BaseRepository<Office> {
     List<Object[]> findAllSupervisorsByBossId(Integer bossId);
 
     @Query(nativeQuery = true, value = "SELECT DISTINCT d.codigo, b.id_entidade, d.nome, a.abreviatura " +
-            " FROM virtus.escritorios a " +
-            " LEFT JOIN virtus.jurisdicoes b ON a.id_escritorio = b.id_escritorio " +
-            " LEFT JOIN virtus.membros c ON c.id_escritorio = b.id_escritorio " +
-            " LEFT JOIN virtus.entidades d ON d.id_entidade = b.id_entidade " +
-            " LEFT JOIN virtus.users u ON u.id_user = c.id_usuario " +
-            " INNER JOIN virtus.ciclos_entidades e ON e.id_entidade = b.id_entidade " +
-            " INNER JOIN virtus.produtos_planos f ON (f.id_entidade = e.id_entidade AND f.id_ciclo = e.id_ciclo) " +
-            " WHERE (c.id_usuario = :idUsuario AND u.id_role in (3,4)) OR (a.id_chefe = :idUsuario)")
-    List<Object[]> listAvaliarPlanos(@Param("idUsuario") Integer idUsuario);
+            "FROM virtus.escritorios a " +
+            "LEFT JOIN virtus.jurisdicoes b ON a.id_escritorio = b.id_escritorio " +
+            "LEFT JOIN virtus.membros c ON c.id_escritorio = b.id_escritorio " +
+            "LEFT JOIN virtus.entidades d ON d.id_entidade = b.id_entidade " +
+            "LEFT JOIN virtus.users u ON u.id_user = c.id_usuario " +
+            "INNER JOIN virtus.ciclos_entidades e ON e.id_entidade = b.id_entidade " +
+            "INNER JOIN virtus.produtos_planos f ON (f.id_entidade = e.id_entidade AND f.id_ciclo = e.id_ciclo) " +
+            "WHERE ( " +
+            "(:filter IS NULL OR LOWER(d.nome) LIKE CONCAT('%', LOWER(:filter), '%'))" +
+            ") AND ( " +
+            "(c.id_usuario = :idUsuario AND u.id_role IN (3, 4)) " +
+            "OR (a.id_chefe = :idUsuario))")
+    List<Object[]> listAvaliarPlanos(@Param("idUsuario") Integer idUsuario, @Param("filter") String filter);
+
 
 }

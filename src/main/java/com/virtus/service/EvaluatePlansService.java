@@ -26,8 +26,8 @@ public class EvaluatePlansService {
     private final EvaluatePlansRepository evaluatePlansRepository;
 
 
-    public List<EntityVirtusResponseDTO> listAvaliarPlanos(CurrentUser currentUser) {
-        var entidades = officeRepository.listAvaliarPlanos(currentUser.getId());
+    public List<EntityVirtusResponseDTO> listAvaliarPlanos(CurrentUser currentUser, String filter) {
+        var entidades = officeRepository.listAvaliarPlanos(currentUser.getId(), filter);
 
         if (CollectionUtils.isEmpty(entidades)) {
             return List.of();
