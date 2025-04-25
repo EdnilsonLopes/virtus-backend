@@ -1,13 +1,12 @@
 package com.virtus.domain.dto.request;
 
-import com.virtus.common.domain.dto.BaseRequestDTO;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 import java.time.LocalDateTime;
 import java.util.List;
+
+import com.virtus.common.domain.dto.BaseRequestDTO;
+
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @Setter

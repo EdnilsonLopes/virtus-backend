@@ -1,14 +1,16 @@
 package com.virtus.common.interceptor;
 
-import com.virtus.common.utils.CorrelationUtils;
+import java.util.UUID;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.UUID;
+import com.virtus.common.utils.CorrelationUtils;
 
 @Component
 public class CorrelationIdInterceptor extends HandlerInterceptorAdapter {

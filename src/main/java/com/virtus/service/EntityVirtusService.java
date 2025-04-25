@@ -1,23 +1,34 @@
 package com.virtus.service;
 
-import com.virtus.common.BaseService;
-import com.virtus.domain.dto.request.CycleEntityRequestDTO;
-import com.virtus.domain.dto.request.EntityVirtusRequestDTO;
-import com.virtus.domain.dto.request.PlanRequestDTO;
-import com.virtus.domain.dto.request.StartCycleRequestDTO;
-import com.virtus.domain.dto.response.*;
-import com.virtus.domain.entity.*;
-import com.virtus.domain.model.CurrentUser;
-import com.virtus.persistence.*;
-import com.virtus.translate.Translator;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
-import javax.persistence.EntityManagerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+
+import javax.persistence.EntityManagerFactory;
+
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
+import com.virtus.common.BaseService;
+import com.virtus.domain.dto.request.CycleEntityRequestDTO;
+import com.virtus.domain.dto.request.EntityVirtusRequestDTO;
+import com.virtus.domain.dto.request.PlanRequestDTO;
+import com.virtus.domain.dto.response.CycleEntityResponseDTO;
+import com.virtus.domain.dto.response.CycleResponseDTO;
+import com.virtus.domain.dto.response.EntityVirtusResponseDTO;
+import com.virtus.domain.dto.response.PlanResponseDTO;
+import com.virtus.domain.entity.Cycle;
+import com.virtus.domain.entity.CycleEntity;
+import com.virtus.domain.entity.EntityVirtus;
+import com.virtus.domain.entity.Plan;
+import com.virtus.domain.model.CurrentUser;
+import com.virtus.persistence.CycleEntityRepository;
+import com.virtus.persistence.CycleRepository;
+import com.virtus.persistence.EntityVirtusRepository;
+import com.virtus.persistence.PlanRepository;
+import com.virtus.persistence.UserRepository;
+import com.virtus.translate.Translator;
 
 @Service
 public class EntityVirtusService extends BaseService<EntityVirtus, EntityVirtusRepository, EntityVirtusRequestDTO, EntityVirtusResponseDTO> {

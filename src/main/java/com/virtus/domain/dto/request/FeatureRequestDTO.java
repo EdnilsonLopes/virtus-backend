@@ -1,7 +1,7 @@
 package com.virtus.domain.dto.request;
 
 import com.virtus.common.domain.dto.BaseRequestDTO;
-import lombok.Data;
+
 import lombok.Getter;
 import lombok.Setter;
 

@@ -1,5 +1,15 @@
 package com.virtus.service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+
+import javax.persistence.EntityManagerFactory;
+
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
 import com.virtus.common.BaseService;
 import com.virtus.domain.dto.request.RoleRequestDTO;
 import com.virtus.domain.dto.response.FeatureResponseDTO;
@@ -8,19 +18,10 @@ import com.virtus.domain.dto.response.RoleResponseDTO;
 import com.virtus.domain.entity.Feature;
 import com.virtus.domain.entity.FeatureRole;
 import com.virtus.domain.entity.Role;
-import com.virtus.exception.VirtusException;
 import com.virtus.persistence.FeatureRepository;
 import com.virtus.persistence.RoleRepository;
 import com.virtus.persistence.UserRepository;
 import com.virtus.translate.Translator;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
-import javax.persistence.EntityManagerFactory;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 @Service
 public class RoleService extends BaseService<Role, RoleRepository, RoleRequestDTO, RoleResponseDTO> {

@@ -1,10 +1,12 @@
 package com.virtus.security.jwt;
 
-import com.nimbusds.jwt.SignedJWT;
-import com.virtus.domain.model.CurrentUser;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
+
+import com.nimbusds.jwt.SignedJWT;
+import com.virtus.domain.model.CurrentUser;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class JwtUtils {

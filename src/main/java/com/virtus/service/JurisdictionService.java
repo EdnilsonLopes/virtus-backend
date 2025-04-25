@@ -1,8 +1,23 @@
 package com.virtus.service;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.persistence.EntityManagerFactory;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+
 import com.virtus.common.BaseService;
 import com.virtus.domain.dto.request.JurisdictionRequestDTO;
-import com.virtus.domain.dto.response.*;
+import com.virtus.domain.dto.response.DistributeActivitiesResponseDTO;
+import com.virtus.domain.dto.response.EntityVirtusResponseDTO;
+import com.virtus.domain.dto.response.JurisdictionResponseDTO;
+import com.virtus.domain.dto.response.OfficeResponseDTO;
+import com.virtus.domain.dto.response.PageableResponseDTO;
 import com.virtus.domain.entity.EntityVirtus;
 import com.virtus.domain.entity.Jurisdiction;
 import com.virtus.domain.entity.Office;
@@ -10,15 +25,6 @@ import com.virtus.domain.model.CurrentUser;
 import com.virtus.persistence.JurisdictionRepository;
 import com.virtus.persistence.UserRepository;
 import com.virtus.translate.Translator;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
-
-import javax.persistence.EntityManagerFactory;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class JurisdictionService extends BaseService<Jurisdiction, JurisdictionRepository, JurisdictionRequestDTO, JurisdictionResponseDTO> {

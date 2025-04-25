@@ -1,30 +1,52 @@
 package com.virtus.common;
 
-import com.virtus.common.domain.dto.BaseRequestDTO;
-import com.virtus.common.domain.dto.BaseResponseDTO;
-import com.virtus.common.domain.entity.BaseEntity;
-import com.virtus.domain.dto.EnumDTO;
-import com.virtus.domain.dto.response.*;
-import com.virtus.domain.entity.*;
-import com.virtus.domain.enums.AverageType;
-import com.virtus.domain.model.CurrentUser;
-import com.virtus.exception.VirtusException;
-import com.virtus.persistence.UserRepository;
-import com.virtus.translate.Translator;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
+import com.virtus.common.domain.dto.BaseRequestDTO;
+import com.virtus.common.domain.dto.BaseResponseDTO;
+import com.virtus.common.domain.entity.BaseEntity;
+import com.virtus.domain.dto.EnumDTO;
+import com.virtus.domain.dto.response.ComponentElementResponseDTO;
+import com.virtus.domain.dto.response.ComponentGradeTypeResponseDTO;
+import com.virtus.domain.dto.response.ComponentResponseDTO;
+import com.virtus.domain.dto.response.ElementItemResponseDTO;
+import com.virtus.domain.dto.response.ElementResponseDTO;
+import com.virtus.domain.dto.response.GradeTypeResponseDTO;
+import com.virtus.domain.dto.response.PageableResponseDTO;
+import com.virtus.domain.dto.response.PillarComponentResponseDTO;
+import com.virtus.domain.dto.response.PillarResponseDTO;
+import com.virtus.domain.dto.response.RoleResponseDTO;
+import com.virtus.domain.dto.response.StatusResponseDTO;
+import com.virtus.domain.dto.response.UserResponseDTO;
+import com.virtus.domain.entity.Component;
+import com.virtus.domain.entity.ComponentPillar;
+import com.virtus.domain.entity.Element;
+import com.virtus.domain.entity.ElementComponent;
+import com.virtus.domain.entity.ElementItem;
+import com.virtus.domain.entity.GradeType;
+import com.virtus.domain.entity.GradeTypeComponent;
+import com.virtus.domain.entity.Pillar;
+import com.virtus.domain.entity.Role;
+import com.virtus.domain.entity.Status;
+import com.virtus.domain.entity.User;
+import com.virtus.domain.enums.AverageType;
+import com.virtus.domain.model.CurrentUser;
+import com.virtus.exception.VirtusException;
+import com.virtus.persistence.UserRepository;
+import com.virtus.translate.Translator;
 
 
 public abstract class BaseService<

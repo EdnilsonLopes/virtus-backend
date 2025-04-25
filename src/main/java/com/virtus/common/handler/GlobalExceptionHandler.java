@@ -1,12 +1,8 @@
 package com.virtus.common.handler;
 
-import com.virtus.common.domain.dto.ErrorInfoResponseDTO;
-import com.virtus.exception.VirtusException;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -14,7 +10,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import java.nio.file.AccessDeniedException;
+import com.virtus.common.domain.dto.ErrorInfoResponseDTO;
+import com.virtus.exception.VirtusException;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @ControllerAdvice

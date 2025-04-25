@@ -1,17 +1,16 @@
 package com.virtus.service;
 
+import javax.persistence.EntityManagerFactory;
+
+import org.springframework.stereotype.Service;
+
 import com.virtus.common.BaseService;
 import com.virtus.domain.dto.request.ActionRequestDTO;
 import com.virtus.domain.dto.response.ActionResponseDTO;
-import com.virtus.domain.dto.response.StatusResponseDTO;
 import com.virtus.domain.entity.Action;
-import com.virtus.domain.entity.Status;
 import com.virtus.persistence.ActionRepository;
 import com.virtus.persistence.UserRepository;
 import com.virtus.translate.Translator;
-import org.springframework.stereotype.Service;
-
-import javax.persistence.EntityManagerFactory;
 
 @Service
 public class ActionService extends BaseService<Action, ActionRepository, ActionRequestDTO, ActionResponseDTO> {

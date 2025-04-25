@@ -1,12 +1,12 @@
 package com.virtus.domain.dto.request;
 
-import com.virtus.common.domain.dto.BaseRequestDTO;
-import lombok.Getter;
-import lombok.Setter;
-
-import javax.persistence.Column;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.virtus.common.domain.dto.BaseRequestDTO;
+
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @Setter

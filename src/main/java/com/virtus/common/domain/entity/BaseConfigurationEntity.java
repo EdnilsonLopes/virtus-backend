@@ -1,11 +1,10 @@
 package com.virtus.common.domain.entity;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
-import java.time.LocalDateTime;
+
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @Setter
