@@ -23,7 +23,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceUnit;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -170,7 +169,13 @@ public class CycleService extends BaseService<Cycle, CycleRepository, CycleReque
                 .stream()
                 .map(entityVirtus -> parseToCycleEntity(entityVirtus, cycle, body.getStartsAt(), body.getEndsAt()))
                 .collect(Collectors.toList());
-
+        AtomicReference<Integer> maxId = new AtomicReference<>(cycleEntityRepository.findMaxId());
+        cycleEntities.forEach(cycleEntity -> {
+            if (cycleEntity.getId() == null) {
+                maxId.set(maxId.get() + 1);
+                cycleEntity.setId(maxId.get());
+            }
+        });
         cycleEntityRepository.saveAll(cycleEntities);
         final User current = user;
         removeProductCycles(cycle);
