@@ -11,6 +11,7 @@ import lombok.Setter;
 @Setter
 public class RoleRequestDTO extends BaseRequestDTO {
 
+    private Integer id;
     private String name;
     private String description;
     private List<FeatureRoleRequestDTO> features;

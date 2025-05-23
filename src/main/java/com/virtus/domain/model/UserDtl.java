@@ -17,6 +17,7 @@ public class UserDtl implements UserDetails {
     private final String username;
     private final String password;
     private final Collection<? extends GrantedAuthority> authorities;
+    private final Integer roleId;
     private final String role;
 
     @Override

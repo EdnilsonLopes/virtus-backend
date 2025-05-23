@@ -1,13 +1,14 @@
 package com.virtus.persistence;
 
-import com.virtus.domain.model.EvaluatePlansConsultModel;
+import static com.virtus.persistence.bigqueries.EvaluatePlansTreeQuery.EVALUATE_PLANS_TREE_QUERY;
+
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
-import static com.virtus.persistence.bigqueries.EvaluatePlansTreeQuery.EVALUATE_PLANS_TREE_QUERY;
+import com.virtus.domain.model.EvaluatePlansConsultModel;
 
 @Repository
 public class EvaluatePlansRepository {
@@ -69,9 +70,62 @@ public class EvaluatePlansRepository {
                             .periodoPermitido(rs.getBoolean("periodo_permitido"))
                             .periodoCiclo(rs.getBoolean("periodo_ciclo"))
                             .build();
-
                     return evaluatePlan;
                 });
     }
+
+public void updateNotaElemento(Integer entidadeId,
+                               Integer cicloId,
+                               Integer pilarId,
+                               Integer planoId,
+                               Integer componenteId,
+                               Integer elementoId,
+                               Integer nota,
+                               String motivacao,
+                               Integer userId,
+                               Integer userRoleId) {
+    String sql = "UPDATE virtus.produtos_elementos SET " +
+            "nota = ?, " +
+            "motivacao_nota = ?, " +
+            "id_tipo_pontuacao = ( " +
+                "SELECT DISTINCT " +
+                    "CASE " +
+                        "WHEN pc.id_supervisor = ? THEN 1 " +
+                        "WHEN 2 = ? THEN 3 " +
+                        "ELSE 0 " +
+                    "END " +
+                "FROM virtus.produtos_componentes pc " +
+                "WHERE pc.id_entidade = ? " +
+                "AND pc.id_ciclo = ? " +
+                "AND pc.id_pilar = ? " +
+                "AND pc.id_componente = ? " +
+            ") " +
+            "WHERE " +
+                "id_entidade = ? " +
+                "AND id_ciclo = ? " +
+                "AND id_pilar = ? " +
+                "AND id_plano = ? " +
+                "AND id_componente = ? " +
+                "AND id_elemento = ? " +
+                "AND nota <> ?";
+    jdbcTemplate.update(sql,
+            nota,
+            motivacao,
+            userId,
+            userRoleId,
+            entidadeId,
+            cicloId,
+            pilarId,
+            componenteId,
+            entidadeId,
+            cicloId,
+            pilarId,
+            planoId,
+            componenteId,
+            elementoId,
+            nota
+    );
+}
+
 }
 

@@ -9,6 +9,7 @@ import lombok.Setter;
 @Setter
 public class UserResponseDTO extends BaseResponseDTO {
 
+    private Integer id;
     private String name;
     private String username;
     private String email;

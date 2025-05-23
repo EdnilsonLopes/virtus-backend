@@ -15,5 +15,6 @@ public class CurrentUser {
     private String username;
     private LocalDateTime expiresIn;
     private String role;
+    private Integer roleId;
 
 }

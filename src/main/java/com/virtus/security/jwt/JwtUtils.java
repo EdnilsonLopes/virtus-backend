@@ -21,6 +21,7 @@ public class JwtUtils {
                     .email(signedJWT.getJWTClaimsSet().getStringClaim("email"))
                     .username(signedJWT.getJWTClaimsSet().getStringClaim("username"))
                     .role(signedJWT.getJWTClaimsSet().getStringClaim("authorities"))
+                    .roleId(1)
                     .build();
         } catch (Exception e) {
             log.error("Error to read subject from jwt", e);

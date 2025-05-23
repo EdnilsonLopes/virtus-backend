@@ -27,6 +27,7 @@ public class AuthorizationService implements UserDetailsService {
                 .email(user.getEmail())
                 .username(user.getUsername())
                 .password(user.getPassword())
+                .roleId(user.getRole().getId())
                 .role(user.getRole().getName())
                 .build();
     }

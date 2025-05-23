@@ -1,6 +1,7 @@
 package com.virtus.controller;
 
 import com.virtus.common.annotation.LoggedUser;
+import com.virtus.domain.dto.request.ProdutoElementoRequestDTO;
 import com.virtus.domain.dto.response.EntityVirtusResponseDTO;
 import com.virtus.domain.dto.response.EvaluatePlansTreeNode;
 import com.virtus.domain.model.CurrentUser;
@@ -9,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -28,7 +31,14 @@ public class EvaluatePlansController {
 
     @GetMapping("/by-entity-and-cycle-id")
     public ResponseEntity<List<EvaluatePlansTreeNode>> getEvaluatePlansTree(@LoggedUser CurrentUser currentUser, @RequestParam Integer entityId, @RequestParam Integer cycleId) {
-        return ResponseEntity.ok(service.findEvaluatePlansTree(currentUser, entityId, cycleId));
+        List<EvaluatePlansTreeNode> evaluatePlansTree = service.findEvaluatePlansTree(currentUser, entityId, cycleId);
+        return ResponseEntity.ok(evaluatePlansTree);
+    }
+
+    @PutMapping("/salvarNotaElemento")
+    public ResponseEntity<Void> salvarNotaElemento(@RequestBody ProdutoElementoRequestDTO dto, CurrentUser currentUser) {
+        service.salvarNotaElemento(dto, currentUser);
+        return ResponseEntity.ok().build();
     }
 
 }

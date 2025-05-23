@@ -27,6 +27,7 @@ public class EvaluatePlansTreeNode {
     private BigDecimal weight;
     private String letter;
     private BigDecimal grade;
+    private Boolean periodoPermitido;
     private List<EvaluatePlansTreeNode> children = new ArrayList<>();
 
     public void addChild(EvaluatePlansTreeNode child) {
