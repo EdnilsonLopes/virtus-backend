@@ -39,5 +39,5 @@ public interface CycleEntityRepository extends BaseRepository<CycleEntity> {
             " LEFT JOIN virtus.ciclos b ON a.id_ciclo = b.id_ciclo " +
             " WHERE a.id_entidade = :idEntidade " +
             " ORDER BY a.criado_em desc")
-    List<CycleEntity> listEntidadesCiclos(@Param("idEntidade") Integer idEntidade);
+    List<CycleEntity> listEntitiesCycles(@Param("idEntidade") Integer idEntidade);
 }

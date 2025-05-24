@@ -8,12 +8,12 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public class HistoryRepository {
+public class ProductHistoryService {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    public List<HistoryComponentDTO> findHistoryByFilter(Long entidadeId, Long cicloId, Long pilarId, Long componenteId) {
+    public List<HistoryComponentDTO> findComponentHistoryByEntityAndCycleAndPillarAndComponent(Long entidadeId, Long cicloId, Long pilarId, Long componenteId) {
         String sql = "SELECT  " +
                 "   a.id_produto_componente_historico,  " +
                 "   id_entidade,  " +

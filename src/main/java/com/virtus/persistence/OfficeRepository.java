@@ -52,7 +52,7 @@ public interface OfficeRepository extends BaseRepository<Office> {
             ") AND ( " +
             "(c.id_usuario = :idUsuario AND u.id_role IN (3, 4)) " +
             "OR (a.id_chefe = :idUsuario))")
-    List<Object[]> listAvaliarPlanos(@Param("idUsuario") Integer idUsuario, @Param("filter") String filter);
+    List<Object[]> listEvaluatePlans(@Param("idUsuario") Integer idUsuario, @Param("filter") String filter);
 
 
 }

@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ProdutoElementoRequestDTO extends BaseRequestDTO {
+public class ProductElementRequestDTO extends BaseRequestDTO {
 
     private Integer entidadeId;
     private Integer cicloId;

@@ -1,6 +1,9 @@
 package com.virtus.service;
 
-import com.virtus.domain.dto.request.ProdutoElementoRequestDTO;
+import com.virtus.domain.dto.CurrentGradesDTO;
+import com.virtus.domain.dto.CurrentWeightsDTO;
+import com.virtus.domain.dto.CurrentValuesDTO;
+import com.virtus.domain.dto.request.ProductElementRequestDTO;
 import com.virtus.domain.dto.response.*;
 import com.virtus.domain.entity.CycleEntity;
 import com.virtus.domain.model.CurrentUser;
@@ -26,8 +29,8 @@ public class EvaluatePlansService {
         private final CycleEntityRepository cycleEntityRepository;
         private final EvaluatePlansRepository evaluatePlansRepository;
 
-        public List<EntityVirtusResponseDTO> listAvaliarPlanos(CurrentUser currentUser, String filter) {
-                var entidades = officeRepository.listAvaliarPlanos(currentUser.getId(), filter);
+        public List<EntityVirtusResponseDTO> listEvaluatePlans(CurrentUser currentUser, String filter) {
+                var entidades = officeRepository.listEvaluatePlans(currentUser.getId(), filter);
 
                 if (CollectionUtils.isEmpty(entidades)) {
                         return List.of();
@@ -35,15 +38,15 @@ public class EvaluatePlansService {
                 List<EntityVirtusResponseDTO> responseDTOS = new ArrayList<>();
                 for (Object[] entidade : entidades) {
                         List<CycleEntity> cycleEntity = cycleEntityRepository
-                                        .listEntidadesCiclos(Integer.parseInt(entidade[1].toString()));
-                        responseDTOS.add(montarEntidadeResponse(entidade, cycleEntity));
+                                        .listEntitiesCycles(Integer.parseInt(entidade[1].toString()));
+                        responseDTOS.add(buildEntityResponse(entidade, cycleEntity));
                 }
 
                 return responseDTOS;
 
         }
 
-        private EntityVirtusResponseDTO montarEntidadeResponse(Object[] entidade, List<CycleEntity> ciclosEntidades) {
+        private EntityVirtusResponseDTO buildEntityResponse(Object[] entidade, List<CycleEntity> ciclosEntidades) {
                 return EntityVirtusResponseDTO.builder()
                                 .code(String.valueOf(entidade[0]))
                                 .id(Integer.parseInt(String.valueOf(entidade[1])))
@@ -205,18 +208,42 @@ public class EvaluatePlansService {
                 return new ArrayList<>(entidadeMap.values());
         }
 
-        public void salvarNotaElemento(ProdutoElementoRequestDTO dto, CurrentUser currentUser) {
-                evaluatePlansRepository.updateNotaElemento(
-                                dto.getEntidadeId(),
-                                dto.getCicloId(),
-                                dto.getPilarId(),
-                                dto.getPlanoId(),
-                                dto.getComponenteId(),
-                                dto.getElementoId(),
-                                dto.getNota(),
-                                dto.getMotivacao(),
-                                currentUser.getId(),
-                                currentUser.getRoleId());
+        public CurrentValuesDTO updateElementGrade(ProductElementRequestDTO dto, CurrentUser currentUser) {
+                evaluatePlansRepository.updateElementGrade(dto, currentUser);
+                evaluatePlansRepository.updateGradeTypeWeights(dto, currentUser);
+                evaluatePlansRepository.updatePlanWeights(dto, currentUser);
+                evaluatePlansRepository.updateComponentWeights(dto, currentUser);
+                // Current Weights
+                CurrentWeightsDTO currentWeights = evaluatePlansRepository.loadCurrentWeights(dto);
 
+                // Recalculate Grades
+                evaluatePlansRepository.updateGradeTypeGrade(dto);
+                evaluatePlansRepository.updatePlanGrade(dto);
+                evaluatePlansRepository.updateComponentGrade(dto);
+                evaluatePlansRepository.updatePillarGrade(dto);
+                evaluatePlansRepository.updateCycleGrade(dto);
+
+                // Current Grades
+                CurrentGradesDTO currentGrades = evaluatePlansRepository.loadCurrentGrades(dto);
+
+                // Return merged updated data
+                return buildCurrentValues(currentWeights, currentGrades);
+        }
+
+        // Build Current Values
+        private CurrentValuesDTO buildCurrentValues(CurrentWeightsDTO ps, CurrentGradesDTO ns) {
+                return CurrentValuesDTO.builder()
+                                .cicloPeso(ps.getCicloPeso())
+                                .pilarPeso(ps.getPilarPeso())
+                                .componentePeso(ps.getComponentePeso())
+                                .planoPeso(ps.getPlanoPeso())
+                                .tipoNotaPeso(ps.getTipoNotaPeso())
+                                .elementoPeso(ps.getElementoPeso())
+                                .tipoNotaNota(ns.getTipoNotaNota())
+                                .planoNota(ns.getPlanoNota())
+                                .componenteNota(ns.getComponenteNota())
+                                .pilarNota(ns.getPilarNota())
+                                .cicloNota(ns.getCicloNota())
+                                .build();
         }
 }

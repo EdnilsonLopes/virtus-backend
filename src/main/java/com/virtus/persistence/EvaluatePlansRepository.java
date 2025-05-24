@@ -8,6 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import com.virtus.domain.dto.CurrentGradesDTO;
+import com.virtus.domain.dto.CurrentWeightsDTO;
+import com.virtus.domain.dto.request.ProductElementRequestDTO;
+import com.virtus.domain.model.CurrentUser;
 import com.virtus.domain.model.EvaluatePlansConsultModel;
 
 @Repository
@@ -19,7 +23,7 @@ public class EvaluatePlansRepository {
     public List<EvaluatePlansConsultModel> findPlansByEntityAndCycle(Integer entidadeId, Integer cicloId) {
         String sql = EVALUATE_PLANS_TREE_QUERY;
 
-        return jdbcTemplate.query(sql, new Object[]{entidadeId, cicloId},
+        return jdbcTemplate.query(sql, new Object[] { entidadeId, cicloId },
                 (rs, rowNum) -> {
                     EvaluatePlansConsultModel evaluatePlan = EvaluatePlansConsultModel.builder()
                             .entidadeId(rs.getInt("id_entidade"))
@@ -58,12 +62,12 @@ public class EvaluatePlansRepository {
                             .itemNome(rs.getString("item_nome"))
                             .planoId(rs.getInt("id_plano"))
                             .cnpb(rs.getString("cnpb"))
-                            //.recursoGarantidor(rs.getString("recurso_garantidor"))
-                            //.planoModalidade(rs.getString("plano_modalidade"))
+                            // .recursoGarantidor(rs.getString("recurso_garantidor"))
+                            // .planoModalidade(rs.getString("plano_modalidade"))
                             .planoPeso(rs.getBigDecimal("plano_peso"))
                             .planoNota(rs.getBigDecimal("plano_nota"))
-                            //.iniciaEm(rs.getString("inicia_em"))
-                            //.terminaEm(rs.getString("termina_em"))
+                            // .iniciaEm(rs.getString("inicia_em"))
+                            // .terminaEm(rs.getString("termina_em"))
                             .cStatus(rs.getString("cstatus"))
                             .statusId(rs.getInt("id_status"))
                             .produtoComponenteId(rs.getInt("id_produto_componente"))
@@ -74,33 +78,24 @@ public class EvaluatePlansRepository {
                 });
     }
 
-public void updateNotaElemento(Integer entidadeId,
-                               Integer cicloId,
-                               Integer pilarId,
-                               Integer planoId,
-                               Integer componenteId,
-                               Integer elementoId,
-                               Integer nota,
-                               String motivacao,
-                               Integer userId,
-                               Integer userRoleId) {
-    String sql = "UPDATE virtus.produtos_elementos SET " +
-            "nota = ?, " +
-            "motivacao_nota = ?, " +
-            "id_tipo_pontuacao = ( " +
+    public void updateElementGrade(ProductElementRequestDTO dto, CurrentUser currentUser) {
+        String sql = "UPDATE virtus.produtos_elementos SET " +
+                "nota = ?, " +
+                "motivacao_nota = ?, " +
+                "id_tipo_pontuacao = ( " +
                 "SELECT DISTINCT " +
-                    "CASE " +
-                        "WHEN pc.id_supervisor = ? THEN 1 " +
-                        "WHEN 2 = ? THEN 3 " +
-                        "ELSE 0 " +
-                    "END " +
+                "CASE " +
+                "WHEN pc.id_supervisor = ? THEN 1 " +
+                "WHEN 2 = ? THEN 3 " +
+                "ELSE 0 " +
+                "END " +
                 "FROM virtus.produtos_componentes pc " +
                 "WHERE pc.id_entidade = ? " +
                 "AND pc.id_ciclo = ? " +
                 "AND pc.id_pilar = ? " +
                 "AND pc.id_componente = ? " +
-            ") " +
-            "WHERE " +
+                ") " +
+                "WHERE " +
                 "id_entidade = ? " +
                 "AND id_ciclo = ? " +
                 "AND id_pilar = ? " +
@@ -108,24 +103,523 @@ public void updateNotaElemento(Integer entidadeId,
                 "AND id_componente = ? " +
                 "AND id_elemento = ? " +
                 "AND nota <> ?";
-    jdbcTemplate.update(sql,
-            nota,
-            motivacao,
-            userId,
-            userRoleId,
-            entidadeId,
-            cicloId,
-            pilarId,
-            componenteId,
-            entidadeId,
-            cicloId,
-            pilarId,
-            planoId,
-            componenteId,
-            elementoId,
-            nota
-    );
-}
+        jdbcTemplate.update(sql,
+                dto.getNota(),
+                dto.getMotivacao(),
+                currentUser.getId(),
+                currentUser.getRoleId(),
+                dto.getEntidadeId(),
+                dto.getCicloId(),
+                dto.getPilarId(),
+                dto.getComponenteId(),
+                dto.getEntidadeId(),
+                dto.getCicloId(),
+                dto.getPilarId(),
+                dto.getPlanoId(),
+                dto.getComponenteId(),
+                dto.getElementoId(),
+                dto.getNota());
+    }
 
-}
+    public void updateGradeTypeWeights(ProductElementRequestDTO dto, CurrentUser currentUser) {
+        String sql = "WITH R1 AS (" +
+                "    SELECT id_entidade, id_ciclo, id_pilar, id_plano, id_componente, id_tipo_nota," +
+                "           ROUND(SUM(peso), 2) AS TOTAL" +
+                "    FROM virtus.produtos_elementos" +
+                "    GROUP BY id_entidade, id_ciclo, id_pilar, id_plano, id_componente, id_tipo_nota" +
+                ")," +
+                "R2 AS (" +
+                "    SELECT id_entidade, id_ciclo, id_pilar, id_plano, id_componente, id_tipo_nota," +
+                "           COUNT(1) AS CONTADOR" +
+                "    FROM virtus.produtos_elementos" +
+                "    WHERE peso <> 0" +
+                "    GROUP BY id_entidade, id_ciclo, id_pilar, id_plano, id_componente, id_tipo_nota" +
+                ")," +
+                "TMP AS (" +
+                "    SELECT r1.id_entidade, r1.id_ciclo, r1.id_pilar, r1.id_plano, r1.id_componente, r1.id_tipo_nota," +
+                "           CASE WHEN r2.CONTADOR IS NULL THEN 0 ELSE ROUND((r1.TOTAL / r2.CONTADOR), 2) END AS PONDERACAO"
+                +
+                "    FROM R1" +
+                "    LEFT JOIN R2" +
+                "           ON r1.id_entidade = r2.id_entidade" +
+                "          AND r1.id_ciclo = r2.id_ciclo" +
+                "          AND r1.id_pilar = r2.id_pilar" +
+                "          AND r1.id_plano = r2.id_plano" +
+                "          AND r1.id_componente = r2.id_componente" +
+                "          AND r1.id_tipo_nota = r2.id_tipo_nota" +
+                ")," +
+                "T2 AS (" +
+                "    SELECT id_entidade, id_pilar, id_plano, id_ciclo, id_componente," +
+                "           SUM(PONDERACAO) AS TOTAL_PESOS_TNS" +
+                "    FROM TMP" +
+                "    GROUP BY id_entidade, id_pilar, id_plano, id_ciclo, id_componente" +
+                ")," +
+                "T1 AS (" +
+                "    SELECT A1.id_entidade, A1.id_ciclo, A1.id_pilar, A1.id_plano, A1.id_componente, A1.id_tipo_nota," +
+                "           CASE WHEN T2.TOTAL_PESOS_TNS = 0 THEN 0" +
+                "                ELSE ROUND((A1.PONDERACAO / T2.TOTAL_PESOS_TNS) * 100, 2)" +
+                "           END AS peso" +
+                "    FROM TMP A1" +
+                "    INNER JOIN T2 ON A1.id_entidade = T2.id_entidade" +
+                "                 AND A1.id_ciclo = T2.id_ciclo" +
+                "                 AND A1.id_pilar = T2.id_pilar" +
+                "                 AND A1.id_plano = T2.id_plano" +
+                "                 AND A1.id_componente = T2.id_componente" +
+                "    WHERE A1.id_entidade = ?" +
+                "      AND A1.id_ciclo = ?" +
+                "      AND A1.id_pilar = ?" +
+                "      AND A1.id_plano = ?" +
+                "      AND A1.id_componente = ?" +
+                ")" +
+                "UPDATE virtus.produtos_tipos_notas " +
+                "SET peso = ROUND(T1.peso, 2) " +
+                "FROM T1 " +
+                "WHERE produtos_tipos_notas.id_tipo_nota = T1.id_tipo_nota " +
+                "  AND produtos_tipos_notas.id_componente = T1.id_componente " +
+                "  AND produtos_tipos_notas.id_plano = T1.id_plano " +
+                "  AND produtos_tipos_notas.id_pilar = T1.id_pilar " +
+                "  AND produtos_tipos_notas.id_ciclo = T1.id_ciclo " +
+                "  AND produtos_tipos_notas.id_entidade = T1.id_entidade";
 
+        jdbcTemplate.update(sql,
+                dto.getEntidadeId(),
+                dto.getCicloId(),
+                dto.getPilarId(),
+                dto.getPlanoId(),
+                dto.getComponenteId());
+    }
+
+    public void updatePlanWeights(ProductElementRequestDTO dto, CurrentUser currentUser) {
+        String sql = "WITH total AS ( " +
+                "    SELECT a.id_entidade, a.id_ciclo, a.id_pilar, a.id_componente, " +
+                "           SUM(p.recurso_garantidor) AS total " +
+                "    FROM virtus.produtos_planos a " +
+                "    INNER JOIN virtus.planos p " +
+                "        ON p.id_entidade = a.id_entidade " +
+                "       AND p.id_plano = a.id_plano " +
+                "    WHERE a.id_entidade = ? " +
+                "      AND a.id_ciclo = ? " +
+                "      AND a.id_pilar = ? " +
+                "      AND a.id_componente = ? " +
+                "    GROUP BY a.id_entidade, a.id_ciclo, a.id_pilar, a.id_componente " +
+                "), " +
+                "R2 AS ( " +
+                "    SELECT a.id_entidade, a.id_ciclo, a.id_pilar, a.id_plano, a.id_componente, " +
+                "           ROUND(p.recurso_garantidor / t.total, 2) * 100 AS peso_percentual " +
+                "    FROM virtus.produtos_planos a " +
+                "    INNER JOIN virtus.planos p " +
+                "        ON p.id_entidade = a.id_entidade " +
+                "       AND p.id_plano = a.id_plano " +
+                "    INNER JOIN total t " +
+                "        ON a.id_entidade = t.id_entidade " +
+                "       AND a.id_ciclo = t.id_ciclo " +
+                "       AND a.id_pilar = t.id_pilar " +
+                "       AND a.id_componente = t.id_componente " +
+                ") " +
+                "UPDATE virtus.produtos_planos " +
+                "SET peso = ROUND(R2.peso_percentual, 2) " +
+                "FROM R2 " +
+                "WHERE R2.id_entidade = produtos_planos.id_entidade " +
+                "  AND R2.id_ciclo = produtos_planos.id_ciclo " +
+                "  AND R2.id_pilar = produtos_planos.id_pilar " +
+                "  AND R2.id_componente = produtos_planos.id_componente " +
+                "  AND R2.id_plano = produtos_planos.id_plano";
+
+        jdbcTemplate.update(sql,
+                dto.getEntidadeId(),
+                dto.getCicloId(),
+                dto.getPilarId(),
+                dto.getComponenteId());
+    }
+
+    public void updateComponentWeights(ProductElementRequestDTO dto, CurrentUser currentUser) {
+        String sql = "WITH T1 AS ( " +
+                "    SELECT id_entidade, id_ciclo, id_pilar, id_plano, id_componente, id_tipo_nota, " +
+                "           ROUND(AVG(peso), 2) AS peso_tn " +
+                "    FROM virtus.produtos_elementos " +
+                "    WHERE peso IS NOT NULL AND peso <> 0 " +
+                "    GROUP BY id_entidade, id_ciclo, id_pilar, id_plano, id_componente, id_tipo_nota " +
+                "), " +
+                "T2 AS ( " +
+                "    SELECT id_entidade, id_ciclo, id_pilar, id_componente, id_plano, " +
+                "           SUM(peso_tn) AS soma_pesos_tipos_notas " +
+                "    FROM T1 " +
+                "    GROUP BY id_entidade, id_ciclo, id_pilar, id_componente, id_plano " +
+                "), " +
+                "T3 AS ( " +
+                "    SELECT T1.id_entidade, T1.id_ciclo, T1.id_pilar, T1.id_componente, T1.id_plano, " +
+                "           T1.id_tipo_nota, T1.peso_tn, T2.soma_pesos_tipos_notas, " +
+                "           ROUND(T1.peso_tn * 100 / T2.soma_pesos_tipos_notas, 2) AS ponderacao_tipo " +
+                "    FROM T1 " +
+                "    INNER JOIN T2 ON T1.id_entidade = T2.id_entidade " +
+                "                 AND T1.id_ciclo = T2.id_ciclo " +
+                "                 AND T1.id_pilar = T2.id_pilar " +
+                "                 AND T1.id_componente = T2.id_componente " +
+                "                 AND T1.id_plano = T2.id_plano " +
+                "    GROUP BY T1.id_entidade, T1.id_ciclo, T1.id_pilar, T1.id_componente, " +
+                "             T1.id_plano, T1.id_tipo_nota, T1.peso_tn, T2.soma_pesos_tipos_notas " +
+                "), " +
+                "T4 AS ( " +
+                "    SELECT T3.id_entidade, T3.id_ciclo, T3.id_pilar, T3.id_componente, T3.id_plano, " +
+                "           ponderacao_tipo, peso_tn, soma_pesos_tipos_notas, " +
+                "           ponderacao_tipo * peso_tn / 100 AS peso_plano, " +
+                "           p.peso / 100 AS ponderacao_plano " +
+                "    FROM T3 " +
+                "    INNER JOIN virtus.produtos_planos p ON p.id_entidade = T3.id_entidade " +
+                "                                       AND p.id_ciclo = T3.id_ciclo " +
+                "                                       AND p.id_pilar = T3.id_pilar " +
+                "                                       AND p.id_componente = T3.id_componente " +
+                "                                       AND p.id_plano = T3.id_plano " +
+                "), " +
+                "T5 AS ( " +
+                "    SELECT T4.id_entidade, T4.id_ciclo, T4.id_pilar, T4.id_componente, " +
+                "           SUM(peso_plano * ponderacao_plano) AS peso_componente " +
+                "    FROM T4 " +
+                "    GROUP BY T4.id_entidade, T4.id_ciclo, T4.id_pilar, T4.id_componente " +
+                ") " +
+                "UPDATE virtus.produtos_componentes " +
+                "SET peso = ( " +
+                "    SELECT DISTINCT ROUND(T5.peso_componente, 2) " +
+                "    FROM T5 " +
+                "    WHERE T5.id_entidade = virtus.produtos_componentes.id_entidade " +
+                "      AND T5.id_ciclo = virtus.produtos_componentes.id_ciclo " +
+                "      AND T5.id_pilar = virtus.produtos_componentes.id_pilar " +
+                "      AND T5.id_componente = virtus.produtos_componentes.id_componente " +
+                ") " +
+                "WHERE id_entidade = ? " +
+                "  AND id_ciclo = ? " +
+                "  AND id_pilar = ? " +
+                "  AND id_componente = ?";
+
+        jdbcTemplate.update(sql,
+                dto.getEntidadeId(),
+                dto.getCicloId(),
+                dto.getPilarId(),
+                dto.getComponenteId());
+    }
+
+    public CurrentWeightsDTO loadCurrentWeights(ProductElementRequestDTO dto) {
+        String sql = "SELECT " +
+                "  COALESCE(TO_CHAR(b.peso, 'FM9999999990.00'), '.00') AS plano, " +
+                "  COALESCE(TO_CHAR(c.peso, 'FM9999999990.00'), '.00') AS componente, " +
+                "  COALESCE(TO_CHAR(d.peso, 'FM9999999990.00'), '.00') AS pilar, " +
+                "  STRING_AGG(CONCAT(a.id_tipo_nota, ':', TO_CHAR(a.peso, 'FM9999999990.00')), '/') AS tipo_nota " +
+                "FROM virtus.produtos_tipos_notas a " +
+                "JOIN virtus.produtos_planos b ON a.id_entidade = b.id_entidade " +
+                " AND a.id_ciclo = b.id_ciclo " +
+                " AND a.id_pilar = b.id_pilar " +
+                " AND a.id_componente = b.id_componente " +
+                " AND a.id_plano = b.id_plano " +
+                "JOIN virtus.produtos_componentes c ON a.id_entidade = c.id_entidade " +
+                " AND a.id_ciclo = c.id_ciclo " +
+                " AND a.id_pilar = c.id_pilar " +
+                " AND a.id_componente = c.id_componente " +
+                "JOIN virtus.produtos_pilares d ON a.id_entidade = d.id_entidade " +
+                " AND a.id_ciclo = d.id_ciclo " +
+                " AND a.id_pilar = d.id_pilar " +
+                "WHERE a.id_entidade = ? " +
+                " AND a.id_ciclo = ? " +
+                " AND a.id_pilar = ? " +
+                " AND a.id_componente = ? " +
+                " AND a.id_plano = ? " +
+                "GROUP BY b.peso, c.peso, d.peso";
+
+        return jdbcTemplate.query(sql, ps -> {
+            ps.setLong(1, dto.getEntidadeId());
+            ps.setLong(2, dto.getCicloId());
+            ps.setLong(3, dto.getPilarId());
+            ps.setLong(4, dto.getComponenteId());
+            ps.setLong(5, dto.getPlanoId());
+        }, rs -> {
+            if (rs.next()) {
+                return CurrentWeightsDTO.builder()
+                        .planoPeso(stripZeros(rs.getString("plano")))
+                        .componentePeso(stripZeros(rs.getString("componente")))
+                        .pilarPeso(stripZeros(rs.getString("pilar")))
+                        .tipoNotaPeso(stripZeros(rs.getString("tipo_nota")))
+                        .build();
+            } else {
+                return new CurrentWeightsDTO(); // empty if not found
+            }
+        });
+    }
+
+    private String stripZeros(String value) {
+        if (value == null)
+            return null;
+        if (value.contains(".")) {
+            value = value.replaceAll("0*$", "").replaceAll("\\.$", "");
+        }
+        return value;
+    }
+
+    public void updateGradeTypeGrade(ProductElementRequestDTO dto) {
+        String sql = "WITH T1 AS ( " +
+                "    SELECT id_entidade, id_ciclo, id_pilar, id_plano, id_componente, id_tipo_nota, " +
+                "           peso * nota AS produtos " +
+                "    FROM virtus.produtos_elementos " +
+                "), " +
+                "T2 AS ( " +
+                "    SELECT id_entidade, id_ciclo, id_pilar, id_plano, id_componente, id_tipo_nota, " +
+                "           SUM(peso) AS soma_pesos_elementos " +
+                "    FROM virtus.produtos_elementos " +
+                "    GROUP BY id_entidade, id_ciclo, id_pilar, id_plano, id_componente, id_tipo_nota " +
+                "), " +
+                "T3 AS ( " +
+                "    SELECT T1.id_entidade, T1.id_ciclo, T1.id_pilar, T1.id_componente, T1.id_plano, T1.id_tipo_nota, "
+                +
+                "           SUM(T1.produtos) / T2.soma_pesos_elementos AS nota_tn " +
+                "    FROM T1 " +
+                "    INNER JOIN T2 ON T1.id_entidade = T2.id_entidade " +
+                "                 AND T1.id_ciclo = T2.id_ciclo " +
+                "                 AND T1.id_pilar = T2.id_pilar " +
+                "                 AND T1.id_componente = T2.id_componente " +
+                "                 AND T1.id_plano = T2.id_plano " +
+                "                 AND T1.id_tipo_nota = T2.id_tipo_nota " +
+                "    WHERE T1.id_entidade = ? " +
+                "      AND T1.id_ciclo = ? " +
+                "      AND T1.id_pilar = ? " +
+                "      AND T1.id_componente = ? " +
+                "      AND T1.id_plano = ? " +
+                "    GROUP BY T1.id_entidade, T1.id_ciclo, T1.id_pilar, T1.id_plano, T1.id_componente, T1.id_tipo_nota, T2.soma_pesos_elementos "
+                +
+                ") " +
+                "UPDATE virtus.produtos_tipos_notas " +
+                "SET nota = ROUND(T3.nota_tn, 2) " +
+                "FROM T3 " +
+                "WHERE produtos_tipos_notas.id_tipo_nota = T3.id_tipo_nota " +
+                "  AND produtos_tipos_notas.id_componente = T3.id_componente " +
+                "  AND produtos_tipos_notas.id_plano = T3.id_plano " +
+                "  AND produtos_tipos_notas.id_pilar = T3.id_pilar " +
+                "  AND produtos_tipos_notas.id_ciclo = T3.id_ciclo " +
+                "  AND produtos_tipos_notas.id_entidade = T3.id_entidade";
+
+        jdbcTemplate.update(sql,
+                dto.getEntidadeId(),
+                dto.getCicloId(),
+                dto.getPilarId(),
+                dto.getComponenteId(),
+                dto.getPlanoId());
+    }
+
+    public void updatePlanGrade(ProductElementRequestDTO dto) {
+        String sql = "UPDATE virtus.produtos_planos " +
+                "SET nota = ( " +
+                "  SELECT ROUND(SUM(nota * peso) / SUM(peso), 2) AS media " +
+                "  FROM virtus.produtos_tipos_notas b " +
+                "  WHERE produtos_planos.id_entidade = b.id_entidade " +
+                "    AND produtos_planos.id_ciclo = b.id_ciclo " +
+                "    AND produtos_planos.id_pilar = b.id_pilar " +
+                "    AND produtos_planos.id_componente = b.id_componente " +
+                "    AND produtos_planos.id_plano = b.id_plano " +
+                "  GROUP BY b.id_entidade, b.id_ciclo, b.id_pilar, b.id_plano, b.id_componente " +
+                "  HAVING SUM(peso) > 0 " +
+                ") " +
+                "WHERE id_entidade = ? " +
+                "  AND id_ciclo = ? " +
+                "  AND id_pilar = ? " +
+                "  AND id_componente = ? " +
+                "  AND id_plano = ?";
+
+        jdbcTemplate.update(sql,
+                dto.getEntidadeId(),
+                dto.getCicloId(),
+                dto.getPilarId(),
+                dto.getComponenteId(),
+                dto.getPlanoId());
+    }
+
+    public void updateComponentGrade(ProductElementRequestDTO dto) {
+        String sql = "WITH T1 AS ( " +
+                "  SELECT id_entidade, id_ciclo, id_pilar, id_plano, id_componente, id_tipo_nota, " +
+                "         ROUND(AVG(peso), 2) AS peso_tn " +
+                "  FROM virtus.produtos_elementos " +
+                "  WHERE peso <> 0 " +
+                "  GROUP BY id_entidade, id_ciclo, id_pilar, id_plano, id_componente, id_tipo_nota " +
+                "), " +
+                "T2 AS ( " +
+                "  SELECT id_entidade, id_ciclo, id_pilar, id_componente, id_plano, SUM(peso_tn) AS soma_pesos_tipos_notas "
+                +
+                "  FROM T1 " +
+                "  GROUP BY id_entidade, id_ciclo, id_pilar, id_componente, id_plano " +
+                "), " +
+                "T3 AS ( " +
+                "  SELECT T1.id_entidade, T1.id_ciclo, T1.id_pilar, T1.id_componente, T1.id_plano, T1.id_tipo_nota, " +
+                "         T1.peso_tn, T2.soma_pesos_tipos_notas, " +
+                "         ROUND(T1.peso_tn * 100 / T2.soma_pesos_tipos_notas, 2) AS ponderacao_tipo " +
+                "  FROM T1 " +
+                "  INNER JOIN T2 ON T1.id_entidade = T2.id_entidade " +
+                "               AND T1.id_ciclo = T2.id_ciclo " +
+                "               AND T1.id_pilar = T2.id_pilar " +
+                "               AND T1.id_componente = T2.id_componente " +
+                "               AND T1.id_plano = T2.id_plano " +
+                "  GROUP BY T1.id_entidade, T1.id_ciclo, T1.id_pilar, T1.id_componente, " +
+                "           T1.id_plano, T1.id_tipo_nota, T1.peso_tn, T2.soma_pesos_tipos_notas " +
+                "), " +
+                "T4 AS ( " +
+                "  SELECT T3.id_entidade, T3.id_ciclo, T3.id_pilar, T3.id_componente, T3.id_plano, " +
+                "         SUM(ponderacao_tipo * peso_tn / 100) AS total_peso_plano " +
+                "  FROM T3 " +
+                "  INNER JOIN virtus.produtos_planos p ON p.id_entidade = T3.id_entidade " +
+                "                                     AND p.id_ciclo = T3.id_ciclo " +
+                "                                     AND p.id_pilar = T3.id_pilar " +
+                "                                     AND p.id_componente = T3.id_componente " +
+                "                                     AND p.id_plano = T3.id_plano " +
+                "  GROUP BY T3.id_entidade, T3.id_ciclo, T3.id_pilar, T3.id_componente, T3.id_plano " +
+                "), " +
+                "T5 AS ( " +
+                "  SELECT T4.id_entidade, T4.id_ciclo, T4.id_pilar, T4.id_componente, T4.id_plano, p.peso / 100 AS ponderacao_plano "
+                +
+                "  FROM virtus.produtos_planos p " +
+                "  INNER JOIN T4 ON T4.id_entidade = p.id_entidade " +
+                "               AND T4.id_ciclo = p.id_ciclo " +
+                "               AND T4.id_pilar = p.id_pilar " +
+                "               AND T4.id_componente = p.id_componente " +
+                "               AND T4.id_plano = p.id_plano " +
+                "  GROUP BY T4.id_entidade, T4.id_ciclo, T4.id_pilar, T4.id_componente, T4.id_plano, p.peso " +
+                "), " +
+                "T6 AS ( " +
+                "  SELECT T4.id_entidade, T4.id_ciclo, T4.id_pilar, T4.id_componente, " +
+                "         SUM(T4.total_peso_plano * T5.ponderacao_plano) AS denominador " +
+                "  FROM T4 " +
+                "  INNER JOIN T5 ON T4.id_entidade = T5.id_entidade " +
+                "               AND T4.id_ciclo = T5.id_ciclo " +
+                "               AND T4.id_pilar = T5.id_pilar " +
+                "               AND T4.id_componente = T5.id_componente " +
+                "               AND T4.id_plano = T5.id_plano " +
+                "  GROUP BY T4.id_entidade, T4.id_ciclo, T4.id_pilar, T4.id_componente " +
+                "), " +
+                "T7 AS ( " +
+                "  SELECT p.id_entidade, p.id_ciclo, p.id_pilar, p.id_componente, " +
+                "         SUM(p.nota * T4.total_peso_plano * T5.ponderacao_plano) / T6.denominador AS nota_componente "
+                +
+                "  FROM virtus.produtos_planos p " +
+                "  INNER JOIN T4 ON T4.id_entidade = p.id_entidade " +
+                "               AND T4.id_ciclo = p.id_ciclo " +
+                "               AND T4.id_pilar = p.id_pilar " +
+                "               AND T4.id_componente = p.id_componente " +
+                "               AND T4.id_plano = p.id_plano " +
+                "  INNER JOIN T5 ON T4.id_entidade = T5.id_entidade " +
+                "               AND T4.id_ciclo = T5.id_ciclo " +
+                "               AND T4.id_pilar = T5.id_pilar " +
+                "               AND T4.id_componente = T5.id_componente " +
+                "               AND T4.id_plano = T5.id_plano " +
+                "  INNER JOIN T6 ON T6.id_entidade = T5.id_entidade " +
+                "               AND T6.id_ciclo = T5.id_ciclo " +
+                "               AND T6.id_pilar = T5.id_pilar " +
+                "               AND T6.id_componente = T5.id_componente " +
+                "  GROUP BY p.id_entidade, p.id_ciclo, p.id_pilar, p.id_componente, T6.denominador " +
+                ") " +
+                "UPDATE virtus.produtos_componentes " +
+                "SET nota = ( " +
+                "  SELECT ROUND(T7.nota_componente, 2) " +
+                "  FROM T7 " +
+                "  WHERE produtos_componentes.id_componente = T7.id_componente " +
+                "    AND produtos_componentes.id_pilar = T7.id_pilar " +
+                "    AND produtos_componentes.id_ciclo = T7.id_ciclo " +
+                "    AND produtos_componentes.id_entidade = T7.id_entidade " +
+                "  GROUP BY T7.id_entidade, T7.id_ciclo, T7.id_pilar, T7.id_componente, T7.nota_componente " +
+                ") " +
+                "WHERE produtos_componentes.id_entidade = ? " +
+                "  AND produtos_componentes.id_ciclo = ? " +
+                "  AND produtos_componentes.id_pilar = ? " +
+                "  AND produtos_componentes.id_componente = ?";
+
+        jdbcTemplate.update(sql,
+                dto.getEntidadeId(),
+                dto.getCicloId(),
+                dto.getPilarId(),
+                dto.getComponenteId());
+    }
+
+    public void updatePillarGrade(ProductElementRequestDTO dto) {
+        String sql = "UPDATE virtus.produtos_pilares " +
+                "SET nota = ( " +
+                "  SELECT ROUND(SUM(nota * peso) / SUM(peso), 2) AS media " +
+                "  FROM virtus.produtos_componentes b " +
+                "  WHERE produtos_pilares.id_entidade = b.id_entidade " +
+                "    AND produtos_pilares.id_ciclo = b.id_ciclo " +
+                "    AND produtos_pilares.id_pilar = b.id_pilar " +
+                "    AND b.nota IS NOT NULL AND b.nota <> 0 " +
+                "  GROUP BY b.id_entidade, b.id_ciclo, b.id_pilar " +
+                ") " +
+                "WHERE id_entidade = ? " +
+                "  AND id_ciclo = ? " +
+                "  AND id_pilar = ?";
+
+        jdbcTemplate.update(sql,
+                dto.getEntidadeId(),
+                dto.getCicloId(),
+                dto.getPilarId());
+    }
+
+    public void updateCycleGrade(ProductElementRequestDTO dto) {
+        String sql = "UPDATE virtus.produtos_ciclos " +
+                "SET nota = R.media " +
+                "FROM ( " +
+                "  SELECT ROUND(SUM(nota * peso / 100), 2) AS media " +
+                "  FROM virtus.produtos_pilares b " +
+                "  WHERE b.id_entidade = ? " +
+                "    AND b.id_ciclo = ? " +
+                "    AND b.nota IS NOT NULL AND b.nota <> 0 " +
+                ") R " +
+                "WHERE id_entidade = ? " +
+                "  AND id_ciclo = ?";
+
+        jdbcTemplate.update(sql,
+                dto.getEntidadeId(),
+                dto.getCicloId(),
+                dto.getEntidadeId(),
+                dto.getCicloId());
+    }
+
+    public CurrentGradesDTO loadCurrentGrades(ProductElementRequestDTO dto) {
+        String sql = "SELECT " +
+                "  COALESCE(TO_CHAR(a.nota, 'FM9999999990.00'), '.00') AS tipo_nota, " +
+                "  COALESCE(TO_CHAR(b.nota, 'FM9999999990.00'), '.00') AS plano, " +
+                "  COALESCE(TO_CHAR(c.nota, 'FM9999999990.00'), '.00') AS componente, " +
+                "  COALESCE(TO_CHAR(d.nota, 'FM9999999990.00'), '.00') AS pilar, " +
+                "  COALESCE(TO_CHAR(e.nota, 'FM9999999990.00'), '.00') AS ciclo " +
+                "FROM virtus.produtos_tipos_notas a " +
+                "JOIN virtus.produtos_planos b ON a.id_entidade = b.id_entidade " +
+                " AND a.id_ciclo = b.id_ciclo " +
+                " AND a.id_pilar = b.id_pilar " +
+                " AND a.id_componente = b.id_componente " +
+                " AND a.id_plano = b.id_plano " +
+                "JOIN virtus.produtos_componentes c ON a.id_entidade = c.id_entidade " +
+                " AND a.id_ciclo = c.id_ciclo " +
+                " AND a.id_pilar = c.id_pilar " +
+                " AND a.id_componente = c.id_componente " +
+                "JOIN virtus.produtos_pilares d ON a.id_entidade = d.id_entidade " +
+                " AND a.id_ciclo = d.id_ciclo " +
+                " AND a.id_pilar = d.id_pilar " +
+                "JOIN virtus.produtos_ciclos e ON a.id_entidade = e.id_entidade " +
+                " AND a.id_ciclo = e.id_ciclo " +
+                "WHERE a.id_entidade = ? " +
+                "  AND a.id_ciclo = ? " +
+                "  AND a.id_pilar = ? " +
+                "  AND a.id_componente = ? " +
+                "  AND a.id_plano = ? " +
+                "  AND a.id_tipo_nota = ?";
+
+        return jdbcTemplate.query(sql, ps -> {
+            ps.setLong(1, dto.getEntidadeId());
+            ps.setLong(2, dto.getCicloId());
+            ps.setLong(3, dto.getPilarId());
+            ps.setLong(4, dto.getComponenteId());
+            ps.setLong(5, dto.getPlanoId());
+            ps.setLong(6, dto.getTipoNotaId());
+        }, rs -> {
+            if (rs.next()) {
+                return CurrentGradesDTO.builder()
+                        .tipoNotaNota(stripZeros(rs.getString("tipo_nota")))
+                        .planoNota(stripZeros(rs.getString("plano")))
+                        .componenteNota(stripZeros(rs.getString("componente")))
+                        .pilarNota(stripZeros(rs.getString("pilar")))
+                        .cicloNota(stripZeros(rs.getString("ciclo")))
+                        .build();
+            }
+            return new CurrentGradesDTO(); // empty if not found
+        });
+    }
+}

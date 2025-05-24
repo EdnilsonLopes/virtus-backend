@@ -1,7 +1,8 @@
 package com.virtus.controller;
 
 import com.virtus.common.annotation.LoggedUser;
-import com.virtus.domain.dto.request.ProdutoElementoRequestDTO;
+import com.virtus.domain.dto.CurrentValuesDTO;
+import com.virtus.domain.dto.request.ProductElementRequestDTO;
 import com.virtus.domain.dto.response.EntityVirtusResponseDTO;
 import com.virtus.domain.dto.response.EvaluatePlansTreeNode;
 import com.virtus.domain.model.CurrentUser;
@@ -26,7 +27,7 @@ public class EvaluatePlansController {
 
     @GetMapping("/list")
     public ResponseEntity<List<EntityVirtusResponseDTO>> listAvaliarPlanos(@LoggedUser CurrentUser currentUser, @RequestParam(value = "filter", required = false) String filter) {
-        return ResponseEntity.ok(service.listAvaliarPlanos(currentUser, filter));
+        return ResponseEntity.ok(service.listEvaluatePlans(currentUser, filter));
     }
 
     @GetMapping("/by-entity-and-cycle-id")
@@ -35,10 +36,10 @@ public class EvaluatePlansController {
         return ResponseEntity.ok(evaluatePlansTree);
     }
 
-    @PutMapping("/salvarNotaElemento")
-    public ResponseEntity<Void> salvarNotaElemento(@RequestBody ProdutoElementoRequestDTO dto, CurrentUser currentUser) {
-        service.salvarNotaElemento(dto, currentUser);
-        return ResponseEntity.ok().build();
+    @PutMapping("/updateElementGrade")
+    public ResponseEntity<CurrentValuesDTO> updateElementGrade(@RequestBody ProductElementRequestDTO dto, CurrentUser currentUser) {
+        CurrentValuesDTO valoresAtuais = service.updateElementGrade(dto, currentUser);
+        return ResponseEntity.ok(valoresAtuais);
     }
 
 }
