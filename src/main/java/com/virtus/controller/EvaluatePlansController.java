@@ -3,6 +3,7 @@ package com.virtus.controller;
 import com.virtus.common.annotation.LoggedUser;
 import com.virtus.domain.dto.CurrentValuesDTO;
 import com.virtus.domain.dto.request.ProductElementRequestDTO;
+import com.virtus.domain.dto.request.ProductPillarRequestDTO;
 import com.virtus.domain.dto.response.EntityVirtusResponseDTO;
 import com.virtus.domain.dto.response.EvaluatePlansTreeNode;
 import com.virtus.domain.model.CurrentUser;
@@ -39,6 +40,12 @@ public class EvaluatePlansController {
     @PutMapping("/updateElementGrade")
     public ResponseEntity<CurrentValuesDTO> updateElementGrade(@RequestBody ProductElementRequestDTO dto, CurrentUser currentUser) {
         CurrentValuesDTO valoresAtuais = service.updateElementGrade(dto, currentUser);
+        return ResponseEntity.ok(valoresAtuais);
+    }
+
+    @PutMapping("/updatePillarWeight")
+    public ResponseEntity<CurrentValuesDTO> updatePillarWeight(@RequestBody ProductPillarRequestDTO dto, CurrentUser currentUser) {
+        CurrentValuesDTO valoresAtuais = service.updatePillarWeight(dto, currentUser);
         return ResponseEntity.ok(valoresAtuais);
     }
 

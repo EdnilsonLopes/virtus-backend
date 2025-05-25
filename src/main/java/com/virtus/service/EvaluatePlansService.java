@@ -4,6 +4,7 @@ import com.virtus.domain.dto.CurrentGradesDTO;
 import com.virtus.domain.dto.CurrentWeightsDTO;
 import com.virtus.domain.dto.CurrentValuesDTO;
 import com.virtus.domain.dto.request.ProductElementRequestDTO;
+import com.virtus.domain.dto.request.ProductPillarRequestDTO;
 import com.virtus.domain.dto.response.*;
 import com.virtus.domain.entity.CycleEntity;
 import com.virtus.domain.model.CurrentUser;
@@ -115,6 +116,8 @@ public class EvaluatePlansService {
                                                                 .type("Pilar")
                                                                 .grade(plan.getPilarNota())
                                                                 .weight(plan.getPilarPeso())
+                                                                .periodoPermitido(plan.getPeriodoPermitido())
+                                                                .supervisorId(plan.getSupervisorId())
                                                                 .children(new ArrayList<>())
                                                                 .build();
                                                 cicloNode.addChild(node);
@@ -185,6 +188,8 @@ public class EvaluatePlansService {
                                                                 .type("Elemento")
                                                                 .grade(plan.getElementoNota())
                                                                 .weight(plan.getElementoPeso())
+                                                                .auditorId(plan.getAuditorId())
+                                                                .supervisorId(plan.getSupervisorId())
                                                                 .periodoPermitido(plan.getPeriodoPermitido())
                                                                 .gradeTypeId(plan.getTipoPontuacaoId())
                                                                 .children(new ArrayList<>())
@@ -211,8 +216,8 @@ public class EvaluatePlansService {
         public CurrentValuesDTO updateElementGrade(ProductElementRequestDTO dto, CurrentUser currentUser) {
                 evaluatePlansRepository.updateElementGrade(dto, currentUser);
                 evaluatePlansRepository.updateGradeTypeWeights(dto, currentUser);
-                // evaluatePlansRepository.updatePlanWeights(dto, currentUser);
-                // evaluatePlansRepository.updateComponentWeights(dto, currentUser);
+                evaluatePlansRepository.updatePlanWeights(dto, currentUser);
+                evaluatePlansRepository.updateComponentWeights(dto, currentUser);
                 // Current Weights
                 CurrentWeightsDTO currentWeights = evaluatePlansRepository.loadCurrentWeights(dto);
 
@@ -245,5 +250,10 @@ public class EvaluatePlansService {
                                 .pilarNota(ns.getPilarNota())
                                 .cicloNota(ns.getCicloNota())
                                 .build();
+        }
+
+        public CurrentValuesDTO updatePillarWeight(ProductPillarRequestDTO dto, CurrentUser currentUser) {
+           String cicloNota = evaluatePlansRepository.updatePillarWeight(dto, currentUser);
+           return CurrentValuesDTO.builder().cicloNota(cicloNota).build();            
         }
 }
