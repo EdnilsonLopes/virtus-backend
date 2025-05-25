@@ -300,29 +300,26 @@ public class EvaluatePlansRepository {
 
     public CurrentWeightsDTO loadCurrentWeights(ProductElementRequestDTO dto) {
         String sql = "SELECT " +
-                "  COALESCE(TO_CHAR(b.peso, 'FM9999999990.00'), '.00') AS plano, " +
-                "  COALESCE(TO_CHAR(c.peso, 'FM9999999990.00'), '.00') AS componente, " +
-                "  COALESCE(TO_CHAR(d.peso, 'FM9999999990.00'), '.00') AS pilar, " +
-                "  STRING_AGG(CONCAT(a.id_tipo_nota, ':', TO_CHAR(a.peso, 'FM9999999990.00')), '/') AS tipo_nota " +
+                "  COALESCE(FORMAT(a.nota, 'N2'), '.00') AS tipo_nota, " +
+                "  COALESCE(FORMAT(b.nota, 'N2'), '.00') AS plano, " +
+                "  COALESCE(FORMAT(c.nota, 'N2'), '.00') AS componente, " +
+                "  COALESCE(FORMAT(d.nota, 'N2'), '.00') AS pilar, " +
+                "  COALESCE(FORMAT(e.nota, 'N2'), '.00') AS ciclo " +
                 "FROM virtus.produtos_tipos_notas a " +
                 "JOIN virtus.produtos_planos b ON a.id_entidade = b.id_entidade " +
-                " AND a.id_ciclo = b.id_ciclo " +
-                " AND a.id_pilar = b.id_pilar " +
-                " AND a.id_componente = b.id_componente " +
-                " AND a.id_plano = b.id_plano " +
+                " AND a.id_ciclo = b.id_ciclo AND a.id_pilar = b.id_pilar " +
+                " AND a.id_componente = b.id_componente AND a.id_plano = b.id_plano " +
                 "JOIN virtus.produtos_componentes c ON a.id_entidade = c.id_entidade " +
-                " AND a.id_ciclo = c.id_ciclo " +
-                " AND a.id_pilar = c.id_pilar " +
-                " AND a.id_componente = c.id_componente " +
+                " AND a.id_ciclo = c.id_ciclo AND a.id_pilar = c.id_pilar AND a.id_componente = c.id_componente " +
                 "JOIN virtus.produtos_pilares d ON a.id_entidade = d.id_entidade " +
-                " AND a.id_ciclo = d.id_ciclo " +
-                " AND a.id_pilar = d.id_pilar " +
+                " AND a.id_ciclo = d.id_ciclo AND a.id_pilar = d.id_pilar " +
+                "JOIN virtus.produtos_ciclos e ON a.id_entidade = e.id_entidade AND a.id_ciclo = e.id_ciclo " +
                 "WHERE a.id_entidade = ? " +
                 " AND a.id_ciclo = ? " +
                 " AND a.id_pilar = ? " +
                 " AND a.id_componente = ? " +
                 " AND a.id_plano = ? " +
-                "GROUP BY b.peso, c.peso, d.peso";
+                " AND a.id_tipo_nota = ? ";
 
         return jdbcTemplate.query(sql, ps -> {
             ps.setLong(1, dto.getEntidadeId());
@@ -330,6 +327,7 @@ public class EvaluatePlansRepository {
             ps.setLong(3, dto.getPilarId());
             ps.setLong(4, dto.getComponenteId());
             ps.setLong(5, dto.getPlanoId());
+            ps.setLong(6, dto.getTipoNotaId());
         }, rs -> {
             if (rs.next()) {
                 return CurrentWeightsDTO.builder()
@@ -575,11 +573,11 @@ public class EvaluatePlansRepository {
 
     public CurrentGradesDTO loadCurrentGrades(ProductElementRequestDTO dto) {
         String sql = "SELECT " +
-                "  COALESCE(TO_CHAR(a.nota, 'FM9999999990.00'), '.00') AS tipo_nota, " +
-                "  COALESCE(TO_CHAR(b.nota, 'FM9999999990.00'), '.00') AS plano, " +
-                "  COALESCE(TO_CHAR(c.nota, 'FM9999999990.00'), '.00') AS componente, " +
-                "  COALESCE(TO_CHAR(d.nota, 'FM9999999990.00'), '.00') AS pilar, " +
-                "  COALESCE(TO_CHAR(e.nota, 'FM9999999990.00'), '.00') AS ciclo " +
+                "  COALESCE(FORMAT(a.nota, 'N2'), '.00') AS tipo_nota, " +
+                "  COALESCE(FORMAT(b.nota, 'N2'), '.00') AS plano, " +
+                "  COALESCE(FORMAT(c.nota, 'N2'), '.00') AS componente, " +
+                "  COALESCE(FORMAT(d.nota, 'N2'), '.00') AS pilar, " +
+                "  COALESCE(FORMAT(e.nota, 'N2'), '.00') AS ciclo " +
                 "FROM virtus.produtos_tipos_notas a " +
                 "JOIN virtus.produtos_planos b ON a.id_entidade = b.id_entidade " +
                 " AND a.id_ciclo = b.id_ciclo " +
@@ -622,4 +620,5 @@ public class EvaluatePlansRepository {
             return new CurrentGradesDTO(); // empty if not found
         });
     }
+
 }
