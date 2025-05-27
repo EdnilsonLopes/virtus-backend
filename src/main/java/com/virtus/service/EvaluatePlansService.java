@@ -222,11 +222,11 @@ public class EvaluatePlansService {
                 CurrentWeightsDTO currentWeights = evaluatePlansRepository.loadCurrentWeights(dto);
 
                 // Recalculate Grades
-                // evaluatePlansRepository.updateGradeTypeGrade(dto);
-                // evaluatePlansRepository.updatePlanGrade(dto);
-                // evaluatePlansRepository.updateComponentGrade(dto);
-                // evaluatePlansRepository.updatePillarGrade(dto);
-                // evaluatePlansRepository.updateCycleGrade(dto);
+                evaluatePlansRepository.updateGradeTypeGrade(dto);
+                evaluatePlansRepository.updatePlanGrade(dto);
+                evaluatePlansRepository.updateComponentGrade(dto);
+                evaluatePlansRepository.updatePillarGrade(dto);
+                evaluatePlansRepository.updateCycleGrade(dto);
 
                 // Current Grades
                 CurrentGradesDTO currentGrades = evaluatePlansRepository.loadCurrentGrades(dto);
