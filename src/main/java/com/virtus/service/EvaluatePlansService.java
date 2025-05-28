@@ -1,26 +1,32 @@
 package com.virtus.service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
 import com.virtus.domain.dto.CurrentGradesDTO;
-import com.virtus.domain.dto.CurrentWeightsDTO;
 import com.virtus.domain.dto.CurrentValuesDTO;
+import com.virtus.domain.dto.CurrentWeightsDTO;
 import com.virtus.domain.dto.request.ProductElementRequestDTO;
 import com.virtus.domain.dto.request.ProductPillarRequestDTO;
-import com.virtus.domain.dto.response.*;
+import com.virtus.domain.dto.response.CycleEntityResponseDTO;
+import com.virtus.domain.dto.response.CycleResponseDTO;
+import com.virtus.domain.dto.response.EntityVirtusResponseDTO;
+import com.virtus.domain.dto.response.EvaluatePlansTreeNode;
 import com.virtus.domain.entity.CycleEntity;
 import com.virtus.domain.model.CurrentUser;
 import com.virtus.domain.model.EvaluatePlansConsultModel;
 import com.virtus.persistence.CycleEntityRepository;
 import com.virtus.persistence.EvaluatePlansRepository;
 import com.virtus.persistence.OfficeRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
+import com.virtus.persistence.ProductHistoryService;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +35,7 @@ public class EvaluatePlansService {
         private final OfficeRepository officeRepository;
         private final CycleEntityRepository cycleEntityRepository;
         private final EvaluatePlansRepository evaluatePlansRepository;
+        private final ProductHistoryService productHistoryService;
 
         public List<EntityVirtusResponseDTO> listEvaluatePlans(CurrentUser currentUser, String filter) {
                 var entidades = officeRepository.listEvaluatePlans(currentUser.getId(), filter);
@@ -215,6 +222,7 @@ public class EvaluatePlansService {
 
         public CurrentValuesDTO updateElementGrade(ProductElementRequestDTO dto, CurrentUser currentUser) {
                 evaluatePlansRepository.updateElementGrade(dto, currentUser);
+                productHistoryService.updateElementGradeHistory(dto, currentUser);
                 evaluatePlansRepository.updateGradeTypeWeights(dto, currentUser);
                 evaluatePlansRepository.updatePlanWeights(dto, currentUser);
                 evaluatePlansRepository.updateComponentWeights(dto, currentUser);
@@ -230,7 +238,6 @@ public class EvaluatePlansService {
 
                 // Current Grades
                 CurrentGradesDTO currentGrades = evaluatePlansRepository.loadCurrentGrades(dto);
-
                 // Return merged updated data
                 return buildCurrentValues(currentWeights, currentGrades);
         }
@@ -254,6 +261,7 @@ public class EvaluatePlansService {
 
         public CurrentValuesDTO updateElementWeight(ProductElementRequestDTO dto, CurrentUser currentUser) {
                 evaluatePlansRepository.updateElementWeight(dto, currentUser);
+                productHistoryService.updateElementWeightHistory(dto, currentUser);
                 evaluatePlansRepository.updateGradeTypeWeights(dto, currentUser);
                 evaluatePlansRepository.updatePlanWeights(dto, currentUser);
                 evaluatePlansRepository.updateComponentWeights(dto, currentUser);

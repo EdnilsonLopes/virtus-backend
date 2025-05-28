@@ -1,6 +1,9 @@
 package com.virtus.persistence;
 
+import com.virtus.domain.dto.request.ProductElementRequestDTO;
 import com.virtus.domain.dto.response.HistoryComponentDTO;
+import com.virtus.domain.model.CurrentUser;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -77,6 +80,63 @@ public class ProductHistoryService {
 
                     return history;
                 });
+    }
+
+    public void updateElementGradeHistory(ProductElementRequestDTO dto, CurrentUser currentUser) {
+        String sql = 
+            "INSERT INTO virtus.produtos_elementos_historicos ( " +
+            "   id_entidade, id_ciclo, id_pilar, id_plano, id_componente, " +
+            "   id_tipo_nota, id_elemento, id_tipo_pontuacao, peso, nota, tipo_alteracao, " +
+            "   motivacao_nota, id_supervisor, id_auditor, id_author, criado_em, " +
+            "   id_versao_origem, id_status) " +
+            "SELECT " +
+            "   id_entidade, id_ciclo, id_pilar, id_plano, id_componente, " +
+            "   id_tipo_nota, id_elemento, id_tipo_pontuacao, peso, nota, 'N', " +
+            "   motivacao_nota, id_supervisor, id_auditor, ?, GETDATE(), " +
+            "   id_author, id_status " +
+            "FROM virtus.produtos_elementos " +
+            "WHERE id_entidade = ? AND id_ciclo = ? AND id_pilar = ? AND " +
+            "      id_plano = ? AND id_componente = ? AND id_tipo_nota = ? AND id_elemento = ?";
+
+        jdbcTemplate.update(
+            sql,
+            currentUser.getId(),                         
+            dto.getEntidadeId(),                     
+            dto.getCicloId(),                        
+            dto.getPilarId(),                        
+            dto.getPlanoId(),                        
+            dto.getComponenteId(),                   
+            dto.getTipoNotaId(),                     
+            dto.getElementoId()                      
+        );
+    }
+
+ public void updateElementWeightHistory(ProductElementRequestDTO dto, CurrentUser currentUser) {
+        String sql =
+            "INSERT INTO virtus.produtos_elementos_historicos ( " +
+            "   id_entidade, id_ciclo, id_pilar, id_plano, id_componente, " +
+            "   id_tipo_nota, id_elemento, id_tipo_pontuacao, peso, nota, tipo_alteracao, " +
+            "   motivacao_peso, id_supervisor, id_auditor, id_author, criado_em, " +
+            "   id_versao_origem, id_status) " +
+            "SELECT " +
+            "   id_entidade, id_ciclo, id_pilar, id_plano, id_componente, " +
+            "   id_tipo_nota, id_elemento, id_tipo_pontuacao, peso, nota, 'P', " +
+            "   motivacao_peso, id_supervisor, id_auditor, ?, GETDATE(), " +
+            "   id_author, id_status " +
+            "FROM virtus.produtos_elementos " +
+            "WHERE id_entidade = ? AND id_ciclo = ? AND id_pilar = ? AND " +
+            "      id_componente = ? AND id_tipo_nota = ? AND id_elemento = ?";
+
+        jdbcTemplate.update(
+            sql,
+            currentUser.getId(),                        
+            dto.getEntidadeId(),                    
+            dto.getCicloId(),                       
+            dto.getPilarId(),                       
+            dto.getComponenteId(),                  
+            dto.getTipoNotaId(),                    
+            dto.getElementoId()                     
+        );
     }
 }
 
