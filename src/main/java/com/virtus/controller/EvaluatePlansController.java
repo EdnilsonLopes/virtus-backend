@@ -27,24 +27,35 @@ public class EvaluatePlansController {
     private final EvaluatePlansService service;
 
     @GetMapping("/list")
-    public ResponseEntity<List<EntityVirtusResponseDTO>> listAvaliarPlanos(@LoggedUser CurrentUser currentUser, @RequestParam(value = "filter", required = false) String filter) {
+    public ResponseEntity<List<EntityVirtusResponseDTO>> listAvaliarPlanos(@LoggedUser CurrentUser currentUser,
+            @RequestParam(value = "filter", required = false) String filter) {
         return ResponseEntity.ok(service.listEvaluatePlans(currentUser, filter));
     }
 
     @GetMapping("/by-entity-and-cycle-id")
-    public ResponseEntity<List<EvaluatePlansTreeNode>> getEvaluatePlansTree(@LoggedUser CurrentUser currentUser, @RequestParam Integer entityId, @RequestParam Integer cycleId) {
+    public ResponseEntity<List<EvaluatePlansTreeNode>> getEvaluatePlansTree(@LoggedUser CurrentUser currentUser,
+            @RequestParam Integer entityId, @RequestParam Integer cycleId) {
         List<EvaluatePlansTreeNode> evaluatePlansTree = service.findEvaluatePlansTree(currentUser, entityId, cycleId);
         return ResponseEntity.ok(evaluatePlansTree);
     }
 
     @PutMapping("/updateElementGrade")
-    public ResponseEntity<CurrentValuesDTO> updateElementGrade(@RequestBody ProductElementRequestDTO dto, CurrentUser currentUser) {
+    public ResponseEntity<CurrentValuesDTO> updateElementGrade(@RequestBody ProductElementRequestDTO dto,
+            CurrentUser currentUser) {
         CurrentValuesDTO valoresAtuais = service.updateElementGrade(dto, currentUser);
         return ResponseEntity.ok(valoresAtuais);
     }
 
+    @PutMapping("/updateElementWeight")
+    public ResponseEntity<CurrentValuesDTO> updateElementWeight(@RequestBody ProductElementRequestDTO dto,
+            CurrentUser currentUser) {
+        CurrentValuesDTO valoresAtuais = service.updateElementWeight(dto, currentUser);
+        return ResponseEntity.ok(valoresAtuais);
+    }
+
     @PutMapping("/updatePillarWeight")
-    public ResponseEntity<CurrentValuesDTO> updatePillarWeight(@RequestBody ProductPillarRequestDTO dto, CurrentUser currentUser) {
+    public ResponseEntity<CurrentValuesDTO> updatePillarWeight(@RequestBody ProductPillarRequestDTO dto,
+            CurrentUser currentUser) {
         CurrentValuesDTO valoresAtuais = service.updatePillarWeight(dto, currentUser);
         return ResponseEntity.ok(valoresAtuais);
     }

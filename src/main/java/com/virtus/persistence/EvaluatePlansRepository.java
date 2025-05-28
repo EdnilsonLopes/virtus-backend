@@ -677,4 +677,23 @@ public class EvaluatePlansRepository {
                                 dto.getCicloId());
         }
 
+        public void updateElementWeight(ProductElementRequestDTO dto, CurrentUser currentUser) {
+                String sql = "UPDATE virtus.produtos_elementos SET peso = ?, motivacao_peso = ? " +
+                                " WHERE id_entidade = ? AND " +
+                                " id_ciclo = ? AND " +
+                                " id_pilar = ? AND " +
+                                " id_plano = ? AND " +
+                                " id_componente = ? AND " +
+                                " id_elemento = ? ";
+                jdbcTemplate.update(sql,
+                                dto.getPeso(),
+                                dto.getMotivacao(),
+                                dto.getEntidadeId(),
+                                dto.getCicloId(),
+                                dto.getPilarId(),
+                                dto.getPlanoId(),
+                                dto.getComponenteId(),
+                                dto.getElementoId());
+        }
+
 }

@@ -252,8 +252,28 @@ public class EvaluatePlansService {
                                 .build();
         }
 
+        public CurrentValuesDTO updateElementWeight(ProductElementRequestDTO dto, CurrentUser currentUser) {
+                evaluatePlansRepository.updateElementWeight(dto, currentUser);
+                evaluatePlansRepository.updateGradeTypeWeights(dto, currentUser);
+                evaluatePlansRepository.updatePlanWeights(dto, currentUser);
+                evaluatePlansRepository.updateComponentWeights(dto, currentUser);
+                // Current Weights
+                CurrentWeightsDTO currentWeights = evaluatePlansRepository.loadCurrentWeights(dto);
+                currentWeights.setElementoPeso(String.valueOf(dto.getPeso()));
+                // Recalculate Grades
+                evaluatePlansRepository.updateGradeTypeGrade(dto);
+                evaluatePlansRepository.updatePlanGrade(dto);
+                evaluatePlansRepository.updateComponentGrade(dto);
+                evaluatePlansRepository.updatePillarGrade(dto);
+                evaluatePlansRepository.updateCycleGrade(dto);
+
+                // Current Grades
+                CurrentGradesDTO currentGrades = evaluatePlansRepository.loadCurrentGrades(dto);
+                return buildCurrentValues(currentWeights, currentGrades);
+        }
+
         public CurrentValuesDTO updatePillarWeight(ProductPillarRequestDTO dto, CurrentUser currentUser) {
-           String cicloNota = evaluatePlansRepository.updatePillarWeight(dto, currentUser);
-           return CurrentValuesDTO.builder().cicloNota(cicloNota).build();            
+                String cicloNota = evaluatePlansRepository.updatePillarWeight(dto, currentUser);
+                return CurrentValuesDTO.builder().cicloNota(cicloNota).build();
         }
 }

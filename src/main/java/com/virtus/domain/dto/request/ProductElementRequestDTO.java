@@ -15,6 +15,7 @@ public class ProductElementRequestDTO extends BaseRequestDTO {
     private Integer componenteId;
     private Integer tipoNotaId;
     private Integer elementoId;
+    private Integer peso;
     private Integer nota;
     private String motivacao;
 
