@@ -27,24 +27,22 @@ import com.virtus.persistence.UserRepository;
 import com.virtus.translate.Translator;
 
 @Service
-public class JurisdictionService extends BaseService<Jurisdiction, JurisdictionRepository, JurisdictionRequestDTO, JurisdictionResponseDTO> {
-
+public class JurisdictionService
+        extends BaseService<Jurisdiction, JurisdictionRepository, JurisdictionRequestDTO, JurisdictionResponseDTO> {
 
     private final JurisdictionRepository repository;
-    private final UserRepository userRepository;
 
-    private final EntityManagerFactory entityManagerFactory;
-
-    public JurisdictionService(JurisdictionRepository repository, UserRepository userRepository, EntityManagerFactory entityManagerFactory) {
+    public JurisdictionService(JurisdictionRepository repository, UserRepository userRepository,
+            EntityManagerFactory entityManagerFactory) {
         super(repository, userRepository, entityManagerFactory);
         this.repository = repository;
-        this.userRepository = userRepository;
-        this.entityManagerFactory = entityManagerFactory;
     }
 
-    public PageableResponseDTO<JurisdictionResponseDTO> findAllJurisdictionsByCurrentUser(CurrentUser currentUser, int page, int size) {
+    public PageableResponseDTO<JurisdictionResponseDTO> findAllJurisdictionsByCurrentUser(CurrentUser currentUser,
+            int page, int size) {
         Page<Jurisdiction> pageResult = repository.findAllByUserId(currentUser.getId(), PageRequest.of(page, size));
-        List<JurisdictionResponseDTO> content = pageResult.getContent().stream().map(c -> parseToResponseDTO(c, false)).collect(Collectors.toList());
+        List<JurisdictionResponseDTO> content = pageResult.getContent().stream().map(c -> parseToResponseDTO(c, false))
+                .collect(Collectors.toList());
 
         return new PageableResponseDTO<>(
                 content,
@@ -95,10 +93,11 @@ public class JurisdictionService extends BaseService<Jurisdiction, JurisdictionR
         return response;
     }
 
-
     @Override
     protected Jurisdiction parseToEntity(JurisdictionRequestDTO body) {
-        Jurisdiction jurisdiction = body.getId() != null ? getRepository().findById(body.getId()).orElse(new Jurisdiction()) : new Jurisdiction();
+        Jurisdiction jurisdiction = body.getId() != null
+                ? getRepository().findById(body.getId()).orElse(new Jurisdiction())
+                : new Jurisdiction();
 
         jurisdiction.setStartsAt(body.getStartsAt());
         jurisdiction.setEndsAt(body.getEndsAt());
@@ -112,7 +111,8 @@ public class JurisdictionService extends BaseService<Jurisdiction, JurisdictionR
         return Translator.translate("jurisdiction.not.found");
     }
 
-    public PageableResponseDTO<DistributeActivitiesResponseDTO> findEntidadeCiclosByUser(CurrentUser currentUser, int page, int size) {
+    public PageableResponseDTO<DistributeActivitiesResponseDTO> findEntidadeCiclosByUser(CurrentUser currentUser,
+            int page, int size) {
         List<Object[]> results = repository.findObjectsToDistributeActivitiesByUser(currentUser.getId());
         List<DistributeActivitiesResponseDTO> dtos = new ArrayList<>();
         for (Object[] result : results) {

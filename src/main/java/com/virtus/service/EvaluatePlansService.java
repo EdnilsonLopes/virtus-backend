@@ -24,7 +24,6 @@ import com.virtus.domain.model.EvaluatePlansConsultModel;
 import com.virtus.persistence.CycleEntityRepository;
 import com.virtus.persistence.EvaluatePlansRepository;
 import com.virtus.persistence.OfficeRepository;
-import com.virtus.persistence.ProductHistoryService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -35,7 +34,8 @@ public class EvaluatePlansService {
         private final OfficeRepository officeRepository;
         private final CycleEntityRepository cycleEntityRepository;
         private final EvaluatePlansRepository evaluatePlansRepository;
-        private final ProductHistoryService productHistoryService;
+        private final ProductElementHistoryService productElementHistoryService;
+        private final ProductPillarHistoryService productPillarHistoryService;
 
         public List<EntityVirtusResponseDTO> listEvaluatePlans(CurrentUser currentUser, String filter) {
                 var entidades = officeRepository.listEvaluatePlans(currentUser.getId(), filter);
@@ -222,7 +222,7 @@ public class EvaluatePlansService {
 
         public CurrentValuesDTO updateElementGrade(ProductElementRequestDTO dto, CurrentUser currentUser) {
                 evaluatePlansRepository.updateElementGrade(dto, currentUser);
-                productHistoryService.updateElementGradeHistory(dto, currentUser);
+                productElementHistoryService.recordElementGradeHistory(dto, currentUser);
                 evaluatePlansRepository.updateGradeTypeWeights(dto, currentUser);
                 evaluatePlansRepository.updatePlanWeights(dto, currentUser);
                 evaluatePlansRepository.updateComponentWeights(dto, currentUser);
@@ -261,7 +261,7 @@ public class EvaluatePlansService {
 
         public CurrentValuesDTO updateElementWeight(ProductElementRequestDTO dto, CurrentUser currentUser) {
                 evaluatePlansRepository.updateElementWeight(dto, currentUser);
-                productHistoryService.updateElementWeightHistory(dto, currentUser);
+                productElementHistoryService.recordElementWeightHistory(dto, currentUser);
                 evaluatePlansRepository.updateGradeTypeWeights(dto, currentUser);
                 evaluatePlansRepository.updatePlanWeights(dto, currentUser);
                 evaluatePlansRepository.updateComponentWeights(dto, currentUser);
@@ -282,6 +282,7 @@ public class EvaluatePlansService {
 
         public CurrentValuesDTO updatePillarWeight(ProductPillarRequestDTO dto, CurrentUser currentUser) {
                 String cicloNota = evaluatePlansRepository.updatePillarWeight(dto, currentUser);
+                productPillarHistoryService.recordPillarWeight(dto, currentUser);
                 return CurrentValuesDTO.builder().cicloNota(cicloNota).build();
         }
 }

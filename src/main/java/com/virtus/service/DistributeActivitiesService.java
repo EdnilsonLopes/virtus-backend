@@ -317,11 +317,11 @@ public class DistributeActivitiesService {
         return response;
     }
 
-    protected EnumDTO<Enum> parseToAverageTypeEnumResponseDTO(AverageType averageType) {
+    protected EnumDTO<AverageType> parseToAverageTypeEnumResponseDTO(AverageType averageType) {
         if (averageType == null) {
-            return EnumDTO.builder().build();
+            return EnumDTO.<AverageType>builder().build();
         }
-        return EnumDTO.builder()
+        return EnumDTO.<AverageType>builder()
                 .value(averageType)
                 .description(Translator.translate(averageType.getKey()))
                 .build();

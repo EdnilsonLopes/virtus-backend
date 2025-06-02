@@ -14,10 +14,10 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @EqualsAndHashCode(of = {"id"})
-public class ProductComponentHistoric extends BaseEntity {
+public class ProductComponentHistory extends BaseEntity {
 
     @Id
-    @Column(name = "id_produto_componente_historicos")
+    @Column(name = "id_produto_componente_historico")
     private Integer id;
 
     @ManyToOne
@@ -98,7 +98,7 @@ public class ProductComponentHistoric extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "id_versao_origem")
-    private ProductComponentHistoric originVersion;
+    private ProductComponentHistory originVersion;
 
 
 }

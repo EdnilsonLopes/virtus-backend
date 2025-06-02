@@ -54,8 +54,7 @@ public class EvaluatePlansController {
     }
 
     @PutMapping("/updatePillarWeight")
-    public ResponseEntity<CurrentValuesDTO> updatePillarWeight(@RequestBody ProductPillarRequestDTO dto,
-            CurrentUser currentUser) {
+    public ResponseEntity<CurrentValuesDTO> updatePillarWeight(@RequestBody ProductPillarRequestDTO dto,@LoggedUser CurrentUser currentUser) {
         CurrentValuesDTO valoresAtuais = service.updatePillarWeight(dto, currentUser);
         return ResponseEntity.ok(valoresAtuais);
     }
