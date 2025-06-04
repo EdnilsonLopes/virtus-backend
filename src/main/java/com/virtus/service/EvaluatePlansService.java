@@ -9,21 +9,34 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import com.virtus.common.domain.dto.BaseResponseDTO;
 import com.virtus.domain.dto.CurrentGradesDTO;
 import com.virtus.domain.dto.CurrentValuesDTO;
 import com.virtus.domain.dto.CurrentWeightsDTO;
 import com.virtus.domain.dto.request.ProductElementRequestDTO;
 import com.virtus.domain.dto.request.ProductPillarRequestDTO;
+import com.virtus.domain.dto.response.ComponentResponseDTO;
 import com.virtus.domain.dto.response.CycleEntityResponseDTO;
 import com.virtus.domain.dto.response.CycleResponseDTO;
+import com.virtus.domain.dto.response.ElementItemResponseDTO;
 import com.virtus.domain.dto.response.EntityVirtusResponseDTO;
 import com.virtus.domain.dto.response.EvaluatePlansTreeNode;
+import com.virtus.domain.dto.response.GradeTypeResponseDTO;
+import com.virtus.domain.dto.response.PillarResponseDTO;
+import com.virtus.domain.dto.response.PlanResponseDTO;
 import com.virtus.domain.entity.CycleEntity;
 import com.virtus.domain.model.CurrentUser;
 import com.virtus.domain.model.EvaluatePlansConsultModel;
+import com.virtus.persistence.ComponentRepository;
 import com.virtus.persistence.CycleEntityRepository;
+import com.virtus.persistence.CycleRepository;
+import com.virtus.persistence.ElementItemRepository;
+import com.virtus.persistence.ElementRepository;
 import com.virtus.persistence.EvaluatePlansRepository;
+import com.virtus.persistence.GradeTypeRepository;
 import com.virtus.persistence.OfficeRepository;
+import com.virtus.persistence.PillarRepository;
+import com.virtus.persistence.PlanRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,10 +45,17 @@ import lombok.RequiredArgsConstructor;
 public class EvaluatePlansService {
 
         private final OfficeRepository officeRepository;
+        private final CycleRepository cycleRepository;
         private final CycleEntityRepository cycleEntityRepository;
-        private final EvaluatePlansRepository evaluatePlansRepository;
         private final ProductElementHistoryService productElementHistoryService;
         private final ProductPillarHistoryService productPillarHistoryService;
+        private final PillarRepository pillarRepository;
+        private final ComponentRepository componentRepository;
+        private final PlanRepository planRepository;
+        private final GradeTypeRepository gradeTypeRepository;
+        private final ElementRepository elementRepository;
+        private final ElementItemRepository elementItemRepository;
+        private final EvaluatePlansRepository evaluatePlansRepository;
 
         public List<EntityVirtusResponseDTO> listEvaluatePlans(CurrentUser currentUser, String filter) {
                 var entidades = officeRepository.listEvaluatePlans(currentUser.getId(), filter);
@@ -284,5 +304,74 @@ public class EvaluatePlansService {
                 String cicloNota = evaluatePlansRepository.updatePillarWeight(dto, currentUser);
                 productPillarHistoryService.recordPillarWeight(dto, currentUser);
                 return CurrentValuesDTO.builder().cicloNota(cicloNota).build();
+        }
+
+        public PillarResponseDTO getPillarDescription(Integer id) {
+                return pillarRepository.findById(id)
+                                .map((com.virtus.domain.entity.Pillar p) -> PillarResponseDTO.builder()
+                                                .id(p.getId())
+                                                .name(p.getName())
+                                                .description(p.getDescription())
+                                                .build())
+                                .orElse(null);
+        }
+
+        public ComponentResponseDTO getComponentDescription(Integer id) {
+                return componentRepository.findById(id)
+                                .map((com.virtus.domain.entity.Component c) -> ComponentResponseDTO.builder()
+                                                .id(c.getId())
+                                                .name(c.getName())
+                                                .description(c.getDescription())
+                                                .build())
+                                .orElse(null);
+        }
+
+        public BaseResponseDTO getPlanDescription(Integer id) {
+                return planRepository.findById(id)
+                                .map((com.virtus.domain.entity.Plan c) -> PlanResponseDTO.builder()
+                                                .id(c.getId())
+                                                .name(c.getName())
+                                                .description(c.getDescription())
+                                                .build())
+                                .orElse(null);
+        }
+
+        public BaseResponseDTO getCycleDescription(Integer id) {
+                return cycleRepository.findById(id)
+                                .map((com.virtus.domain.entity.Cycle c) -> CycleResponseDTO.builder()
+                                                .id(c.getId())
+                                                .name(c.getName())
+                                                .description(c.getDescription())
+                                                .build())
+                                .orElse(null);
+        }
+
+        public BaseResponseDTO getGradeTypeDescription(Integer id) {
+                return gradeTypeRepository.findById(id)
+                                .map((com.virtus.domain.entity.GradeType gt) -> GradeTypeResponseDTO.builder()
+                                                .id(gt.getId())
+                                                .name(gt.getName())
+                                                .description(gt.getDescription())
+                                                .build())
+                                .orElse(null);        }
+
+        public BaseResponseDTO getElementDescription(Integer id) {
+            return elementRepository.findById(id)
+                                .map((com.virtus.domain.entity.Element e) -> ElementItemResponseDTO.builder()
+                                                .id(e.getId())
+                                                .name(e.getName())
+                                                .description(e.getDescription())
+                                                .build())
+                                .orElse(null);  
+        }
+
+        public BaseResponseDTO getElementItemDescription(Integer id) {
+            return elementItemRepository.findById(id)
+                                .map((com.virtus.domain.entity.ElementItem ei) -> ElementItemResponseDTO.builder()
+                                                .id(ei.getId())
+                                                .name(ei.getName())
+                                                .description(ei.getDescription())
+                                                .build())
+                                .orElse(null);  
         }
 }

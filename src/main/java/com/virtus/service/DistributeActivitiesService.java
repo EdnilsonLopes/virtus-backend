@@ -281,16 +281,16 @@ public class DistributeActivitiesService {
         return response;
     }
 
-    protected ComponentResponseDTO parseToComponentResponse(Component entity) {
+    protected ComponentResponseDTO parseToComponentResponse(Component component) {
         ComponentResponseDTO response = new ComponentResponseDTO();
-        response.setId(entity.getId());
-        response.setName(entity.getName());
-        response.setOrdination(entity.getOrdination());
-        response.setPga(entity.getPga());
-        response.setDescription(entity.getDescription());
-        response.setReference(entity.getReference());
-        response.setCreatedAt(entity.getCreatedAt());
-        response.setUpdatedAt(entity.getUpdatedAt());
+        response.setId(component.getId());
+        response.setName(component.getName());
+        response.setOrdination(component.getOrdination());
+        response.setPga(component.getPga());
+        response.setDescription(component.getDescription());
+        response.setReference(component.getReference());
+        response.setCreatedAt(component.getCreatedAt());
+        response.setUpdatedAt(component.getUpdatedAt());
         return response;
     }
 

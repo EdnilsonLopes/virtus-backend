@@ -4,6 +4,8 @@ import com.virtus.common.domain.entity.BaseEntity;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
+
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;

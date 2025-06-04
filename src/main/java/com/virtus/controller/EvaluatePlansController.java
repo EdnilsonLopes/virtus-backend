@@ -1,11 +1,13 @@
 package com.virtus.controller;
 
 import com.virtus.common.annotation.LoggedUser;
+import com.virtus.common.domain.dto.BaseResponseDTO;
 import com.virtus.domain.dto.CurrentValuesDTO;
 import com.virtus.domain.dto.request.ProductElementRequestDTO;
 import com.virtus.domain.dto.request.ProductPillarRequestDTO;
 import com.virtus.domain.dto.response.EntityVirtusResponseDTO;
 import com.virtus.domain.dto.response.EvaluatePlansTreeNode;
+import com.virtus.domain.dto.response.PillarResponseDTO;
 import com.virtus.domain.model.CurrentUser;
 import com.virtus.service.EvaluatePlansService;
 import lombok.RequiredArgsConstructor;
@@ -54,9 +56,45 @@ public class EvaluatePlansController {
     }
 
     @PutMapping("/updatePillarWeight")
-    public ResponseEntity<CurrentValuesDTO> updatePillarWeight(@RequestBody ProductPillarRequestDTO dto,@LoggedUser CurrentUser currentUser) {
+    public ResponseEntity<CurrentValuesDTO> updatePillarWeight(@RequestBody ProductPillarRequestDTO dto,
+            @LoggedUser CurrentUser currentUser) {
         CurrentValuesDTO valoresAtuais = service.updatePillarWeight(dto, currentUser);
         return ResponseEntity.ok(valoresAtuais);
+    }
+
+    @GetMapping("/description")
+    public ResponseEntity<BaseResponseDTO> getDescription(
+            @RequestParam("id") Integer id,
+            @RequestParam("objectType") String objectType) {
+
+        BaseResponseDTO dto;
+
+        switch (objectType) {
+            case "Ciclo":
+                dto = service.getCycleDescription(id);
+                break;
+            case "Pilar":
+                dto = service.getPillarDescription(id);
+                break;
+            case "Componente":
+                dto = service.getComponentDescription(id);
+                break;
+            case "Plano":
+                dto = service.getPlanDescription(id);
+                break;
+            case "Tipo Nota":
+                dto = service.getGradeTypeDescription(id);
+                break;
+            case "Elemento":
+                dto = service.getElementDescription(id);
+                break;
+            case "Item":
+                dto = service.getElementItemDescription(id);
+                break;
+            default:
+                return ResponseEntity.badRequest().body(null);
+        }
+        return ResponseEntity.ok(dto);
     }
 
 }
