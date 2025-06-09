@@ -1,16 +1,28 @@
 package com.virtus.controller;
 
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.virtus.common.annotation.LoggedUser;
 import com.virtus.domain.dto.request.ActivitiesByProductComponentRequestDto;
+import com.virtus.domain.dto.request.ProductComponentRequestDTO;
 import com.virtus.domain.dto.request.UpdateConfigPlanRequestDTO;
-import com.virtus.domain.dto.response.*;
+import com.virtus.domain.dto.response.DistributeActivitiesResponseDTO;
+import com.virtus.domain.dto.response.DistributeActivitiesTreeResponseDTO;
+import com.virtus.domain.dto.response.PageableResponseDTO;
+import com.virtus.domain.dto.response.PlanResponseDTO;
+import com.virtus.domain.dto.response.ProductPlanResponseDTO;
 import com.virtus.domain.model.CurrentUser;
 import com.virtus.service.DistributeActivitiesService;
 import com.virtus.service.JurisdictionService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/distribute-activities")
@@ -75,4 +87,20 @@ public class DistributeActivitiesController {
         return ResponseEntity.ok().build();
     }
 
+    
+    @PostMapping("/udpateNewAuditorComponent")
+    public ResponseEntity<Void> updateNewAuditorComponent(
+            @LoggedUser CurrentUser currentUser,
+            @RequestBody ProductComponentRequestDTO body){
+        service.updateNewAuditorComponent(currentUser, body);
+        return ResponseEntity.ok().build();
+    }
+    
+    @PostMapping("/updateReschedullingComponent")
+    public ResponseEntity<Void> updateReschedullingComponent(
+            @LoggedUser CurrentUser currentUser,
+            @RequestBody ProductComponentRequestDTO body){
+        service.updateReschedullingComponent(currentUser, body);
+        return ResponseEntity.ok().build();
+    }
 }

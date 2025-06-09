@@ -32,5 +32,7 @@ public class ProductComponentHistoryDTO {
     private String authorName;
     private String alteradoEm;
     private String motivacao;
+    private String auditorAnteriorName;
+    private String auditorName;
 
 }

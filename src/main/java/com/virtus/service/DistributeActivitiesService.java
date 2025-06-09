@@ -3,6 +3,7 @@ package com.virtus.service;
 import com.virtus.domain.dto.AuditorDTO;
 import com.virtus.domain.dto.EnumDTO;
 import com.virtus.domain.dto.request.ActivitiesByProductComponentRequestDto;
+import com.virtus.domain.dto.request.ProductComponentRequestDTO;
 import com.virtus.domain.dto.request.UpdateConfigPlanRequestDTO;
 import com.virtus.domain.dto.response.*;
 import com.virtus.domain.entity.*;
@@ -27,6 +28,7 @@ public class DistributeActivitiesService {
     private final TeamMemberRepository teamMemberRepository;
     private final JurisdictionRepository jurisdictionRepository;
     private final ProductComponentRepository productComponentRepository;
+    private final ProductComponentHistoryRepository productComponentHistoryRepository;
     private final UserRepository userRepository;
     private final PlanRepository planRepository;
     private final ProductPlanRepository productPlanRepository;
@@ -40,6 +42,7 @@ public class DistributeActivitiesService {
                                        TeamMemberRepository teamMemberRepository,
                                        JurisdictionRepository jurisdictionRepository,
                                        ProductComponentRepository productComponentRepository,
+                                       ProductComponentHistoryRepository productComponentHistoryRepository,
                                        UserRepository userRepository,
                                        PlanRepository planRepository, ProductPlanRepository productPlanRepository,
                                        ProductGradeTypeRepository productGradeTypeRepository, ProductElementRepository productElementRepository,
@@ -50,6 +53,7 @@ public class DistributeActivitiesService {
         this.teamMemberRepository = teamMemberRepository;
         this.jurisdictionRepository = jurisdictionRepository;
         this.productComponentRepository = productComponentRepository;
+        this.productComponentHistoryRepository = productComponentHistoryRepository;
         this.userRepository = userRepository;
         this.planRepository = planRepository;
         this.productPlanRepository = productPlanRepository;
@@ -489,5 +493,32 @@ public class DistributeActivitiesService {
                 body.getComponentId(),
                 planDTO.getId()
         );
+    }
+
+    public void updateNewAuditorComponent(CurrentUser currentUser, ProductComponentRequestDTO body) {
+             productComponentRepository.updateNewAuditorComponent(
+                body.getEntidadeId(),
+                body.getCicloId(),
+                body.getPilarId(),
+                body.getComponenteId(),
+                body.getNovoAuditorId(),
+                body.getMotivacao()
+        );
+        productComponentHistoryRepository.registerNewAuditorComponentHistory(currentUser, body);
+    }
+
+    public void updateReschedullingComponent(CurrentUser currentUser, ProductComponentRequestDTO body) {
+        productComponentRepository.updateReschedullingComponent(
+                body.getEntidadeId(),
+                body.getCicloId(),
+                body.getPilarId(),
+                body.getComponenteId(),
+                body.getNovoIniciarEm(),
+                body.getIniciarEmAnterior(),
+                body.getNovoTerminarEm(),
+                body.getTerminarEmAnterior(),
+                body.getMotivacao()
+        );
+        productComponentHistoryRepository.registerNewSchedulleComponentHistory(currentUser, body);
     }
 }
