@@ -1,11 +1,15 @@
 package com.virtus.persistence;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -122,6 +126,42 @@ public class ProductComponentHistoryRepository {
                                         body.getComponenteId(), ex.getMessage(), ex);
                         // opcional: lançar exceção customizada ou HTTP 500
                         throw new RuntimeException("Erro ao salvar histórico de auditor", ex);
+                }
+        }
+
+        public void registerReschedullingComponentHistory(
+                        Long entidadeId,
+                        Long cicloId,
+                        Long pilarId,
+                        Long componenteId,
+                        String tipoAlteracao,
+                        LocalDate iniciaEm,
+                        LocalDate iniciaEmAnterior,
+                        LocalDate terminaEm,
+                        LocalDate terminaEmAnterior,
+                        Long idAuthor) {
+                String sql = "INSERT INTO virtus.produtos_componentes_historicos " +
+                        "(id_entidade, id_ciclo, id_pilar, id_componente, id_tipo_pontuacao, peso, nota, tipo_alteracao, motivacao_reprogramacao, id_supervisor, id_auditor, inicia_em, inicia_em_anterior, termina_em, termina_em_anterior, id_author, criado_em, id_versao_origem, id_status) " +
+                        "SELECT pc.id_entidade, pc.id_ciclo, pc.id_pilar, pc.id_componente, pc.id_tipo_pontuacao, pc.peso, pc.nota, ?, pc.motivacao_reprogramacao, pc.id_supervisor, pc.id_auditor, ?, ?, ?, ?, ?, GETDATE(), pc.id_author, pc.id_status " +
+                        "FROM virtus.produtos_componentes pc " +
+                        "WHERE pc.id_entidade = ? AND pc.id_ciclo = ? AND pc.id_pilar = ? AND pc.id_componente = ?";
+                try {
+                        int rows = jdbcTemplate.update(sql,
+                                tipoAlteracao,
+                                iniciaEm,
+                                iniciaEmAnterior,
+                                terminaEm,
+                                terminaEmAnterior,
+                                idAuthor,
+                                entidadeId,
+                                cicloId,
+                                pilarId,
+                                componenteId);
+                        logger.info("Histórico de reprogramação registrado com sucesso. Linhas afetadas: {}", rows);
+                } catch (DataAccessException ex) {
+                        logger.error("Erro ao registrar histórico de reprogramação para entidade={}, ciclo={}, pilar={}, componente={}: {}",
+                                entidadeId, cicloId, pilarId, componenteId, ex.getMessage(), ex);
+                        throw new RuntimeException("Erro ao salvar histórico de reprogramação", ex);
                 }
         }
 

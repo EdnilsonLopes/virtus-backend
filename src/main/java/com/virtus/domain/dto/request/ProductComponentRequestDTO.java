@@ -1,5 +1,7 @@
 package com.virtus.domain.dto.request;
 
+import java.time.LocalDate;
+
 import com.virtus.common.domain.dto.BaseRequestDTO;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,9 +16,10 @@ public class ProductComponentRequestDTO extends BaseRequestDTO {
     private Integer componenteId;
     private Integer novoAuditorId;
     private Integer auditorAnteriorId;
-    private Integer novoIniciarEm;
-    private Integer iniciarEmAnterior;
-    private Integer novoTerminarEm;
-    private Integer terminarEmAnterior;
+    private LocalDate iniciaEm;
+    private LocalDate iniciaEmAnterior;
+    private LocalDate terminaEm;
+    private LocalDate terminaEmAnterior;
+    private String tipoData;
     private String motivacao;
 }

@@ -39,16 +39,16 @@ public class DistributeActivitiesService {
     private final ProductCycleRepository productCycleRepository;
 
     public DistributeActivitiesService(CycleEntityRepository cycleEntityRepository,
-                                       TeamMemberRepository teamMemberRepository,
-                                       JurisdictionRepository jurisdictionRepository,
-                                       ProductComponentRepository productComponentRepository,
-                                       ProductComponentHistoryRepository productComponentHistoryRepository,
-                                       UserRepository userRepository,
-                                       PlanRepository planRepository, ProductPlanRepository productPlanRepository,
-                                       ProductGradeTypeRepository productGradeTypeRepository, ProductElementRepository productElementRepository,
-                                       ProductItemRepository productItemRepository,
-                                       ProductPillarRepository productPillarRepository,
-                                       ProductCycleRepository productCycleRepository) {
+            TeamMemberRepository teamMemberRepository,
+            JurisdictionRepository jurisdictionRepository,
+            ProductComponentRepository productComponentRepository,
+            ProductComponentHistoryRepository productComponentHistoryRepository,
+            UserRepository userRepository,
+            PlanRepository planRepository, ProductPlanRepository productPlanRepository,
+            ProductGradeTypeRepository productGradeTypeRepository, ProductElementRepository productElementRepository,
+            ProductItemRepository productItemRepository,
+            ProductPillarRepository productPillarRepository,
+            ProductCycleRepository productCycleRepository) {
         this.cycleEntityRepository = cycleEntityRepository;
         this.teamMemberRepository = teamMemberRepository;
         this.jurisdictionRepository = jurisdictionRepository;
@@ -64,7 +64,8 @@ public class DistributeActivitiesService {
         this.productCycleRepository = productCycleRepository;
     }
 
-    public DistributeActivitiesTreeResponseDTO findDistributeActivitiesTree(CurrentUser currentUser, Integer entityId, Integer cycleId) {
+    public DistributeActivitiesTreeResponseDTO findDistributeActivitiesTree(CurrentUser currentUser, Integer entityId,
+            Integer cycleId) {
         CycleEntity cycleEntity = cycleEntityRepository.findByEntityIdAndCycleId(entityId, cycleId).orElse(null);
         if (cycleEntity == null) {
             return null;
@@ -83,20 +84,23 @@ public class DistributeActivitiesService {
         response.getAuditors().add(parseAuditor(cycleEntity.getSupervisor()));
         if (!CollectionUtils.isEmpty(jurisdictions)) {
             User boss = jurisdictions.get(0).getOffice().getBoss();
-            if (response.getAuditors().stream().filter(auditorDTO -> auditorDTO.getUserId().equals(boss.getId())).findAny().isEmpty()) {
+            if (response.getAuditors().stream().filter(auditorDTO -> auditorDTO.getUserId().equals(boss.getId()))
+                    .findAny().isEmpty()) {
                 response.getAuditors().add(parseAuditor(boss));
             }
         }
 
         response.setProducts(productComponents.stream().map(p -> {
             ProductComponentResponseDTO responsePc = parseToProductComponentResponse(p, cycleEntity);
-            responsePc.setPlans(listConfiguredPlans(entityId, cycleId, p.getPillar().getId(), p.getComponent().getId()));
+            responsePc
+                    .setPlans(listConfiguredPlans(entityId, cycleId, p.getPillar().getId(), p.getComponent().getId()));
             return responsePc;
         }).collect(Collectors.toList()));
         return response;
     }
 
-    private ProductComponentResponseDTO parseToProductComponentResponse(ProductComponent productComponent, CycleEntity cycleEntity) {
+    private ProductComponentResponseDTO parseToProductComponentResponse(ProductComponent productComponent,
+            CycleEntity cycleEntity) {
         ProductComponentResponseDTO dto = new ProductComponentResponseDTO();
         dto.setId(productComponent.getId());
         dto.setComponent(parseToComponentResponse(productComponent.getComponent()));
@@ -123,7 +127,8 @@ public class DistributeActivitiesService {
                     .role(cycleEntity.getSupervisor().getRole().getName())
                     .build());
         }
-        dto.setStartsAt(productComponent.getStartsAt() != null ? productComponent.getStartsAt() : cycleEntity.getStartsAt());
+        dto.setStartsAt(
+                productComponent.getStartsAt() != null ? productComponent.getStartsAt() : cycleEntity.getStartsAt());
         dto.setEndsAt(productComponent.getEndsAt() != null ? productComponent.getEndsAt() : cycleEntity.getEndsAt());
         return dto;
     }
@@ -334,7 +339,8 @@ public class DistributeActivitiesService {
     public void distributeActivities(CurrentUser currentUser, List<ActivitiesByProductComponentRequestDto> body) {
         List<ProductComponent> update = new ArrayList<>();
         for (ActivitiesByProductComponentRequestDto activity : body) {
-            ProductComponent productComponent = productComponentRepository.findById(activity.getProductComponentId()).orElseThrow(() -> new VirtusException("Produto componente não encontrado!"));
+            ProductComponent productComponent = productComponentRepository.findById(activity.getProductComponentId())
+                    .orElseThrow(() -> new VirtusException("Produto componente não encontrado!"));
             productComponent.setSupervisor(userRepository.findById(activity.getSupervisorId()).orElse(null));
             if (activity != null && activity.getAuditorId() != null) {
                 productComponent.setAuditor(userRepository.findById(activity.getAuditorId()).orElse(null));
@@ -342,18 +348,21 @@ public class DistributeActivitiesService {
             productComponent.setEndsAt(activity.getEndsAt());
             productComponent.setStartsAt(activity.getStartsAt());
             update.add(productComponent);
-            //Gerar
+            // Gerar
         }
         if (!CollectionUtils.isEmpty(update)) {
             productComponentRepository.saveAllAndFlush(update);
         }
     }
 
-    public List<PlanResponseDTO> listPlansToConfig(CurrentUser currentUser, Integer entityId, Integer cycleId, Integer pillarId, boolean pga) {
-        return planRepository.findByEntityId(entityId).stream().map(this::parseToPlanResponse).collect(Collectors.toList());
+    public List<PlanResponseDTO> listPlansToConfig(CurrentUser currentUser, Integer entityId, Integer cycleId,
+            Integer pillarId, boolean pga) {
+        return planRepository.findByEntityId(entityId).stream().map(this::parseToPlanResponse)
+                .collect(Collectors.toList());
     }
 
-    public List<ProductPlanResponseDTO> listConfiguredPlans(Integer entidadeId, Integer cicloId, Integer pilarId, Integer componenteId) {
+    public List<ProductPlanResponseDTO> listConfiguredPlans(Integer entidadeId, Integer cicloId, Integer pilarId,
+            Integer componenteId) {
         return productPlanRepository.listarConfigPlanos(entidadeId, cicloId, pilarId, componenteId);
     }
 
@@ -368,8 +377,7 @@ public class DistributeActivitiesService {
                 body.getEntityId(),
                 body.getCycleId(),
                 body.getPillarId(),
-                body.getComponentId()
-        );
+                body.getComponentId());
         inserirProdutosPlanos(body, currentUser);
 
         registrarConfigPlanosHistorico(body, currentUser, configuracaoAnterior);
@@ -397,12 +405,12 @@ public class DistributeActivitiesService {
                 body.getComponentId(),
                 planDTO.getId(),
                 1,
-                currentUser.getId()
-        );
+                currentUser.getId());
     }
 
     @Transactional
-    public void registrarConfigPlanosHistorico(UpdateConfigPlanRequestDTO body, CurrentUser currentUser, String configuracaoAnterior) {
+    public void registrarConfigPlanosHistorico(UpdateConfigPlanRequestDTO body, CurrentUser currentUser,
+            String configuracaoAnterior) {
 
         final String motivacao = body.getMotivation();
 
@@ -413,8 +421,7 @@ public class DistributeActivitiesService {
                 body.getComponentId(),
                 currentUser,
                 configuracaoAnterior,
-                motivacao
-        );
+                motivacao);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -434,16 +441,14 @@ public class DistributeActivitiesService {
                 body.getComponentId(),
                 planDTO.getId(),
                 1,
-                currentUser.getId()
-        );
+                currentUser.getId());
         productItemRepository.inserirProdutosItens(
                 body.getCycleId(),
                 body.getEntityId(),
                 body.getPillarId(),
                 body.getComponentId(),
                 planDTO.getId(),
-                currentUser.getId()
-        );
+                currentUser.getId());
 
         atualizarPesoComponentes(body);
         atualizarComponenteNota(body);
@@ -457,8 +462,7 @@ public class DistributeActivitiesService {
                 body.getEntityId(),
                 body.getCycleId(),
                 body.getPillarId(),
-                body.getComponentId()
-        );
+                body.getComponentId());
     }
 
     private void atualizarComponenteNota(UpdateConfigPlanRequestDTO body) {
@@ -466,23 +470,20 @@ public class DistributeActivitiesService {
                 body.getEntityId(),
                 body.getCycleId(),
                 body.getPillarId(),
-                body.getComponentId()
-        );
+                body.getComponentId());
     }
 
     private void atualizarPilarNota(UpdateConfigPlanRequestDTO body) {
         productPillarRepository.atualizarPilarNota(
                 body.getEntityId(),
                 body.getCycleId(),
-                body.getPillarId()
-        );
+                body.getPillarId());
     }
 
     private void atualizarCicloNota(UpdateConfigPlanRequestDTO body) {
         productCycleRepository.atualizarCicloNota(
                 body.getEntityId(),
-                body.getCycleId()
-        );
+                body.getCycleId());
     }
 
     private void atualizarPesoTiposNotas(UpdateConfigPlanRequestDTO body, PlanResponseDTO planDTO) {
@@ -491,34 +492,53 @@ public class DistributeActivitiesService {
                 body.getCycleId(),
                 body.getPillarId(),
                 body.getComponentId(),
-                planDTO.getId()
-        );
+                planDTO.getId());
     }
 
     public void updateNewAuditorComponent(CurrentUser currentUser, ProductComponentRequestDTO body) {
-             productComponentRepository.updateNewAuditorComponent(
+        productComponentRepository.updateNewAuditorComponent(
                 body.getEntidadeId(),
                 body.getCicloId(),
                 body.getPilarId(),
                 body.getComponenteId(),
                 body.getNovoAuditorId(),
-                body.getMotivacao()
-        );
+                body.getMotivacao());
         productComponentHistoryRepository.registerNewAuditorComponentHistory(currentUser, body);
     }
 
     public void updateReschedullingComponent(CurrentUser currentUser, ProductComponentRequestDTO body) {
-        productComponentRepository.updateReschedullingComponent(
-                body.getEntidadeId(),
-                body.getCicloId(),
-                body.getPilarId(),
-                body.getComponenteId(),
-                body.getNovoIniciarEm(),
-                body.getIniciarEmAnterior(),
-                body.getNovoTerminarEm(),
-                body.getTerminarEmAnterior(),
-                body.getMotivacao()
+
+        if ("I".equalsIgnoreCase(body.getTipoData())) {
+            productComponentRepository.updateStartsAtComponent(
+                    body.getEntidadeId() != null ? body.getEntidadeId().longValue() : null,
+                    body.getCicloId() != null ? body.getCicloId().longValue() : null,
+                    body.getPilarId() != null ? body.getPilarId().longValue() : null,
+                    body.getComponenteId() != null ? body.getComponenteId().longValue() : null,
+                    body.getIniciaEm(),
+                    body.getMotivacao());
+        } else if ("T".equalsIgnoreCase(body.getTipoData())) {
+            productComponentRepository.updateEndsAtComponent(
+                    body.getEntidadeId() != null ? body.getEntidadeId().longValue() : null,
+                    body.getCicloId() != null ? body.getCicloId().longValue() : null,
+                    body.getPilarId() != null ? body.getPilarId().longValue() : null,
+                    body.getComponenteId() != null ? body.getComponenteId().longValue() : null,
+                    body.getTerminaEm(),
+                    body.getMotivacao());
+        } else {
+            throw new IllegalArgumentException("tipoData deve ser 'iniciaEm' ou 'terminaEm'");
+        }
+
+        productComponentHistoryRepository.registerReschedullingComponentHistory(
+                body.getEntidadeId() != null ? body.getEntidadeId().longValue() : null,
+                body.getCicloId() != null ? body.getCicloId().longValue() : null,
+                body.getPilarId() != null ? body.getPilarId().longValue() : null,
+                body.getComponenteId() != null ? body.getComponenteId().longValue() : null,
+                body.getTipoData(),
+                body.getIniciaEm(),
+                body.getIniciaEmAnterior(),
+                body.getTerminaEm(),
+                body.getTerminaEmAnterior(),
+                currentUser != null ? Long.valueOf(currentUser.getId()) : null
         );
-        productComponentHistoryRepository.registerNewSchedulleComponentHistory(currentUser, body);
     }
 }
