@@ -28,6 +28,7 @@ public class EvaluatePlansTreeNode {
     private String letter;
     private BigDecimal grade;
     private Boolean periodoPermitido;
+    private Boolean periodoCiclo;
     private List<EvaluatePlansTreeNode> children = new ArrayList<>();
 
     public void addChild(EvaluatePlansTreeNode child) {

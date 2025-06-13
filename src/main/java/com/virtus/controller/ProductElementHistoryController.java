@@ -1,5 +1,6 @@
 package com.virtus.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +28,8 @@ public class ProductElementHistoryController {
             @RequestParam Long componenteId,
             @RequestParam Long planoId,
             @RequestParam Long elementoId) {
-
-        List<ProductElementHistoryDTO> historyList = service.find(entidadeId, cicloId, pilarId, componenteId, planoId, elementoId); 
+        List<ProductElementHistoryDTO> historyList = service.find(entidadeId, cicloId, pilarId, componenteId, planoId,
+                elementoId);        
         return ResponseEntity.ok(historyList);
     }
 

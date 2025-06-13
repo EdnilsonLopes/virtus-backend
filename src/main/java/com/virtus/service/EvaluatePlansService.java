@@ -144,6 +144,7 @@ public class EvaluatePlansService {
                                                                 .grade(plan.getPilarNota())
                                                                 .weight(plan.getPilarPeso())
                                                                 .periodoPermitido(plan.getPeriodoPermitido())
+                                                                .periodoCiclo(plan.getPeriodoCiclo())
                                                                 .supervisorId(plan.getSupervisorId())
                                                                 .children(new ArrayList<>())
                                                                 .build();

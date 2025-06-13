@@ -1,13 +1,12 @@
 package com.virtus.persistence;
 
 import static com.virtus.persistence.bigqueries.EvaluatePlansTreeQuery.EVALUATE_PLANS_TREE_QUERY;
+
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.util.List;
-import java.util.spi.CurrencyNameProvider;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -15,7 +14,6 @@ import com.virtus.domain.dto.CurrentGradesDTO;
 import com.virtus.domain.dto.CurrentWeightsDTO;
 import com.virtus.domain.dto.request.ProductElementRequestDTO;
 import com.virtus.domain.dto.request.ProductPillarRequestDTO;
-import com.virtus.domain.entity.ProductPillar;
 import com.virtus.domain.model.CurrentUser;
 import com.virtus.domain.model.EvaluatePlansConsultModel;
 
@@ -29,7 +27,9 @@ public class EvaluatePlansRepository {
 
         public List<EvaluatePlansConsultModel> findPlansByEntityAndCycle(Integer entidadeId, Integer cicloId) {
                 String sql = EVALUATE_PLANS_TREE_QUERY;
-
+                log.info(sql
+                                + " - entidadeId: {} cicloId: {}",
+                                entidadeId, cicloId);
                 return jdbcTemplate.query(sql, new Object[] { entidadeId, cicloId },
                                 (rs, rowNum) -> {
                                         EvaluatePlansConsultModel evaluatePlan = EvaluatePlansConsultModel.builder()
@@ -637,12 +637,15 @@ public class EvaluatePlansRepository {
         }
 
         public String updatePillarWeight(ProductPillarRequestDTO dto, CurrentUser currentUser) {
-                String sqlUpdate = "UPDATE virtus.produtos_pilares SET peso = ?, motivacao_peso = ? " +
+                String sqlUpdate = "UPDATE virtus.produtos_pilares SET peso = ?, motivacao_peso = ?, " +
+                                " id_tipo_pontuacao = (SELECT case when b.id_supervisor = ? " +
+                                " then 3 else 2 end FROM virtus.produtos_ciclos b where id_produto_ciclo = b.id_produto_ciclo) " +
                                 "WHERE id_entidade = ? AND id_ciclo = ? AND id_pilar = ?";
 
                 jdbcTemplate.update(sqlUpdate,
                                 dto.getNovoPeso(),
                                 dto.getMotivacao(),
+                                dto.getSupervisorId(),
                                 dto.getEntidadeId(),
                                 dto.getCicloId(),
                                 dto.getPilarId());

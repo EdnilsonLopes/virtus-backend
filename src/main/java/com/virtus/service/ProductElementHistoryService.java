@@ -27,5 +27,6 @@ public class ProductElementHistoryService {
     public void recordElementWeightHistory(ProductElementRequestDTO dto, CurrentUser currentUser) {
         repository.recordElementWeightHistory(dto, currentUser);
     }
+
 }
 

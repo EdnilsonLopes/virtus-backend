@@ -23,10 +23,10 @@ public class ProductElementHistoryDTO {
     private String iniciaEmAnterior;
     private String terminaEm;
     private String terminaEmAnterior;
+    private Integer idTipoPontuacao;
     private String config;
     private String configAnterior;
     private Double peso;
-    private Integer idTipoPontuacao;
     private Double nota;
     private String tipoAlteracao;
     private Long idAuditor;
