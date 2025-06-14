@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.virtus.common.annotation.LoggedUser;
 import com.virtus.domain.dto.response.ProductElementHistoryDTO;
+import com.virtus.domain.model.CurrentUser;
 import com.virtus.service.ProductElementHistoryService;
 
 @RestController
@@ -22,6 +24,7 @@ public class ProductElementHistoryController {
 
     @GetMapping("/list")
     public ResponseEntity<List<ProductElementHistoryDTO>> getHistory(
+            @LoggedUser CurrentUser currentUser,
             @RequestParam Long entidadeId,
             @RequestParam Long cicloId,
             @RequestParam Long pilarId,

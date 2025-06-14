@@ -26,6 +26,8 @@ public class ProductElementHistoryDTO {
     private Integer idTipoPontuacao;
     private String config;
     private String configAnterior;
+    private Double pesoAnterior;
+    private Double notaAnterior;
     private Double peso;
     private Double nota;
     private String tipoAlteracao;

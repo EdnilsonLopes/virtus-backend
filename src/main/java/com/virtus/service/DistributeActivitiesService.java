@@ -398,13 +398,14 @@ public class DistributeActivitiesService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void inserirProdutoPlano(UpdateConfigPlanRequestDTO body, PlanResponseDTO planDTO, CurrentUser currentUser) {
+        int tipoPontuacao = 1;
         productPlanRepository.inserirProdutosPlanos(
                 body.getEntityId(),
                 body.getCycleId(),
                 body.getPillarId(),
                 body.getComponentId(),
                 planDTO.getId(),
-                1,
+                tipoPontuacao,
                 currentUser.getId());
     }
 
@@ -426,13 +427,14 @@ public class DistributeActivitiesService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void atualizarPesoPlanos(UpdateConfigPlanRequestDTO body, PlanResponseDTO planDTO, CurrentUser currentUser) {
+        int tipoPontuacao = 1;
         productGradeTypeRepository.inserirProdutosTiposNotas(
                 body.getEntityId(),
                 body.getCycleId(),
                 body.getPillarId(),
                 body.getComponentId(),
                 planDTO.getId(),
-                1,
+                tipoPontuacao,  
                 currentUser.getId());
         productElementRepository.inserirProdutosElementos(
                 body.getEntityId(),
@@ -440,7 +442,7 @@ public class DistributeActivitiesService {
                 body.getPillarId(),
                 body.getComponentId(),
                 planDTO.getId(),
-                1,
+                tipoPontuacao,  
                 currentUser.getId());
         productItemRepository.inserirProdutosItens(
                 body.getCycleId(),

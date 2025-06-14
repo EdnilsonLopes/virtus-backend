@@ -2,6 +2,8 @@ package com.virtus.persistence;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -12,6 +14,8 @@ import com.virtus.domain.model.CurrentUser;
 
 @Repository
 public class ProductElementHistoryRepository {
+
+        private static final Logger logger = LoggerFactory.getLogger(ProductElementHistoryRepository.class);
 
         @Autowired
         private JdbcTemplate jdbcTemplate;
@@ -30,7 +34,7 @@ public class ProductElementHistoryRepository {
                                 "FROM virtus.produtos_elementos " +
                                 "WHERE id_entidade = ? AND id_ciclo = ? AND id_pilar = ? AND " +
                                 "      id_plano = ? AND id_componente = ? AND id_tipo_nota = ? AND id_elemento = ?";
-
+                logger.debug("Executing SQL: {}", sql);
                 jdbcTemplate.update(
                                 sql,
                                 currentUser.getId(),
@@ -81,24 +85,28 @@ public class ProductElementHistoryRepository {
                                 " a.id_tipo_nota, " +
                                 " a.id_elemento, " +
                                 " a.id_tipo_pontuacao, " +
-                                " a.peso, " +
-                                " a.nota, " +
                                 " a.id_author, " +
-                                " COALESCE(b.name, ''), " +
+                                " COALESCE(b.name, '') AS nome_autor, " +
                                 " COALESCE(FORMAT(a.criado_em, 'dd/MM/yyyy HH:mm:ss'), '') AS alterado_em, " +
                                 " CASE WHEN tipo_alteracao = 'P' THEN a.motivacao_peso ELSE a.motivacao_nota END AS motivacao, "
                                 +
-                                " CASE WHEN tipo_alteracao = 'P' THEN 'Peso' ELSE 'Nota' END AS tipo_alteracao " +
+                                " CASE WHEN tipo_alteracao = 'P' THEN 'Peso' ELSE 'Nota' END AS tipo_alteracao, " +
+                                " a.peso, " +
+                                " COALESCE(LAG(a.peso) OVER (PARTITION BY a.id_entidade, a.id_ciclo, a.id_pilar, a.id_plano, a.id_componente, a.id_elemento ORDER BY a.criado_em ASC), '') AS peso_anterior, "
+                                +
+                                " a.nota, " +
+                                " COALESCE(LAG(a.nota) OVER (PARTITION BY a.id_entidade, a.id_ciclo, a.id_pilar, a.id_plano, a.id_componente, a.id_elemento ORDER BY a.criado_em ASC), '') AS nota_anterior " +
                                 "FROM virtus.produtos_elementos_historicos a " +
                                 "LEFT JOIN virtus.users b ON a.id_author = b.id_user " +
-                                "WHERE a.id_entidade = ? " +
-                                "AND a.id_ciclo = ? " +
-                                "AND a.id_pilar = ? " +
-                                "AND a.id_plano = ? " +
-                                "AND a.id_componente = ? " +
-                                "AND a.id_elemento = ? " +
+                                "WHERE "+
+                                "a.id_entidade = ? "+
+                                "AND a.id_ciclo = ? "+
+                                "AND a.id_pilar = ? "+
+                                "AND a.id_plano = ? "+
+                                "AND a.id_componente = ? "+
+                                "AND a.id_elemento = ? "+
                                 "ORDER BY a.criado_em DESC";
-
+                logger.info("Executing SQL: {}", sql);
                 return jdbcTemplate.query(sql, new Object[] {
                                 entidadeId, cicloId, pilarId, planoId, componenteId, elementoId
                 }, (rs, rowNum) -> {
@@ -113,14 +121,15 @@ public class ProductElementHistoryRepository {
                         dto.setIdElemento(rs.getLong(8));
                         int metodoId = rs.getInt(9);
                         dto.setIdTipoPontuacao(metodoId);
-                        dto.setPeso(rs.getDouble(10));
-                        dto.setNota(rs.getDouble(11));
-                        dto.setIdAuthor(rs.getLong(12));
-                        dto.setAuthorName(rs.getString(13));
-                        dto.setAlteradoEm(rs.getString(14));
-                        dto.setMotivacao(rs.getString(15));
-                        dto.setTipoAlteracao(rs.getString(16));
-
+                        dto.setIdAuthor(rs.getLong(10));
+                        dto.setAuthorName(rs.getString(11));
+                        dto.setAlteradoEm(rs.getString(12));
+                        dto.setMotivacao(rs.getString(13));
+                        dto.setTipoAlteracao(rs.getString(14));
+                        dto.setPeso(rs.getDouble(15));
+                        dto.setPesoAnterior(rs.getDouble(16));
+                        dto.setNota(rs.getDouble(17));
+                        dto.setNotaAnterior(rs.getDouble(18));
                         switch (metodoId) {
                                 case 1:
                                         dto.setMetodo("Manual");

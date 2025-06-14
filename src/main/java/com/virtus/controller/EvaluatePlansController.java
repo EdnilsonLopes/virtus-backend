@@ -1,16 +1,7 @@
 package com.virtus.controller;
 
-import com.virtus.common.annotation.LoggedUser;
-import com.virtus.common.domain.dto.BaseResponseDTO;
-import com.virtus.domain.dto.CurrentValuesDTO;
-import com.virtus.domain.dto.request.ProductElementRequestDTO;
-import com.virtus.domain.dto.request.ProductPillarRequestDTO;
-import com.virtus.domain.dto.response.EntityVirtusResponseDTO;
-import com.virtus.domain.dto.response.EvaluatePlansTreeNode;
-import com.virtus.domain.dto.response.PillarResponseDTO;
-import com.virtus.domain.model.CurrentUser;
-import com.virtus.service.EvaluatePlansService;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +10,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.List;
+import com.virtus.common.annotation.LoggedUser;
+import com.virtus.common.domain.dto.BaseResponseDTO;
+import com.virtus.domain.dto.CurrentValuesDTO;
+import com.virtus.domain.dto.request.ProductElementRequestDTO;
+import com.virtus.domain.dto.request.ProductPillarRequestDTO;
+import com.virtus.domain.dto.response.EntityVirtusResponseDTO;
+import com.virtus.domain.dto.response.EvaluatePlansTreeNode;
+import com.virtus.domain.model.CurrentUser;
+import com.virtus.service.EvaluatePlansService;
+
+import lombok.RequiredArgsConstructor;
 
 @Controller
 @RequestMapping("/evaluate-plans")
@@ -42,15 +43,13 @@ public class EvaluatePlansController {
     }
 
     @PutMapping("/updateElementGrade")
-    public ResponseEntity<CurrentValuesDTO> updateElementGrade(@RequestBody ProductElementRequestDTO dto,
-            CurrentUser currentUser) {
+    public ResponseEntity<CurrentValuesDTO> updateElementGrade(@LoggedUser CurrentUser currentUser, @RequestBody ProductElementRequestDTO dto) {
         CurrentValuesDTO valoresAtuais = service.updateElementGrade(dto, currentUser);
         return ResponseEntity.ok(valoresAtuais);
     }
 
     @PutMapping("/updateElementWeight")
-    public ResponseEntity<CurrentValuesDTO> updateElementWeight(@RequestBody ProductElementRequestDTO dto,
-            CurrentUser currentUser) {
+    public ResponseEntity<CurrentValuesDTO> updateElementWeight(@LoggedUser CurrentUser currentUser, @RequestBody ProductElementRequestDTO dto            ) {
         CurrentValuesDTO valoresAtuais = service.updateElementWeight(dto, currentUser);
         return ResponseEntity.ok(valoresAtuais);
     }
