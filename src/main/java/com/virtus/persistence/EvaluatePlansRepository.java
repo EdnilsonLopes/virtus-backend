@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import com.virtus.domain.dto.CurrentGradesDTO;
 import com.virtus.domain.dto.CurrentWeightsDTO;
+import com.virtus.domain.dto.request.ProductElementItemRequestDTO;
 import com.virtus.domain.dto.request.ProductElementRequestDTO;
 import com.virtus.domain.dto.request.ProductPillarRequestDTO;
 import com.virtus.domain.model.CurrentUser;
@@ -80,6 +81,20 @@ public class EvaluatePlansRepository {
                                                         .produtoComponenteId(rs.getInt("id_produto_componente"))
                                                         .periodoPermitido(rs.getBoolean("periodo_permitido"))
                                                         .periodoCiclo(rs.getBoolean("periodo_ciclo"))
+                                                        .cicloAnalisado(rs.getBoolean("ciclo_analisado"))
+                                                        .pilarAnalisado(rs.getBoolean("pilar_analisado"))
+                                                        .componenteAnalisado(rs.getBoolean("componente_analisado"))
+                                                        .planoAnalisado(rs.getBoolean("plano_analisado"))
+                                                        .tipoNotaAnalisado(rs.getBoolean("tipo_nota_analisado"))
+                                                        .elementoAnalisado(rs.getBoolean("elemento_analisado"))
+                                                        .itemAnalisado(rs.getBoolean("item_analisado"))
+                                                        .cicloDescrito(rs.getBoolean("ciclo_descrito"))
+                                                        .pilarDescrito(rs.getBoolean("pilar_descrito"))
+                                                        .componenteDescrito(rs.getBoolean("componente_descrito"))
+                                                        .planoDescrito(rs.getBoolean("plano_descrito"))
+                                                        .tipoNotaDescrito(rs.getBoolean("tipo_nota_descrito"))
+                                                        .elementoDescrito(rs.getBoolean("elemento_descrito"))
+                                                        .itemDescrito(rs.getBoolean("item_descrito"))
                                                         .build();
                                         return evaluatePlan;
                                 });
@@ -639,7 +654,8 @@ public class EvaluatePlansRepository {
         public String updatePillarWeight(ProductPillarRequestDTO dto, CurrentUser currentUser) {
                 String sqlUpdate = "UPDATE virtus.produtos_pilares SET peso = ?, motivacao_peso = ?, " +
                                 " id_tipo_pontuacao = (SELECT case when b.id_supervisor = ? " +
-                                " then 3 else 2 end FROM virtus.produtos_ciclos b where id_produto_ciclo = b.id_produto_ciclo) " +
+                                " then 3 else 2 end FROM virtus.produtos_ciclos b where id_produto_ciclo = b.id_produto_ciclo) "
+                                +
                                 "WHERE id_entidade = ? AND id_ciclo = ? AND id_pilar = ?";
 
                 jdbcTemplate.update(sqlUpdate,
@@ -697,6 +713,73 @@ public class EvaluatePlansRepository {
                                 dto.getPlanoId(),
                                 dto.getComponenteId(),
                                 dto.getElementoId());
+        }
+
+        public void updateAnalysis(String objectType, ProductElementItemRequestDTO dto, CurrentUser currentUser) {
+                if (objectType.equals("Ciclo")) {
+                        String sql = "UPDATE virtus.produtos_ciclos SET analise = ? WHERE id_entidade = ? AND id_ciclo = ?";
+                        jdbcTemplate.update(sql,
+                                        dto.getAnalise(),
+                                        dto.getEntidadeId(),
+                                        dto.getCicloId());
+                } else if (objectType.equals("Pilar")) {
+                        String sql = "UPDATE virtus.produtos_pilares SET analise = ? WHERE id_entidade = ? AND id_ciclo = ? AND id_pilar = ?";
+                        jdbcTemplate.update(sql,
+                                        dto.getAnalise(),
+                                        dto.getEntidadeId(),
+                                        dto.getCicloId(),
+                                        dto.getPilarId());
+                } else if (objectType.equals("Componente")) {
+                        String sql = "UPDATE virtus.produtos_componentes SET analise = ? WHERE id_entidade = ? AND id_ciclo = ? AND id_pilar = ? AND id_componente = ?";
+                        jdbcTemplate.update(sql,
+                                        dto.getAnalise(),
+                                        dto.getEntidadeId(),
+                                        dto.getCicloId(),
+                                        dto.getPilarId(),
+                                        dto.getComponenteId());
+                } else if (objectType.equals("Plano")) {
+                        String sql = "UPDATE virtus.produtos_planos SET analise = ? WHERE id_entidade = ? AND id_ciclo = ? AND id_pilar = ? AND id_componente = ? AND id_plano = ?";
+                        jdbcTemplate.update(sql,
+                                        dto.getAnalise(),
+                                        dto.getEntidadeId(),
+                                        dto.getCicloId(),
+                                        dto.getPilarId(),
+                                        dto.getComponenteId(),
+                                        dto.getPlanoId());
+                } else if (objectType.equals("Tipo Nota")) {
+                        String sql = "UPDATE virtus.produtos_tipos_notas SET analise = ? WHERE id_entidade = ? AND id_ciclo = ? AND id_pilar = ? AND id_componente = ? AND id_plano = ? AND id_tipo_nota = ? ";
+                        jdbcTemplate.update(sql,
+                                        dto.getAnalise(),
+                                        dto.getEntidadeId(),
+                                        dto.getCicloId(),
+                                        dto.getPilarId(),
+                                        dto.getComponenteId(),
+                                        dto.getPlanoId(),
+                                        dto.getTipoNotaId());
+                } else if (objectType.equals("Elemento")) {
+                        String sql = "UPDATE virtus.produtos_elementos SET analise = ? WHERE id_entidade = ? AND id_ciclo = ? AND id_pilar = ? AND id_componente = ? AND id_plano = ? AND id_tipo_nota = ? AND id_elemento = ?";
+                        jdbcTemplate.update(sql,
+                                        dto.getAnalise(),
+                                        dto.getEntidadeId(),
+                                        dto.getCicloId(),
+                                        dto.getPilarId(),
+                                        dto.getComponenteId(),
+                                        dto.getPlanoId(),
+                                        dto.getTipoNotaId(),
+                                        dto.getElementoId());
+                } else if (objectType.equals("Item")) {
+                        String sql = "UPDATE virtus.produtos_itens SET analise = ? WHERE id_entidade = ? AND id_ciclo = ? AND id_pilar = ? AND id_componente = ? AND id_plano = ? AND id_tipo_nota = ? AND id_elemento = ? AND id_item = ?";
+                        jdbcTemplate.update(sql,
+                                        dto.getAnalise(),
+                                        dto.getEntidadeId(),
+                                        dto.getCicloId(),
+                                        dto.getPilarId(),
+                                        dto.getComponenteId(),
+                                        dto.getPlanoId(),
+                                        dto.getTipoNotaId(),
+                                        dto.getElementoId(),
+                                        dto.getItemId());
+                }
         }
 
 }

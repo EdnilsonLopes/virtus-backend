@@ -6,11 +6,9 @@ import java.util.Optional;
 
 import javax.transaction.Transactional;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 import com.virtus.common.BaseRepository;
 import com.virtus.domain.entity.ProductComponent;
@@ -186,7 +184,7 @@ public interface ProductComponentRepository extends BaseRepository<ProductCompon
                         @Param("novaData") LocalDate novaData,
                         @Param("motivacao") String motivacao);
 
-                        @Modifying
+        @Modifying
         @Transactional
         @Query(value = "UPDATE virtus.produtos_componentes SET termina_em = :novaData, motivacao_reprogramacao = :motivacao WHERE id_entidade = :entidadeId AND id_ciclo = :cicloId AND id_pilar = :pilarId AND id_componente = :componenteId", nativeQuery = true)
         int updateEndsAtComponent(
@@ -196,5 +194,9 @@ public interface ProductComponentRepository extends BaseRepository<ProductCompon
                         @Param("componenteId") Long componenteId,
                         @Param("novaData") LocalDate novaData,
                         @Param("motivacao") String motivacao);
+
+        @Query(value = "SELECT analise FROM virtus.produtos_componentes WHERE id_entidade = :entidadeId AND id_ciclo = :cicloId AND id_pilar = :pilarId AND id_componente = :componenteId", nativeQuery = true)
+        String findByCycleLevelIds(Long entidadeId, Long cicloId, Long pilarId,
+                        Long componenteId);
 
 }

@@ -40,8 +40,10 @@ public class EvaluatePlansTreeQuery {
             " j.cnpb, " +
             " CASE " +
             " 	WHEN j.recurso_garantidor >= 1000000 " +
-            " AND j.recurso_garantidor < 1000000000 THEN concat(format(j.recurso_garantidor/1000000, 'N', 'pt-br'), ' Milhões') " +
-            " WHEN j.recurso_garantidor >= 1000000000 THEN concat(format(j.recurso_garantidor/1000000000, 'N', 'pt-br'), ' Bilhões') " +
+            " AND j.recurso_garantidor < 1000000000 THEN concat(format(j.recurso_garantidor/1000000, 'N', 'pt-br'), ' Milhões') "
+            +
+            " WHEN j.recurso_garantidor >= 1000000000 THEN concat(format(j.recurso_garantidor/1000000000, 'N', 'pt-br'), ' Bilhões') "
+            +
             " ELSE concat(format(j.recurso_garantidor/1000, 'N', 'pt-br'), ' Milhares') " +
             " END, " +
             " j.id_modalidade, " +
@@ -55,15 +57,87 @@ public class EvaluatePlansTreeQuery {
             " CASE " +
             " WHEN g.inicia_em IS NOT NULL " +
             " AND g.termina_em IS NOT NULL " +
-            " AND GETDATE() BETWEEN coalesce(g.inicia_em, CAST('0001-01-01' AS DATE)) AND coalesce(dateadd(DAY, 1, g.termina_em), CAST('9999-12-31' AS DATE)) THEN 1 " +
+            " AND GETDATE() BETWEEN coalesce(g.inicia_em, CAST('0001-01-01' AS DATE)) AND coalesce(dateadd(DAY, 1, g.termina_em), CAST('9999-12-31' AS DATE)) THEN 1 "
+            +
             " ELSE 0 " +
             " END AS periodo_permitido, " +
             " CASE " +
             " WHEN ce.inicia_em IS NOT NULL " +
             " AND ce.termina_em IS NOT NULL " +
-            " AND GETDATE() BETWEEN coalesce(ce.inicia_em, CAST('0001-01-01' AS DATE)) AND coalesce(dateadd(DAY, 1, ce.termina_em), CAST('9999-12-31' AS DATE)) THEN 1 " +
+            " AND GETDATE() BETWEEN coalesce(ce.inicia_em, CAST('0001-01-01' AS DATE)) AND coalesce(dateadd(DAY, 1, ce.termina_em), CAST('9999-12-31' AS DATE)) THEN 1 "
+            +
             " ELSE 0 " +
-            " END AS periodo_ciclo " +
+            " END AS periodo_ciclo, " +
+            "  CASE " + 
+            "    WHEN pdc.analise IS NULL OR TRIM(pdc.analise) = '' " + 
+            "  THEN 0 " + 
+            "    ELSE 1 " + 
+            "  END AS ciclo_analisado, " +
+            "  CASE " + 
+            "    WHEN f.analise IS NULL OR TRIM(f.analise) = '' " + 
+            "  THEN 0 " + 
+            "    ELSE 1 " + 
+            "  END AS pilar_analisado, " +
+            "  CASE " + 
+            "    WHEN g.analise IS NULL OR TRIM(g.analise) = '' " + 
+            "  THEN 0 " + 
+            "    ELSE 1 " + 
+            "  END AS componente_analisado, " +
+            "  CASE " + 
+            "    WHEN a.analise IS NULL OR TRIM(a.analise) = '' " + 
+            "  THEN 0 " + 
+            "    ELSE 1 " + 
+            "  END AS plano_analisado, " +
+            "  CASE " + 
+            "    WHEN o.analise IS NULL OR TRIM(o.analise) = '' " + 
+            "  THEN 0 " + 
+            "    ELSE 1 " + 
+            "  END AS tipo_nota_analisado, " +
+            "  CASE " + 
+            "    WHEN n.analise IS NULL OR TRIM(n.analise) = '' " + 
+            "  THEN 0 " + 
+            "    ELSE 1 " + 
+            "  END AS elemento_analisado, " +
+            "  CASE " + 
+            "    WHEN i.analise IS NULL OR TRIM(i.analise) = '' " + 
+            "  THEN 0 " + 
+            "    ELSE 1 " + 
+            "  END AS item_analisado, " +
+            "    CASE " +
+            "      WHEN c.descricao IS NULL OR TRIM(c.descricao) = '' " +
+            "  	  THEN 0 " +
+            "      ELSE 1 " +
+            "    END AS ciclo_descrito, " +
+            "    CASE " +
+            "      WHEN d.descricao IS NULL OR TRIM(d.descricao) = '' " +
+            "  	  THEN 0 " +
+            "      ELSE 1 " +
+            "    END AS pilar_descrito, " +
+            "    CASE " +
+            "      WHEN e.descricao IS NULL OR TRIM(e.descricao) = '' " +
+            "  	  THEN 0 " +
+            "      ELSE 1 " +
+            "    END AS componente_descrito,  " +
+            "    CASE   " +
+            "  	WHEN j.descricao IS NULL OR TRIM(j.descricao) = ''   " +
+            "  	  THEN 0   " +
+            "  	ELSE 1   " +
+            "    END AS plano_descrito,  " +
+            "    CASE   " +
+            "  	WHEN m.descricao IS NULL OR TRIM(m.descricao) = ''   " +
+            "  	  THEN 0   " +
+            "  	ELSE 1   " +
+            "    END AS tipo_nota_descrito,  " +
+            "    CASE   " +
+            "  	WHEN k.descricao IS NULL OR TRIM(k.descricao) = ''   " +
+            "  	  THEN 0   " +
+            "  	ELSE 1   " +
+            "    END AS elemento_descrito,  " +
+            "    CASE   " +
+            "  	WHEN l.descricao IS NULL OR TRIM(l.descricao) = ''   " +
+            "  	  THEN 0   " +
+            "  	ELSE 1   " +
+            "    END AS item_descrito " +
             " FROM virtus.produtos_planos a " +
             " INNER JOIN virtus.entidades b ON a.id_entidade = b.id_entidade " +
             " INNER JOIN virtus.ciclos c ON a.id_ciclo = c.id_ciclo " +

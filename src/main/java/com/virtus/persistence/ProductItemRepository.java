@@ -1,5 +1,6 @@
 package com.virtus.persistence;
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -55,6 +56,28 @@ public class ProductItemRepository {
                 "       AND e.id_item = d.id_item)";
 
         jdbcTemplate.update(sql, authorId, cicloId, entidadeId, pilarId, componenteId, planoId, entidadeId, planoId);
+    }
+
+    public String findByCycleLevelIds(Long entidadeId, Long cicloId, Long pilarId, Long componenteId, Long planoId,
+            Long tipoNotaId, Long elementoId, Long itemId) {
+        String sql = "SELECT analise FROM virtus.produtos_itens " +
+                " WHERE id_entidade = ? AND id_ciclo = ? AND id_pilar = ? " +
+                " AND id_componente = ? AND id_plano = ? AND id_tipo_nota = ? "+
+                " AND id_elemento = ? AND id_item = ? ";
+        try {
+            return jdbcTemplate.queryForObject(sql,
+                    new Object[] { entidadeId,
+                            cicloId,
+                            pilarId,
+                            componenteId,
+                            planoId,
+                            tipoNotaId,
+                            elementoId,
+                            itemId },
+                    String.class);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
 }

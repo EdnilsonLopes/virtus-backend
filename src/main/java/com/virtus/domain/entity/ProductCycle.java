@@ -1,15 +1,20 @@
 package com.virtus.domain.entity;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
 import com.virtus.common.domain.entity.BaseEntity;
-import com.virtus.domain.enums.AverageType;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.GenericGenerator;
-
-import javax.persistence.*;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "produtos_ciclos", schema = "virtus")
@@ -39,6 +44,9 @@ public class ProductCycle extends BaseEntity {
 
     @Column(name = "motivacao")
     private String motivation;
+
+    @Column(name = "analise")
+    private String analysis;
 
     @ManyToOne
     @JoinColumn(name = "id_supervisor")

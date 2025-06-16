@@ -13,6 +13,7 @@ import com.virtus.common.domain.dto.BaseResponseDTO;
 import com.virtus.domain.dto.CurrentGradesDTO;
 import com.virtus.domain.dto.CurrentValuesDTO;
 import com.virtus.domain.dto.CurrentWeightsDTO;
+import com.virtus.domain.dto.request.ProductElementItemRequestDTO;
 import com.virtus.domain.dto.request.ProductElementRequestDTO;
 import com.virtus.domain.dto.request.ProductPillarRequestDTO;
 import com.virtus.domain.dto.response.ComponentResponseDTO;
@@ -47,6 +48,13 @@ public class EvaluatePlansService {
         private final OfficeRepository officeRepository;
         private final CycleRepository cycleRepository;
         private final CycleEntityRepository cycleEntityRepository;
+        private final ProductCycleService productCycleService;
+        private final ProductPillarService productPillarService;
+        private final ProductComponentService productComponentService;
+        private final ProductPlanService productPlanService;
+        private final ProductGradeTypeService productGradeTypeService;
+        private final ProductElementService productElementService;
+        private final ProductElementItemService productElementItemService;
         private final ProductElementHistoryService productElementHistoryService;
         private final ProductPillarHistoryService productPillarHistoryService;
         private final PillarRepository pillarRepository;
@@ -126,6 +134,10 @@ public class EvaluatePlansService {
                                                                 .type("Ciclo")
                                                                 .grade(plan.getCicloNota())
                                                                 .letter(plan.getTipoNotaLetra())
+                                                                .periodoPermitido(plan.getPeriodoPermitido())
+                                                                .periodoCiclo(plan.getPeriodoCiclo())
+                                                                .cicloAnalisado(plan.getCicloAnalisado())
+                                                                .cicloDescrito(plan.getCicloDescrito())
                                                                 .children(new ArrayList<>())
                                                                 .build();
                                                 entidadeNode.addChild(node);
@@ -145,6 +157,10 @@ public class EvaluatePlansService {
                                                                 .weight(plan.getPilarPeso())
                                                                 .periodoPermitido(plan.getPeriodoPermitido())
                                                                 .periodoCiclo(plan.getPeriodoCiclo())
+                                                                .cicloAnalisado(plan.getCicloAnalisado())
+                                                                .pilarAnalisado(plan.getPilarAnalisado())
+                                                                .cicloDescrito(plan.getCicloDescrito())
+                                                                .pilarDescrito(plan.getPilarDescrito())
                                                                 .supervisorId(plan.getSupervisorId())
                                                                 .children(new ArrayList<>())
                                                                 .build();
@@ -164,6 +180,13 @@ public class EvaluatePlansService {
                                                                 .grade(plan.getComponenteNota())
                                                                 .weight(plan.getComponentePeso())
                                                                 .auditorId(plan.getAuditorId())
+                                                                .periodoCiclo(plan.getPeriodoCiclo())
+                                                                .cicloAnalisado(plan.getCicloAnalisado())
+                                                                .pilarAnalisado(plan.getPilarAnalisado())
+                                                                .componenteAnalisado(plan.getComponenteAnalisado())
+                                                                .cicloDescrito(plan.getCicloDescrito())
+                                                                .pilarDescrito(plan.getPilarDescrito())
+                                                                .componenteDescrito(plan.getComponenteDescrito())
                                                                 .supervisorId(plan.getSupervisorId())
                                                                 .children(new ArrayList<>())
                                                                 .build();
@@ -182,6 +205,14 @@ public class EvaluatePlansService {
                                                                 .type("Plano")
                                                                 .grade(plan.getPlanoNota())
                                                                 .weight(plan.getPlanoPeso())
+                                                                .cicloAnalisado(plan.getCicloAnalisado())
+                                                                .pilarAnalisado(plan.getPilarAnalisado())
+                                                                .componenteAnalisado(plan.getComponenteAnalisado())
+                                                                .planoAnalisado(plan.getPlanoAnalisado())
+                                                                .cicloDescrito(plan.getCicloDescrito())
+                                                                .pilarDescrito(plan.getPilarDescrito())
+                                                                .componenteDescrito(plan.getComponenteDescrito())
+                                                                .planoDescrito(plan.getPlanoDescrito())
                                                                 .children(new ArrayList<>())
                                                                 .build();
                                                 componenteNode.addChild(node);
@@ -199,6 +230,16 @@ public class EvaluatePlansService {
                                                                 .type("Tipo Nota")
                                                                 .grade(plan.getTipoNotaNota())
                                                                 .weight(plan.getTipoNotaPeso())
+                                                                .cicloAnalisado(plan.getCicloAnalisado())
+                                                                .pilarAnalisado(plan.getPilarAnalisado())
+                                                                .componenteAnalisado(plan.getComponenteAnalisado())
+                                                                .planoAnalisado(plan.getPlanoAnalisado())
+                                                                .tipoNotaAnalisado(plan.getTipoNotaAnalisado())
+                                                                .cicloDescrito(plan.getCicloDescrito())
+                                                                .pilarDescrito(plan.getPilarDescrito())
+                                                                .componenteDescrito(plan.getComponenteDescrito())
+                                                                .planoDescrito(plan.getPlanoDescrito())
+                                                                .tipoNotaDescrito(plan.getTipoNotaDescrito())
                                                                 .children(new ArrayList<>())
                                                                 .build();
                                                 planoNode.addChild(node);
@@ -219,6 +260,18 @@ public class EvaluatePlansService {
                                                                 .auditorId(plan.getAuditorId())
                                                                 .supervisorId(plan.getSupervisorId())
                                                                 .periodoPermitido(plan.getPeriodoPermitido())
+                                                                .cicloAnalisado(plan.getCicloAnalisado())
+                                                                .pilarAnalisado(plan.getPilarAnalisado())
+                                                                .componenteAnalisado(plan.getComponenteAnalisado())
+                                                                .planoAnalisado(plan.getPlanoAnalisado())
+                                                                .tipoNotaAnalisado(plan.getTipoNotaAnalisado())
+                                                                .elementoAnalisado(plan.getElementoAnalisado())
+                                                                .cicloDescrito(plan.getCicloDescrito())
+                                                                .pilarDescrito(plan.getPilarDescrito())
+                                                                .componenteDescrito(plan.getComponenteDescrito())
+                                                                .planoDescrito(plan.getPlanoDescrito())
+                                                                .tipoNotaDescrito(plan.getTipoNotaDescrito())
+                                                                .elementoDescrito(plan.getElementoDescrito())
                                                                 .gradeTypeId(plan.getTipoPontuacaoId())
                                                                 .children(new ArrayList<>())
                                                                 .build();
@@ -232,6 +285,20 @@ public class EvaluatePlansService {
                                                 .id(plan.getItemId())
                                                 .name(plan.getItemNome())
                                                 .type("Item")
+                                                .cicloAnalisado(plan.getCicloAnalisado())
+                                                .pilarAnalisado(plan.getPilarAnalisado())
+                                                .componenteAnalisado(plan.getComponenteAnalisado())
+                                                .planoAnalisado(plan.getPlanoAnalisado())
+                                                .tipoNotaAnalisado(plan.getTipoNotaAnalisado())
+                                                .elementoAnalisado(plan.getElementoAnalisado())
+                                                .itemAnalisado(plan.getItemAnalisado())
+                                                .cicloDescrito(plan.getCicloDescrito())
+                                                .pilarDescrito(plan.getPilarDescrito())
+                                                .componenteDescrito(plan.getComponenteDescrito())
+                                                .planoDescrito(plan.getPlanoDescrito())
+                                                .tipoNotaDescrito(plan.getTipoNotaDescrito())
+                                                .elementoDescrito(plan.getElementoDescrito())
+                                                .itemDescrito(plan.getItemDescrito())
                                                 .children(new ArrayList<>())
                                                 .build();
                                 elementoNode.addChild(itemNode);
@@ -354,25 +421,65 @@ public class EvaluatePlansService {
                                                 .name(gt.getName())
                                                 .description(gt.getDescription())
                                                 .build())
-                                .orElse(null);        }
+                                .orElse(null);
+        }
 
         public BaseResponseDTO getElementDescription(Integer id) {
-            return elementRepository.findById(id)
+                return elementRepository.findById(id)
                                 .map((com.virtus.domain.entity.Element e) -> ElementItemResponseDTO.builder()
                                                 .id(e.getId())
                                                 .name(e.getName())
                                                 .description(e.getDescription())
                                                 .build())
-                                .orElse(null);  
+                                .orElse(null);
         }
 
         public BaseResponseDTO getElementItemDescription(Integer id) {
-            return elementItemRepository.findById(id)
+                return elementItemRepository.findById(id)
                                 .map((com.virtus.domain.entity.ElementItem ei) -> ElementItemResponseDTO.builder()
                                                 .id(ei.getId())
                                                 .name(ei.getName())
                                                 .description(ei.getDescription())
                                                 .build())
-                                .orElse(null);  
+                                .orElse(null);
         }
+
+        public void updateAnalysis(String objectType, ProductElementItemRequestDTO dto, CurrentUser currentUser) {
+                evaluatePlansRepository.updateAnalysis(objectType, dto, currentUser);
+        }
+
+        public String getCycleAnalysys(Long entidadeId, Long cicloId) {
+                return productCycleService.findByCycleLevelIds(entidadeId, cicloId);
+        }
+
+        public String getPillarAnalysys(Long entityId, Long cycleId, Long pillarId) {
+                return productPillarService.findByCycleLevelIds(entityId, cycleId, pillarId);
+        }
+
+        public String getComponentAnalysys(Long entityId, Long cycleId, Long pillarId, Long componentId) {
+                return productComponentService.findByCycleLevelIds(entityId, cycleId, pillarId, componentId);
+        }
+
+        public String getPlanAnalysys(Long entityId, Long cycleId, Long pillarId, Long componentId, Long planId) {
+                return productPlanService.findByCycleLevelIds(entityId, cycleId, pillarId, componentId, planId);
+        }
+
+        public String getGradeTypeAnalysys(Long entityId, Long cycleId, Long pillarId, Long componentId, Long planId,
+                        Long gradeTypeId) {
+                return productGradeTypeService.findByCycleLevelIds(entityId, cycleId, pillarId, componentId, planId,
+                                gradeTypeId);
+        }
+
+        public String getElementAnalysys(Long entityId, Long cycleId, Long pillarId, Long componentId, Long planId,
+                        Long gradeTypeId, Long elementId) {
+                return productElementService.findByCycleLevelIds(entityId, cycleId, pillarId, componentId, planId,
+                                gradeTypeId, elementId);
+        }
+
+        public String getElementItemAnalysys(Long entityId, Long cycleId, Long pillarId, Long componentId, Long planId,
+                        Long gradeTypeId, Long elementId, Long itemId) {
+                return productElementItemService.findByCycleLevelIds(entityId, cycleId, pillarId, componentId, planId,
+                                gradeTypeId, elementId, itemId);
+        }
+
 }

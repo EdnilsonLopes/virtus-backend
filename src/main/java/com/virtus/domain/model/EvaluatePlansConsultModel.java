@@ -76,5 +76,21 @@ public class EvaluatePlansConsultModel {
 
     private Boolean periodoPermitido;
     private Boolean periodoCiclo;
+
+    private Boolean cicloAnalisado;
+    private Boolean pilarAnalisado;
+    private Boolean componenteAnalisado;
+    private Boolean planoAnalisado;
+    private Boolean tipoNotaAnalisado;
+    private Boolean elementoAnalisado;
+    private Boolean itemAnalisado;
+
+    private Boolean cicloDescrito;
+    private Boolean pilarDescrito;
+    private Boolean componenteDescrito;
+    private Boolean planoDescrito;
+    private Boolean tipoNotaDescrito;
+    private Boolean elementoDescrito;
+    private Boolean itemDescrito;
 }
 

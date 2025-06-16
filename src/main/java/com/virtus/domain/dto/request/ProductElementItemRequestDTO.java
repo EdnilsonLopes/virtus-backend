@@ -9,12 +9,16 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ProductComponentRequestDTO extends BaseRequestDTO {
+public class ProductElementItemRequestDTO extends BaseRequestDTO {
 
     private Integer entidadeId;
     private Integer cicloId;
     private Integer pilarId;
     private Integer componenteId;
+    private Integer planoId;
+    private Integer tipoNotaId;
+    private Integer elementoId;
+    private Integer itemId;
     private Integer novoAuditorId;
     private Integer auditorAnteriorId;
     private LocalDate iniciaEm;
