@@ -1,13 +1,13 @@
 package com.virtus.persistence;
 
-import com.virtus.common.BaseRepository;
-import com.virtus.domain.entity.Pillar;
-import com.virtus.domain.entity.Role;
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.Query;
 
-import java.util.Optional;
+import com.virtus.common.BaseRepository;
+import com.virtus.domain.entity.Role;
 
 public interface RoleRepository extends BaseRepository<Role> {
 

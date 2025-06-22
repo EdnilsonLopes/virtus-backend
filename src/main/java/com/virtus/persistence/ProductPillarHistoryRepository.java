@@ -37,7 +37,7 @@ public class ProductPillarHistoryRepository {
                 "    id_entidade, " +
                 "    id_ciclo, " +
                 "    id_pilar, " +
-                "    id_tipo_pontuacao, " +
+                "    1 as id_tipo_pontuacao, " +
                 "    peso, " +
                 "    nota, " +
                 "    ?, " +
@@ -65,24 +65,27 @@ public class ProductPillarHistoryRepository {
     public List<ProductPillarHistoryDTO> find(Long entidadeId, Long cicloId, Long pilarId) {
         String sql = "SELECT " +
                 "  a.id_produto_pilar_historico, " +
-                "  id_entidade, " +
-                "  id_ciclo, " +
-                "  id_pilar, " +
-                "  COALESCE(peso, 0) as peso, " +
-                "  id_tipo_pontuacao, " +
-                "  COALESCE(nota, 0) as nota, " +
-                "  tipo_alteracao, " +
+                "  a.id_entidade, " +
+                "  a.id_ciclo, " +
+                "  a.id_pilar, " +
+                "  COALESCE(a.peso, 0) AS peso, " +
+                "  COALESCE(LAG(a.peso) OVER (PARTITION BY a.id_entidade, a.id_ciclo, a.id_pilar ORDER BY a.criado_em), 0) AS peso_anterior, "
+                +
+                "  a.id_tipo_pontuacao, " +
+                "  COALESCE(a.nota, 0) AS nota, " +
+                "  COALESCE(LAG(a.nota) OVER (PARTITION BY a.id_entidade, a.id_ciclo, a.id_pilar ORDER BY a.criado_em), 0) AS nota_anterior, "
+                +
+                "  a.tipo_alteracao, " +
                 "  a.id_author, " +
                 "  COALESCE(b.name, '') AS author_name, " +
                 "  COALESCE(FORMAT(a.criado_em, 'dd/MM/yyyy HH:mm:ss'), '') AS alterado_em, " +
-                "  motivacao_peso " +
+                "  a.motivacao_peso " +
                 "FROM virtus.produtos_pilares_historicos a " +
                 "LEFT JOIN virtus.users b ON a.id_author = b.id_user " +
                 "WHERE a.id_entidade = ? " +
                 "  AND a.id_ciclo = ? " +
                 "  AND a.id_pilar = ? " +
                 "ORDER BY a.criado_em DESC";
-
         return jdbcTemplate.query(sql, new Object[] { entidadeId, cicloId, pilarId },
                 (rs, rowNum) -> {
                     ProductPillarHistoryDTO dto = new ProductPillarHistoryDTO();
@@ -91,7 +94,9 @@ public class ProductPillarHistoryRepository {
                     dto.setIdCiclo(rs.getLong("id_ciclo"));
                     dto.setIdPilar(rs.getLong("id_pilar"));
                     dto.setPeso(rs.getDouble("peso"));
+                    dto.setPesoAnterior(rs.getDouble("peso_anterior"));
                     dto.setNota(rs.getDouble("nota"));
+                    dto.setNotaAnterior(rs.getDouble("nota_anterior"));
                     int tipo = rs.getInt("id_tipo_pontuacao");
                     String tipoStr;
                     switch (tipo) {

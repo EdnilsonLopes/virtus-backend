@@ -3,7 +3,6 @@ package com.virtus.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.virtus.persistence.ProductComponentRepository;
 import com.virtus.persistence.ProductElementRepository;
 
 @Service

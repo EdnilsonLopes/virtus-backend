@@ -1,17 +1,17 @@
 package com.virtus.persistence;
 
-import com.virtus.common.BaseRepository;
-import com.virtus.domain.entity.Cycle;
-import com.virtus.domain.entity.TeamMember;
-import com.virtus.domain.entity.User;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
-import java.util.Optional;
+import com.virtus.common.BaseRepository;
+import com.virtus.domain.entity.TeamMember;
+import com.virtus.domain.entity.User;
 
 
 public interface TeamMemberRepository extends BaseRepository<TeamMember> {

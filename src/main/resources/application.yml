@@ -1,0 +1,4 @@
+app:
+  schema: virtus
+  db:
+    initialize: true  

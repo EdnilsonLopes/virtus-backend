@@ -18,7 +18,9 @@ public class ProductPillarHistoryDTO {
     private String idTipoPontuacao;
     private String metodo;
     private Double peso;
+    private Double pesoAnterior;
     private Double nota;
+    private Double notaAnterior;
     private String tipoAlteracao;
     private String motivacaoPeso;
     private String motivacaoNota;

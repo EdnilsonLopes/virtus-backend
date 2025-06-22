@@ -1,15 +1,14 @@
 package com.virtus.persistence;
 
-import com.virtus.common.BaseRepository;
-import com.virtus.domain.entity.Member;
-import com.virtus.domain.entity.Office;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
+import com.virtus.common.BaseRepository;
+import com.virtus.domain.entity.Office;
 
 public interface OfficeRepository extends BaseRepository<Office> {
 

@@ -1,14 +1,11 @@
 package com.virtus.persistence;
 
-import com.virtus.common.BaseRepository;
-import com.virtus.domain.dto.response.ProductElementHistoryDTO;
-import com.virtus.domain.entity.ProductCycle;
-
-import java.util.List;
-
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import com.virtus.common.BaseRepository;
+import com.virtus.domain.entity.ProductCycle;
 
 public interface ProductCycleRepository extends BaseRepository<ProductCycle> {
 
