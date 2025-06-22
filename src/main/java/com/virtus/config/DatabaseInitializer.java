@@ -20,6 +20,9 @@ public class DatabaseInitializer {
         schemaCreator.createSchema();  
         schemaCreator.createTables();  
         schemaCreator.loadIndicators();
+        // SOMENTE DESCOMENTAR QUANDO FOR NECESSÁRIO CARREGAR AS NOTAS INDICADORES
+        // SOMENTE DESENVOLVIMENTO LOCALHOST NUNCA NA PRODUÇÃO
+        // schemaCreator.loadIndicatorScores();
         System.out.println("Database initialization completed.");
     }
 }

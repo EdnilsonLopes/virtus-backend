@@ -21,23 +21,7 @@ public class IndicadoresTableScripts {
                 return sql;
         }
 
-        // Table NOTAS_INDICADORES
-        public static String createNotasIndicadoresTable(String schema) {
-                String sql = String.format(
-                                "IF NOT EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'%s.notas_indicadores') "
-                                                +
-                                                "AND type in (N'U')) BEGIN CREATE TABLE %s.notas_indicadores (" +
-                                                "id_nota_indicador integer NOT NULL PRIMARY KEY, " +
-                                                "cnpb varchar(25) NOT NULL, " +
-                                                "data_referencia varchar(6) NULL, " +
-                                                "id_indicador integer NOT NULL, " +
-                                                "sigla_indicador varchar(25) NULL, " +
-                                                "tx_componente varchar(25) NOT NULL, " +
-                                                "nota float NOT NULL, " +
-                                                "criado_em datetime NOT NULL) END ",
-                                schema, schema);
-                return sql;
-        }
+        
 
         // Table NOTAS_AUTOMATICAS
         public static String createNotasAutomaticasTable(String schema) {

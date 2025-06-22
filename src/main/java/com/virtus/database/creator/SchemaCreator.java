@@ -6,6 +6,7 @@ import com.virtus.config.AppProperties;
 import com.virtus.database.executor.SqlExecutor;
 import com.virtus.database.scripts.HistoryTableScripts;
 import com.virtus.database.scripts.IndicadoresTableScripts;
+import com.virtus.database.scripts.NotasIndicadoresTableScripts;
 import com.virtus.database.scripts.ProductTableScripts;
 import com.virtus.database.scripts.SchemaScript;
 import com.virtus.database.scripts.TableScripts;
@@ -59,8 +60,8 @@ public class SchemaCreator {
                 (Function<String, String>) TableScripts::createUsersTable,
                 (Function<String, String>) TableScripts::createVersoesTable,
                 (Function<String, String>) IndicadoresTableScripts::createIndicadoresTable,
-                (Function<String, String>) IndicadoresTableScripts::createNotasIndicadoresTable,
                 (Function<String, String>) IndicadoresTableScripts::createNotasAutomaticasTable,
+                (Function<String, String>) NotasIndicadoresTableScripts::createNotasIndicadoresTable,
                 (Function<String, String>) WorkflowTableScripts::createActionsTable,
                 (Function<String, String>) WorkflowTableScripts::createActionsStatusTable,
                 (Function<String, String>) WorkflowTableScripts::createActivitiesTable,
@@ -92,5 +93,9 @@ public class SchemaCreator {
 
     public void loadIndicators() {
         executor.execute(IndicadoresTableScripts.insertIndicadoresIfNotExists(appProperties.getSchema()));  
+    }
+    
+    public void loadIndicatorScores() {
+        executor.execute(NotasIndicadoresTableScripts.insertNotasIndicadoresIfNotExists(appProperties.getSchema()));  
     }
 }

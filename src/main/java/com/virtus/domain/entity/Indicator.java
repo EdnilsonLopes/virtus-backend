@@ -1,9 +1,11 @@
 package com.virtus.domain.entity;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 import com.virtus.common.domain.entity.BaseEntity;
 

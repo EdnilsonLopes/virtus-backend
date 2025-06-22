@@ -15,7 +15,7 @@ import lombok.Setter;
 @Table(name = "notas_indicadores", schema = "virtus")
 @Getter
 @Setter
-@EqualsAndHashCode(of = {"id"}, callSuper = false)
+@EqualsAndHashCode(of = { "id" })
 public class IndicatorScore extends BaseEntity {
 
     @Id
@@ -42,5 +42,12 @@ public class IndicatorScore extends BaseEntity {
 
     @Column(name = "criado_em", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
-}
 
+    public IndicatorScore(Integer id) {
+        this.id = id;
+    }
+
+    public IndicatorScore() {
+    }
+
+}

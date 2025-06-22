@@ -1,14 +1,19 @@
 package com.virtus.service;
 
-import com.virtus.domain.entity.IndicatorScore;
-import com.virtus.persistence.IndicatorScoreRepository;
+import java.math.BigDecimal;
+import java.util.List;
+
+import javax.persistence.EntityNotFoundException;
+
+import org.springframework.data.domain.Sort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.util.List;
+import com.virtus.domain.entity.IndicatorScore;
+import com.virtus.persistence.IndicatorScoreRepository;
 
 @Service
 public class IndicatorScoreService {
@@ -44,7 +49,21 @@ public class IndicatorScoreService {
         return repository.findByScoreRangeAndIndicatorCode(min, max, indicatorCode);
     }
 
-    public Page<IndicatorScore> findAllByFilter(String filter, int page, int size) {
-        return repository.findAllByFilter(filter, PageRequest.of(page, size));
+public Page<IndicatorScore> findAllByFilter(String filter, int page, int size) {
+    
+    if (filter == null || filter.trim().isEmpty()) {
+        // Se não houver filtro, retorna todos ordenados por data de referência
+        Pageable pageable = PageRequest.of(page, size, Sort.by("referenceDate").descending());
+        return repository.findAll(pageable);
+    }
+    Pageable pageable = PageRequest.of(page, size, Sort.by("data_referencia").descending());
+    // Se houver filtro, utiliza uma consulta nativa que busca por sigla do indicador ou texto do componente
+    return repository.findAllByFilter(filter.trim(), pageable);
+}
+
+
+    public IndicatorScore findById(Integer id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Nota de indicador não encontrada com ID: " + id));
     }
 }

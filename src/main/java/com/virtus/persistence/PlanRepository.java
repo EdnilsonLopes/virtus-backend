@@ -10,9 +10,28 @@ import com.virtus.domain.entity.Plan;
 
 public interface PlanRepository extends JpaRepository<Plan, Integer> {
 
-    @Query(value = "select p from Plan p where p.entity.id = :entityId")
+    /**
+     * Retorna todos os planos vinculados a uma entidade específica.
+     *
+     * @param entityId ID da entidade
+     * @return Lista de planos
+     */
+    @Query("SELECT p FROM Plan p WHERE p.entity.id = :entityId")
     List<Plan> findByEntityId(@Param("entityId") Integer entityId);
 
-    @Query("SELECT COALESCE(MAX(e.id), 0) FROM Plan e")
+    /**
+     * Retorna o maior ID atual da tabela Plan, ou 0 se estiver vazia.
+     *
+     * @return Maior ID existente
+     */
+    @Query("SELECT COALESCE(MAX(p.id), 0) FROM Plan p")
     Integer findMaxId();
+
+    /**
+     * Busca um plano pelo CNPB (chave única).
+     *
+     * @param cnpb CNPB do plano
+     * @return Plano correspondente, ou null se não encontrado
+     */
+    Plan findByCnpb(String cnpb);
 }

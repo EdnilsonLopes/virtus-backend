@@ -1,6 +1,8 @@
 package com.virtus.domain.dto.response;
 
 import com.virtus.common.domain.dto.BaseResponseDTO;
+import com.virtus.domain.entity.EntityVirtus;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
@@ -18,6 +20,7 @@ public class PlanResponseDTO extends BaseResponseDTO {
     private String situation;
     private Double guaranteeResource;
     private String modality;
+    private EntityVirtusResponseDTO entity;
 
     private PlanResponseDTO(Builder builder) {
         this.reference = builder.reference;
@@ -28,6 +31,7 @@ public class PlanResponseDTO extends BaseResponseDTO {
         this.situation = builder.situation;
         this.guaranteeResource = builder.guaranteeResource;
         this.modality = builder.modality;
+        this.entity = builder.entity;
         this.setId(builder.id);
     }
 
@@ -37,6 +41,7 @@ public class PlanResponseDTO extends BaseResponseDTO {
 
     public static class Builder {
 
+        public EntityVirtusResponseDTO entity;
         private Integer id;
         private String reference;
         private String name;
@@ -49,6 +54,11 @@ public class PlanResponseDTO extends BaseResponseDTO {
 
         public Builder id(Integer id) {
             this.id = id;
+            return this;
+        }
+
+        public Builder entity(EntityVirtusResponseDTO entity) {
+            this.entity = entity;
             return this;
         }
 
