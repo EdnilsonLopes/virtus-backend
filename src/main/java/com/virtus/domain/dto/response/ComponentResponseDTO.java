@@ -22,6 +22,7 @@ public class ComponentResponseDTO extends BaseResponseDTO {
     private String reference;
     private Boolean pga;
     private List<ComponentElementResponseDTO> componentElements;
-    private List<ComponentGradeTypeResponseDTO> componentGradeTypes;
+    private List<ComponentGradeTypeResponseDTO> componentGradeTypes;    
+    private List<ComponentIndicatorResponseDTO> componentIndicators;
 
 }

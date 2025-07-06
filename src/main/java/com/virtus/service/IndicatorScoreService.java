@@ -1,69 +1,52 @@
 package com.virtus.service;
 
-import java.math.BigDecimal;
-import java.util.List;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceUnit;
 
-import javax.persistence.EntityNotFoundException;
-
-import org.springframework.data.domain.Sort;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.virtus.common.BaseService;
+import com.virtus.domain.dto.request.IndicatorScoreRequestDTO;
+import com.virtus.domain.dto.response.IndicatorScoreResponseDTO;
 import com.virtus.domain.entity.IndicatorScore;
 import com.virtus.persistence.IndicatorScoreRepository;
+import com.virtus.persistence.UserRepository;
 
 @Service
-public class IndicatorScoreService {
+public class IndicatorScoreService
+        extends
+        BaseService<IndicatorScore, IndicatorScoreRepository, IndicatorScoreRequestDTO, IndicatorScoreResponseDTO> {
 
-    @Autowired
-    private IndicatorScoreRepository repository;
+    @PersistenceUnit
+    private final EntityManagerFactory entityManagerFactory;
 
-    public void loadIndicatorScores(String reference) {
-        repository.loadIndicatorScores(reference);
+    public IndicatorScoreService(IndicatorScoreRepository repository, UserRepository userRepository,
+            EntityManagerFactory entityManagerFactory) {
+        super(repository, userRepository, entityManagerFactory);
+        this.entityManagerFactory = entityManagerFactory;
     }
 
-    public List<IndicatorScore> findByCnpb(String cnpb) {
-        return repository.findByCnpb(cnpb);
+    @Override
+    protected IndicatorScoreResponseDTO parseToResponseDTO(IndicatorScore entity, boolean detailed) {
+        return parseToIndicatorScoreResponseDTO(entity, detailed);
     }
 
-    public List<IndicatorScore> findByReferenceDate(String referenceDate) {
-        return repository.findByReferenceDate(referenceDate);
+    @Override
+    protected IndicatorScore parseToEntity(IndicatorScoreRequestDTO body) {
+        IndicatorScore entity = new IndicatorScore();
+        entity.setId(body.getId());
+        entity.setCnpb(body.getCnpb());
+        entity.setIndicatorId(body.getIndicatorId());
+        entity.setIndicatorSigla(body.getIndicatorSigla());
+        entity.setReferenceDate(body.getReferenceDate());
+        entity.setComponentText(body.getComponentText());
+        entity.setScore(body.getScore());
+        return entity;
     }
 
-    public List<IndicatorScore> findByCnpbAndReferenceDate(String cnpb, String referenceDate) {
-        return repository.findByCnpbAndReferenceDate(cnpb, referenceDate);
+    @Override
+    protected String getNotFoundMessage() {
+        throw new UnsupportedOperationException("Unimplemented method 'getNotFoundMessage'");
     }
 
-    public List<IndicatorScore> findByIndicatorCode(String indicatorCode) {
-        return repository.findByIndicatorCode(indicatorCode);
-    }
-
-    public List<IndicatorScore> findByComponentText(String componentText) {
-        return repository.findByComponentText(componentText);
-    }
-
-    public List<IndicatorScore> findByScoreRangeAndIndicatorCode(BigDecimal min, BigDecimal max, String indicatorCode) {
-        return repository.findByScoreRangeAndIndicatorCode(min, max, indicatorCode);
-    }
-
-public Page<IndicatorScore> findAllByFilter(String filter, int page, int size) {
-    
-    if (filter == null || filter.trim().isEmpty()) {
-        // Se não houver filtro, retorna todos ordenados por data de referência
-        Pageable pageable = PageRequest.of(page, size, Sort.by("referenceDate").descending());
-        return repository.findAll(pageable);
-    }
-    Pageable pageable = PageRequest.of(page, size, Sort.by("data_referencia").descending());
-    // Se houver filtro, utiliza uma consulta nativa que busca por sigla do indicador ou texto do componente
-    return repository.findAllByFilter(filter.trim(), pageable);
-}
-
-
-    public IndicatorScore findById(Integer id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Nota de indicador não encontrada com ID: " + id));
-    }
 }

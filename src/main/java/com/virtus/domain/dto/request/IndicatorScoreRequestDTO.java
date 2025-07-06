@@ -1,21 +1,20 @@
-package com.virtus.domain.dto.response;
+package com.virtus.domain.dto.request;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
-import com.virtus.common.domain.dto.BaseResponseDTO;
+import com.virtus.common.domain.dto.BaseRequestDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.experimental.SuperBuilder;
 
-@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class IndicatorScoreResponseDTO extends BaseResponseDTO {
+public class IndicatorScoreRequestDTO extends BaseRequestDTO {
 
     private Integer id;
     private String cnpb;
@@ -24,6 +23,5 @@ public class IndicatorScoreResponseDTO extends BaseResponseDTO {
     private String indicatorSigla;
     private String componentText;
     private BigDecimal score;
-    private String authorName;
-    private java.time.LocalDateTime createdAt;
+    private LocalDateTime createdAt;
 }

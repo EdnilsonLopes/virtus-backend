@@ -17,5 +17,6 @@ public class ComponentRequestDTO extends BaseRequestDTO {
     private Integer ordination;
     private List<ComponentElementRequestDTO> componentElements;
     private List<ComponentGradeTypeRequestDTO> componentGradeTypes;
+    private List<ComponentIndicatorRequestDTO> componentIndicators;
 
 }

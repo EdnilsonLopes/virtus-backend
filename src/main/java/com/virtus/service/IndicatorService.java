@@ -1,105 +1,50 @@
 package com.virtus.service;
 
-import com.virtus.domain.entity.Indicator;
-import com.virtus.persistence.IndicatorRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceUnit;
+
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import com.virtus.common.BaseService;
+import com.virtus.domain.dto.request.IndicatorRequestDTO;
+import com.virtus.domain.dto.response.IndicatorResponseDTO;
+import com.virtus.domain.entity.Indicator;
+import com.virtus.persistence.IndicatorRepository;
+import com.virtus.persistence.UserRepository;
+import com.virtus.translate.Translator;
 
 @Service
-public class IndicatorService {
+public class IndicatorService extends BaseService<
+        Indicator,
+        IndicatorRepository,
+        IndicatorRequestDTO,
+        IndicatorResponseDTO> {
 
-    @Autowired
-    private IndicatorRepository repository;
+    @PersistenceUnit
+    private final EntityManagerFactory entityManagerFactory;
 
-    public Page<Indicator> findByFilter(String filter, int page, int size) {
-        if (filter == null || filter.trim().isEmpty()) {
-            // JPA Query derivada funciona perfeitamente com camelCase da entidade
-            // Se não houver filtro, retorna todos os indicadores ordenados por nome
-            Pageable pageable = PageRequest.of(page, size, Sort.by("indicatorName"));
-            return repository.findAll(pageable);
-        }
-        // Native Query para busca por nome, descrição ou sigla, 
-        // tem que usar o nome da coluna do banco de dados
-        // e não o nome do atributo da entidade.    
-        Pageable pageable = PageRequest.of(page, size, Sort.by("nome_indicador"));
-        return repository.searchAllByFilter(filter.trim(), pageable);
+    public IndicatorService(IndicatorRepository repository, UserRepository userRepository, EntityManagerFactory entityManagerFactory) {
+        super(repository, userRepository, entityManagerFactory);
+        this.entityManagerFactory = entityManagerFactory;
     }
 
-    /**
-     * Busca por parte do nome do indicador (case-insensitive).
-     * 
-     * @param size
-     * @param page
-     */
-    public Page<Indicator> findByNameContaining(String filter, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("indicatorName").ascending());
-
-        if (filter == null || filter.trim().isEmpty()) {
-            return repository.findAll(pageable);
-        }
-
-        return repository.findByIndicatorNameContainingIgnoreCase(filter, pageable);
+    @Override
+    protected IndicatorResponseDTO parseToResponseDTO(Indicator entity, boolean detailed) {
+        return parseToIndicatorResponseDTO(entity, detailed);
     }
 
-    /**
-     * Busca por parte da descrição do indicador (case-insensitive).
-     */
-    public List<Indicator> findByDescriptionContaining(String description) {
-        return repository.findByDescriptionContainingIgnoreCase(description);
+    @Override
+    protected Indicator parseToEntity(IndicatorRequestDTO body) {
+        Indicator entity = new Indicator();
+        entity.setId(body.getId());
+        entity.setIndicatorName(body.getIndicatorName());
+        entity.setIndicatorAcronym(body.getIndicatorAcronym());
+        entity.setIndicatorDescription(body.getIndicatorDescription());
+        return entity;
     }
 
-    /**
-     * Retorna indicadores cujas siglas estão na lista informada.
-     */
-    public List<Indicator> findByAcronyms(List<String> acronyms) {
-        return repository.findByAcronyms(acronyms);
-    }
-
-    /**
-     * Retorna todas as siglas cadastradas.
-     */
-    public List<String> findAllAcronyms() {
-        return repository.findAllAcronyms();
-    }
-
-    /**
-     * Salva ou atualiza um indicador.
-     */
-    public Indicator save(Indicator indicator) {
-        return repository.save(indicator);
-    }
-
-    /**
-     * Retorna todos os indicadores.
-     */
-    public List<Indicator> findAll() {
-        return repository.findAll();
-    }
-
-    public Page<Indicator> findAllPaginated(String filter, Pageable pageable) {
-        if (filter == null || filter.isBlank()) {
-            return repository.findAll(pageable);
-        }
-        return repository.findByIndicatorNameContainingIgnoreCase(filter, pageable);
-    }
-
-    /**
-     * Exclui um indicador pelo ID.
-     */
-    public void deleteById(Integer id) {
-        repository.deleteById(id);
-    }
-
-    /**
-     * Busca um indicador pelo ID.
-     */
-    public Indicator findById(Integer id) {
-        return repository.findById(id).orElse(null);
+    @Override
+    protected String getNotFoundMessage() {
+        return Translator.translate("type.of.note.not.found");
     }
 }

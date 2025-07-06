@@ -16,14 +16,14 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "tipos_notas_componentes", schema = "virtus")
+@Table(name = "indicadores_componentes", schema = "virtus")
 @Getter
 @Setter
 @EqualsAndHashCode(of = {"id"})
-public class GradeTypeComponent extends BaseEntity {
+public class IndicatorComponent extends BaseEntity {
 
     @Id
-    @Column(name = "id_tipo_nota_componente")
+    @Column(name = "id_indicador_componente")
     private Integer id;
 
     @ManyToOne
@@ -31,8 +31,8 @@ public class GradeTypeComponent extends BaseEntity {
     private Component component;
 
     @ManyToOne
-    @JoinColumn(name = "id_tipo_nota")
-    private GradeType gradeType;
+    @JoinColumn(name = "id_indicador")
+    private Indicator indicator;
 
     @Column(name = "peso_padrao")
     private Integer standardWeight;

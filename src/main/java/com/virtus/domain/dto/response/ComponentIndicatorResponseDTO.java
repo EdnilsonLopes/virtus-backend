@@ -7,9 +7,9 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ComponentGradeTypeResponseDTO extends BaseResponseDTO {
+public class ComponentIndicatorResponseDTO extends BaseResponseDTO {
 
-    private GradeTypeResponseDTO gradeType;
+    private IndicatorResponseDTO indicator;
     private Integer standardWeight;
     private UserResponseDTO author;
 

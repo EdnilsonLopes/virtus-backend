@@ -1,15 +1,23 @@
 package com.virtus.domain.entity;
 
+import java.util.List;
+import java.util.Objects;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
 import com.virtus.common.domain.entity.BaseConfigurationEntity;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.GenericGenerator;
-
-import javax.persistence.*;
-import java.util.List;
-import java.util.Objects;
 
 @Entity
 @Table(name = "componentes", schema = "virtus")
@@ -34,6 +42,9 @@ public class Component extends BaseConfigurationEntity {
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "component", orphanRemoval = true)
     private List<GradeTypeComponent> gradeTypeComponents;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "component", orphanRemoval = true)
+    private List<IndicatorComponent> indicatorComponents;
 
     public Component(Integer id) {
         setId(id);

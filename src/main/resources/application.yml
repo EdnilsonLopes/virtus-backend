@@ -1,4 +1,4 @@
 app:
   schema: virtus
   db:
-    initialize: false  
+    initialize: false

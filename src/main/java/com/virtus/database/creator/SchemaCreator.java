@@ -46,6 +46,7 @@ public class SchemaCreator {
                 (Function<String, String>) TableScripts::createElementosComponentesTable,
                 (Function<String, String>) TableScripts::createEntidadesTable,
                 (Function<String, String>) TableScripts::createEscritoriosTable,
+                (Function<String, String>) TableScripts::createIndicadoresComponentesTable,
                 (Function<String, String>) TableScripts::createIntegrantesTable,
                 (Function<String, String>) TableScripts::createItensTable,
                 (Function<String, String>) TableScripts::createJurisdicoesTable,
@@ -96,6 +97,10 @@ public class SchemaCreator {
     }
     
     public void loadIndicatorScores() {
-        executor.execute(NotasIndicadoresTableScripts.insertNotasIndicadoresIfNotExists(appProperties.getSchema()));  
+        try {
+            executor.execute(NotasIndicadoresTableScripts.insertNotasIndicadoresIfNotExists(appProperties.getSchema()));  
+        } catch (Exception e) {
+            System.out.println("Error loading indicator scores: " + e.getMessage());
+        }
     }
 }

@@ -10,7 +10,7 @@ import org.apache.logging.log4j.util.Strings;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin(origins = "http://localhost:4200/")
+@CrossOrigin(origins = "*")
 public class BaseController<T extends BaseEntity,
         S extends BaseService<T, ? extends BaseRepository<T>, C, DTO>,
         C extends BaseRequestDTO,

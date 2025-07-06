@@ -21,10 +21,13 @@ import com.virtus.common.domain.entity.BaseEntity;
 import com.virtus.domain.dto.EnumDTO;
 import com.virtus.domain.dto.response.ComponentElementResponseDTO;
 import com.virtus.domain.dto.response.ComponentGradeTypeResponseDTO;
+import com.virtus.domain.dto.response.ComponentIndicatorResponseDTO;
 import com.virtus.domain.dto.response.ComponentResponseDTO;
 import com.virtus.domain.dto.response.ElementItemResponseDTO;
 import com.virtus.domain.dto.response.ElementResponseDTO;
 import com.virtus.domain.dto.response.GradeTypeResponseDTO;
+import com.virtus.domain.dto.response.IndicatorResponseDTO;
+import com.virtus.domain.dto.response.IndicatorScoreResponseDTO;
 import com.virtus.domain.dto.response.PageableResponseDTO;
 import com.virtus.domain.dto.response.PillarComponentResponseDTO;
 import com.virtus.domain.dto.response.PillarResponseDTO;
@@ -38,6 +41,9 @@ import com.virtus.domain.entity.ElementComponent;
 import com.virtus.domain.entity.ElementItem;
 import com.virtus.domain.entity.GradeType;
 import com.virtus.domain.entity.GradeTypeComponent;
+import com.virtus.domain.entity.Indicator;
+import com.virtus.domain.entity.IndicatorComponent;
+import com.virtus.domain.entity.IndicatorScore;
 import com.virtus.domain.entity.Pillar;
 import com.virtus.domain.entity.Role;
 import com.virtus.domain.entity.Status;
@@ -48,15 +54,9 @@ import com.virtus.exception.VirtusException;
 import com.virtus.persistence.UserRepository;
 import com.virtus.translate.Translator;
 
+public abstract class BaseService<T extends BaseEntity, R extends BaseRepository<T>, C extends BaseRequestDTO, DTO extends BaseResponseDTO> {
 
-public abstract class BaseService<
-        T extends BaseEntity,
-        R extends BaseRepository<T>,
-        C extends BaseRequestDTO,
-        DTO extends BaseResponseDTO> {
-
-    public final VirtusException ERROR_USER_NOT_FOUND =
-            new VirtusException(Translator.translate("user.not.found"));
+    public final VirtusException ERROR_USER_NOT_FOUND = new VirtusException(Translator.translate("user.not.found"));
 
     private final R repository;
     private final UserRepository userRepository;
@@ -73,7 +73,8 @@ public abstract class BaseService<
 
     public PageableResponseDTO<DTO> findAll(CurrentUser currentUser, int page, int size) {
         Page<T> pageResult = findAll(page, size);
-        List<DTO> content = pageResult.getContent().stream().map(c -> parseToResponseDTO(c, false)).collect(Collectors.toList());
+        List<DTO> content = pageResult.getContent().stream().map(c -> parseToResponseDTO(c, false))
+                .collect(Collectors.toList());
 
         return new PageableResponseDTO<>(
                 content,
@@ -85,7 +86,8 @@ public abstract class BaseService<
 
     public PageableResponseDTO<DTO> findAllByFilter(CurrentUser currentUser, String filter, int page, int size) {
         Page<T> pageResult = findAllByFilter(filter, page, size);
-        List<DTO> content = pageResult.getContent().stream().map(c -> parseToResponseDTO(c, false)).collect(Collectors.toList());
+        List<DTO> content = pageResult.getContent().stream().map(c -> parseToResponseDTO(c, false))
+                .collect(Collectors.toList());
 
         return new PageableResponseDTO<>(
                 content,
@@ -102,7 +104,6 @@ public abstract class BaseService<
         response.setUpdatedAt(result.getUpdatedAt());
         return response;
     }
-
 
     public DTO create(CurrentUser currentUser, C body) {
         User user = null;
@@ -255,11 +256,63 @@ public abstract class BaseService<
         if (detailed) {
             response.setComponentElements(parseToComponentElementsResponse(entity.getElementComponents()));
             response.setComponentGradeTypes(parseToComponentGradeTypesResponse(entity.getGradeTypeComponents()));
+            response.setComponentIndicators(parseToComponentIndicatorsResponse(entity.getIndicatorComponents()));
         }
         return response;
     }
 
-    private List<ComponentGradeTypeResponseDTO> parseToComponentGradeTypesResponse(List<GradeTypeComponent> gradeTypeComponents) {
+    private List<ComponentIndicatorResponseDTO> parseToComponentIndicatorsResponse(
+            List<IndicatorComponent> indicatorComponents) {
+        if (CollectionUtils.isEmpty(indicatorComponents)) {
+            return new ArrayList<>();
+        }
+        return indicatorComponents.stream().map(this::parseToComponentIndicatorResponse).collect(Collectors.toList());
+    }
+
+    private ComponentIndicatorResponseDTO parseToComponentIndicatorResponse(IndicatorComponent indicatorComponent) {
+        ComponentIndicatorResponseDTO response = new ComponentIndicatorResponseDTO();
+        response.setId(indicatorComponent.getId());
+        response.setStandardWeight(indicatorComponent.getStandardWeight());
+        response.setAuthor(parseToUserResponseDTO(indicatorComponent.getAuthor()));
+        response.setIndicator(parseToIndicatorResponseDTO(indicatorComponent.getIndicator(), false));
+        response.setCreatedAt(indicatorComponent.getCreatedAt());
+        response.setUpdatedAt(indicatorComponent.getUpdatedAt());
+        return response;
+    }
+
+    protected IndicatorResponseDTO parseToIndicatorResponseDTO(Indicator entity, boolean detailed) {
+        IndicatorResponseDTO dto = new IndicatorResponseDTO();
+        dto.setId(entity.getId());
+        dto.setIndicatorAcronym(entity.getIndicatorAcronym());
+        dto.setIndicatorName(entity.getIndicatorName());
+        dto.setIndicatorDescription(entity.getIndicatorDescription());
+        dto.setCreatedAt(entity.getCreatedAt());
+        if (entity.getAuthor() != null) {
+            dto.setAuthorName(entity.getAuthor().getName());
+        }
+        dto.setUpdatedAt(entity.getUpdatedAt());
+        return dto;
+    }
+
+    protected IndicatorScoreResponseDTO parseToIndicatorScoreResponseDTO(IndicatorScore entity, boolean detailed) {
+        IndicatorScoreResponseDTO dto = new IndicatorScoreResponseDTO();
+        dto.setId(entity.getId());
+        dto.setCnpb(entity.getCnpb());
+        dto.setReferenceDate(entity.getReferenceDate());
+        dto.setComponentText(entity.getComponentText());
+        dto.setScore(entity.getScore());
+        dto.setIndicatorId(entity.getIndicatorId());
+        dto.setIndicatorSigla(entity.getIndicatorSigla());
+        dto.setCreatedAt(entity.getCreatedAt());
+        if (entity.getAuthor() != null) {
+            dto.setAuthorName(entity.getAuthor().getName());
+        }
+        dto.setUpdatedAt(entity.getUpdatedAt());
+        return dto;
+    }
+
+    private List<ComponentGradeTypeResponseDTO> parseToComponentGradeTypesResponse(
+            List<GradeTypeComponent> gradeTypeComponents) {
         if (CollectionUtils.isEmpty(gradeTypeComponents)) {
             return new ArrayList<>();
         }
@@ -277,7 +330,8 @@ public abstract class BaseService<
         return response;
     }
 
-    private List<ComponentElementResponseDTO> parseToComponentElementsResponse(List<ElementComponent> elementComponents) {
+    private List<ComponentElementResponseDTO> parseToComponentElementsResponse(
+            List<ElementComponent> elementComponents) {
         if (CollectionUtils.isEmpty(elementComponents)) {
             return new ArrayList<>();
         }
@@ -362,7 +416,7 @@ public abstract class BaseService<
     protected abstract String getNotFoundMessage();
 
     protected void completeDetails(T entity) {
-        //Optional
+        // Optional
     }
 
     protected void beforeCreate(T entity) {
@@ -374,27 +428,27 @@ public abstract class BaseService<
     }
 
     protected void beforeDelete(Integer entity) {
-        //Optional
+        // Optional
     }
 
     protected void afterCreate(T entity) {
-        //Optional
+        // Optional
     }
 
     protected void afterUpdate(T entity) {
-        //Optional
+        // Optional
     }
 
     protected void afterDelete(Integer entity) {
-        //Optional
+        // Optional
     }
 
     protected void validate(VirtusException ex, User user, T entity) throws VirtusException {
-        //Optional
+        // Optional
     }
 
     protected void validateOnDelete(VirtusException ex, User user, Integer id) throws VirtusException {
-        //Optional
+        // Optional
     }
 
     @Transactional
@@ -428,7 +482,7 @@ public abstract class BaseService<
         return getRepository().findAll(PageRequest.of(page, size));
     }
 
-    protected Page<T> findAllByFilter(String filter, int page, int size) {
+    public Page<T> findAllByFilter(String filter, int page, int size) {
         return getRepository().findAllByFilter(filter, PageRequest.of(page, size));
     }
 

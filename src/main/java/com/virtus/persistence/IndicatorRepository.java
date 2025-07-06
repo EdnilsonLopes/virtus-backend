@@ -34,7 +34,8 @@ public interface IndicatorRepository extends BaseRepository<Indicator> {
     @Query(value = "SELECT * FROM virtus.indicadores " +
             "WHERE LOWER(nome_indicador) LIKE LOWER(CONCAT('%', :filter, '%')) " +
             "OR LOWER(descricao_indicador) LIKE LOWER(CONCAT('%', :filter, '%')) " +
-            "OR LOWER(sigla_indicador) LIKE LOWER(CONCAT('%', :filter, '%'))", countQuery = "SELECT COUNT(*) FROM virtus.indicadores "
+            "OR LOWER(sigla_indicador) LIKE LOWER(CONCAT('%', :filter, '%')) " +
+            "ORDER BY sigla_indicador", countQuery = "SELECT COUNT(*) FROM virtus.indicadores "
                     +
                     "WHERE LOWER(nome_indicador) LIKE LOWER(CONCAT('%', :filter, '%')) " +
                     "OR LOWER(descricao_indicador) LIKE LOWER(CONCAT('%', :filter, '%')) " +
