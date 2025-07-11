@@ -1,5 +1,9 @@
 package com.virtus.controller;
 
+import java.util.Map;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,6 +20,12 @@ public class IndicatorScoreController extends
 
         public IndicatorScoreController(IndicatorScoreService service) {
                 super(service);
+        }
+
+        @GetMapping("/last-reference")
+        public ResponseEntity<Map<String, String>> getLastReferenceFromConformity() {
+                String lastReference = getService().getLastReferenceFromConformity();
+                return ResponseEntity.ok(Map.of("referenceDate", lastReference));
         }
 
 }

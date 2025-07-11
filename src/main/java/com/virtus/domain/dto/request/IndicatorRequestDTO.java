@@ -1,7 +1,5 @@
 package com.virtus.domain.dto.request;
 
-import java.util.List;
-
 import com.virtus.common.domain.dto.BaseRequestDTO;
 
 import lombok.Getter;

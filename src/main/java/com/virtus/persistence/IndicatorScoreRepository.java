@@ -3,6 +3,7 @@ package com.virtus.persistence;
 import com.virtus.common.BaseRepository;
 import com.virtus.domain.entity.IndicatorScore;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -93,12 +94,16 @@ public interface IndicatorScoreRepository extends BaseRepository<IndicatorScore>
             @Param("indicatorCode") String indicatorCode);
 
     @Query(value = "SELECT * FROM virtus.notas_indicadores " +
-            "WHERE sigla_indicador LIKE %:filter% " +
+            "WHERE id_nota_indicador LIKE %:filter% "+
+            "   OR nota LIKE %:filter% " +
+            "   OR sigla_indicador LIKE %:filter% " +
             "   OR tx_componente LIKE %:filter% " +
             "   OR data_referencia LIKE %:filter%", countQuery = "SELECT count(*) FROM virtus.notas_indicadores " +
-                    "WHERE sigla_indicador LIKE %:filter% " +
+                    "WHERE id_nota_indicador LIKE %:filter% "+
+                    "   OR nota LIKE %:filter% " +
+                    "   OR sigla_indicador LIKE %:filter% " +
                     "   OR tx_componente LIKE %:filter% " +
                     "   OR data_referencia LIKE %:filter%", nativeQuery = true)
-    Page<IndicatorScore> findAllByFilter(@Param("filter") String filter, Pageable pageable);
+    Page<IndicatorScore> findAllByFilter(String filter, PageRequest pageRequest);
 
 }

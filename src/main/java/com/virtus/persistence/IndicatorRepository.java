@@ -1,14 +1,16 @@
 package com.virtus.persistence;
 
-import com.virtus.common.BaseRepository;
-import com.virtus.domain.entity.Indicator;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import com.virtus.common.BaseRepository;
+import com.virtus.domain.entity.Indicator;
 
 @Repository
 public interface IndicatorRepository extends BaseRepository<Indicator> {
@@ -42,5 +44,7 @@ public interface IndicatorRepository extends BaseRepository<Indicator> {
                     "OR LOWER(sigla_indicador) LIKE LOWER(CONCAT('%', :filter, '%'))", nativeQuery = true)
     Page<Indicator> searchAllByFilter(@Param("filter") String filter, Pageable pageable);
 
+    @Query("SELECT i FROM Indicator i WHERE i.indicatorName LIKE %:filter% OR i.indicatorAcronym LIKE %:filter% OR i.indicatorDescription LIKE %:filter% ORDER BY i.indicatorAcronym ASC")
+    Page<Indicator> findAllByFilter(String filter, PageRequest pageRequest);
 
 }

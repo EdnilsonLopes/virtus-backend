@@ -2,9 +2,12 @@ package com.virtus.service;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnit;
+import javax.transaction.Transactional;
 
 import org.springframework.stereotype.Service;
 
+import com.virtus.client.VirtusApiClient;
+import com.virtus.client.dto.LastReferenceDTO;
 import com.virtus.common.BaseService;
 import com.virtus.domain.dto.request.IndicatorScoreRequestDTO;
 import com.virtus.domain.dto.response.IndicatorScoreResponseDTO;
@@ -19,11 +22,13 @@ public class IndicatorScoreService
 
     @PersistenceUnit
     private final EntityManagerFactory entityManagerFactory;
+    private VirtusApiClient indicatorApiClient;
 
     public IndicatorScoreService(IndicatorScoreRepository repository, UserRepository userRepository,
-            EntityManagerFactory entityManagerFactory) {
+            EntityManagerFactory entityManagerFactory, VirtusApiClient indicatorApiClient) {
         super(repository, userRepository, entityManagerFactory);
         this.entityManagerFactory = entityManagerFactory;
+        this.indicatorApiClient = indicatorApiClient;
     }
 
     @Override
@@ -47,6 +52,12 @@ public class IndicatorScoreService
     @Override
     protected String getNotFoundMessage() {
         throw new UnsupportedOperationException("Unimplemented method 'getNotFoundMessage'");
+    }
+
+    @Transactional
+    public String getLastReferenceFromConformity() {
+        LastReferenceDTO dto = indicatorApiClient.fetchLastReference();
+        return dto != null ? dto.getUltimaReferencia() : null;
     }
 
 }

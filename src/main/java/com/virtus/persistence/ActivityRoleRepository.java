@@ -1,7 +1,9 @@
-package com.virtus.domain.entity;
+package com.virtus.persistence;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+
+import com.virtus.domain.entity.ActivityRole;
 
 public interface ActivityRoleRepository extends JpaRepository<ActivityRole, Integer> {
 

@@ -1,14 +1,17 @@
 package com.virtus.controller;
 
-import com.virtus.common.domain.mapper.PlanMapper;
-import com.virtus.domain.dto.response.PlanResponseDTO;
-import com.virtus.domain.entity.Plan;
-import com.virtus.service.PlanService;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import com.virtus.common.domain.mapper.PlanMapper;
+import com.virtus.domain.dto.response.PlanResponseDTO;
+import com.virtus.service.PlanService;
 
 @RestController
 @RequestMapping("/plans")

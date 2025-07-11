@@ -1,10 +1,16 @@
 package com.virtus.service;
 
+import java.util.List;
+
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnit;
+import javax.transaction.Transactional;
 
 import org.springframework.stereotype.Service;
 
+import com.virtus.client.VirtusApiClient;
+import com.virtus.client.dto.ExternalIndicatorDTO;
+import com.virtus.client.dto.LastReferenceDTO;
 import com.virtus.common.BaseService;
 import com.virtus.domain.dto.request.IndicatorRequestDTO;
 import com.virtus.domain.dto.response.IndicatorResponseDTO;
@@ -14,18 +20,18 @@ import com.virtus.persistence.UserRepository;
 import com.virtus.translate.Translator;
 
 @Service
-public class IndicatorService extends BaseService<
-        Indicator,
-        IndicatorRepository,
-        IndicatorRequestDTO,
-        IndicatorResponseDTO> {
+public class IndicatorService
+        extends BaseService<Indicator, IndicatorRepository, IndicatorRequestDTO, IndicatorResponseDTO> {
 
     @PersistenceUnit
-    private final EntityManagerFactory entityManagerFactory;
+    private EntityManagerFactory entityManagerFactory;
+    private VirtusApiClient indicatorApiClient;
 
-    public IndicatorService(IndicatorRepository repository, UserRepository userRepository, EntityManagerFactory entityManagerFactory) {
+    public IndicatorService(IndicatorRepository repository, UserRepository userRepository,
+            EntityManagerFactory entityManagerFactory, VirtusApiClient indicatorApiClient) {
         super(repository, userRepository, entityManagerFactory);
         this.entityManagerFactory = entityManagerFactory;
+        this.indicatorApiClient = indicatorApiClient;
     }
 
     @Override
@@ -47,4 +53,20 @@ public class IndicatorService extends BaseService<
     protected String getNotFoundMessage() {
         return Translator.translate("type.of.note.not.found");
     }
+
+    @Transactional
+    public void syncFromRemoteApi() {
+        List<ExternalIndicatorDTO> externalIndicators = indicatorApiClient.fetchAllIndicators();
+        for (ExternalIndicatorDTO dto : externalIndicators) {
+            Indicator indicator = getRepository().findById(dto.getIdIndicador())
+                    .orElse(new Indicator(dto.getIdIndicador()));
+
+            indicator.setIndicatorAcronym(dto.getSgIndicador());
+            indicator.setIndicatorName(dto.getDescrIndicador());
+            indicator.setIndicatorDescription(dto.getDescrIndicador());
+
+            getRepository().save(indicator);
+        }
+    }
+
 }

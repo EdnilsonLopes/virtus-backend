@@ -1,14 +1,15 @@
 package com.virtus.domain.dto.response;
 
+import java.time.LocalDate;
+
 import com.virtus.common.domain.dto.BaseResponseDTO;
 import com.virtus.domain.dto.EnumDTO;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-
-import java.time.LocalDate;
 
 @Getter
 @Setter

@@ -1,15 +1,23 @@
 package com.virtus.domain.entity;
 
+import java.time.LocalDateTime;
+import java.util.Objects;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
 import com.virtus.common.domain.entity.BaseEntity;
 import com.virtus.domain.enums.AverageType;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.GenericGenerator;
-
-import javax.persistence.*;
-import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Entity
 @Table(name = "pilares_ciclos", schema = "virtus")

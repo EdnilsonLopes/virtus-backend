@@ -20,7 +20,7 @@ public class DatabaseInitializer {
         schemaCreator.createSchema();  
         schemaCreator.createTables();  
         schemaCreator.loadIndicators();
-        schemaCreator.loadIndicatorScores();
+        // schemaCreator.loadIndicatorScores();
         System.out.println("Database initialization completed.");
     }
 }

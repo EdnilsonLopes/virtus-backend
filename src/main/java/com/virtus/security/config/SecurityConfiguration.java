@@ -22,7 +22,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private final JwtAuthenticationEntryPoint unauthorizedHandler;
 
-    public SecurityConfiguration(AuthorizationService authorizationService, JwtAuthenticationEntryPoint unauthorizedHandler) {
+    public SecurityConfiguration(AuthorizationService authorizationService,
+            JwtAuthenticationEntryPoint unauthorizedHandler) {
         this.authorizationService = authorizationService;
         this.unauthorizedHandler = unauthorizedHandler;
     }
@@ -37,17 +38,27 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         http.csrf().disable()
                 .exceptionHandling()
                 .authenticationEntryPoint(unauthorizedHandler).and()
-                .authorizeRequests().anyRequest().authenticated();
-        http.addFilterBefore(authenticationTokenFilterBean(authorizationService), UsernamePasswordAuthenticationFilter.class);
+                .authorizeRequests()
+                .antMatchers("/indicators/sync").permitAll()
+                .antMatchers("/indicator-scores/last-reference").permitAll()
+                .anyRequest().authenticated();
+
+        http.addFilterBefore(authenticationTokenFilterBean(authorizationService),
+                UsernamePasswordAuthenticationFilter.class);
+
+        http.addFilterBefore(authenticationTokenFilterBean(authorizationService),
+                UsernamePasswordAuthenticationFilter.class);
     }
 
     @Bean
-    public JwtAuthenticationTokenFilter authenticationTokenFilterBean(AuthorizationService authorizationService) throws Exception {
+    public JwtAuthenticationTokenFilter authenticationTokenFilterBean(AuthorizationService authorizationService)
+            throws Exception {
         return new JwtAuthenticationTokenFilter(authorizationService);
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
+            throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
