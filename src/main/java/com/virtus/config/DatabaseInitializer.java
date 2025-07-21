@@ -18,7 +18,15 @@ public class DatabaseInitializer {
     public void init() {
         System.out.println("Initializing database...");
         schemaCreator.createSchema();  
-        schemaCreator.createTables();  
+        schemaCreator.createTables(); 
+        schemaCreator.loadFeatures(); 
+        schemaCreator.loadRoles(); 
+        schemaCreator.loadOffices(); 
+        schemaCreator.loadUsers(); 
+        schemaCreator.loadEntities(); 
+        schemaCreator.loadPlans(); 
+        schemaCreator.loadJurisdictions(); 
+        schemaCreator.loadMembers(); 
         schemaCreator.loadIndicators();
         // schemaCreator.loadIndicatorScores();
         System.out.println("Database initialization completed.");

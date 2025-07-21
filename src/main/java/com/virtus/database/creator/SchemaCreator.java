@@ -4,12 +4,20 @@ import org.springframework.stereotype.Component;
 
 import com.virtus.config.AppProperties;
 import com.virtus.database.executor.SqlExecutor;
+import com.virtus.database.scripts.EntitiesVirtusScripts;
+import com.virtus.database.scripts.FeaturesScripts;
 import com.virtus.database.scripts.HistoryTableScripts;
-import com.virtus.database.scripts.IndicadoresTableScripts;
-import com.virtus.database.scripts.NotasIndicadoresTableScripts;
+import com.virtus.database.scripts.IndicadoresScripts;
+import com.virtus.database.scripts.IndicatorsScoresTableScripts;
+import com.virtus.database.scripts.JurisdictionsScripts;
+import com.virtus.database.scripts.MembersScripts;
+import com.virtus.database.scripts.OfficesScripts;
+import com.virtus.database.scripts.PlansScripts;
 import com.virtus.database.scripts.ProductTableScripts;
+import com.virtus.database.scripts.RolesScripts;
 import com.virtus.database.scripts.SchemaScript;
 import com.virtus.database.scripts.TableScripts;
+import com.virtus.database.scripts.UsersScripts;
 import com.virtus.database.scripts.WorkflowTableScripts;
 
 import lombok.RequiredArgsConstructor;
@@ -60,9 +68,9 @@ public class SchemaCreator {
                 (Function<String, String>) TableScripts::createTiposNotasComponentesTable,
                 (Function<String, String>) TableScripts::createUsersTable,
                 (Function<String, String>) TableScripts::createVersoesTable,
-                (Function<String, String>) IndicadoresTableScripts::createIndicadoresTable,
-                (Function<String, String>) IndicadoresTableScripts::createNotasAutomaticasTable,
-                (Function<String, String>) NotasIndicadoresTableScripts::createNotasIndicadoresTable,
+                (Function<String, String>) IndicadoresScripts::createIndicadoresTable,
+                (Function<String, String>) IndicadoresScripts::createNotasAutomaticasTable,
+                (Function<String, String>) IndicatorsScoresTableScripts::createNotasIndicadoresTable,
                 (Function<String, String>) WorkflowTableScripts::createActionsTable,
                 (Function<String, String>) WorkflowTableScripts::createActionsStatusTable,
                 (Function<String, String>) WorkflowTableScripts::createActivitiesTable,
@@ -93,14 +101,79 @@ public class SchemaCreator {
     }
 
     public void loadIndicators() {
-        executor.execute(IndicadoresTableScripts.insertIndicadoresIfNotExists(appProperties.getSchema()));  
+        executor.execute(IndicadoresScripts.insertIndicadoresIfNotExists(appProperties.getSchema()));  
     }
     
     public void loadIndicatorScores() {
         try {
-            executor.execute(NotasIndicadoresTableScripts.insertNotasIndicadoresIfNotExists(appProperties.getSchema()));  
+            executor.execute(IndicatorsScoresTableScripts.insertNotasIndicadoresIfNotExists(appProperties.getSchema()));  
         } catch (Exception e) {
             System.out.println("Error loading indicator scores: " + e.getMessage());
+        }
+    }
+
+    public void loadFeatures() {
+        try {
+            executor.execute(FeaturesScripts.insertFeaturesIfNotExists(appProperties.getSchema()));  
+        } catch (Exception e) {
+            System.out.println("Error loading features: " + e.getMessage());
+        }
+    }
+
+    public void loadRoles() {
+        try {
+            executor.execute(RolesScripts.insertRolesIfNotExists(appProperties.getSchema()));  
+            executor.execute(RolesScripts.insertRoleFeatures(appProperties.getSchema()));  
+        } catch (Exception e) {
+            System.out.println("Error loading roles: " + e.getMessage());
+        }
+    }
+
+    public void loadEntities() {
+        try {
+            executor.execute(EntitiesVirtusScripts.insertEntidadesIfNotExists(appProperties.getSchema()));  
+        } catch (Exception e) {
+            System.out.println("Error loading entitites: " + e.getMessage());
+        }
+    }
+
+    public void loadOffices() {
+        try {
+            executor.execute(OfficesScripts.insertEscritoriosIfNotExists(appProperties.getSchema()));  
+        } catch (Exception e) {
+            System.out.println("Error loading entitites: " + e.getMessage());
+        }
+    }
+
+    public void loadPlans() {
+        try {
+            executor.execute(PlansScripts.insertPlanosIfNotExists(appProperties.getSchema()));  
+        } catch (Exception e) {
+            System.out.println("Error loading plans: " + e.getMessage());
+        }
+    }
+
+    public void loadUsers() {
+        try {
+            executor.execute(UsersScripts.insertUsersIfNotExists(appProperties.getSchema()));  
+        } catch (Exception e) {
+            System.out.println("Error loading users: " + e.getMessage());
+        }
+    }
+
+    public void loadJurisdictions() {
+        try {
+            executor.execute(JurisdictionsScripts.insertJurisdictionIfNotExists(appProperties.getSchema()));  
+        } catch (Exception e) {
+            System.out.println("Error loading jurisdictions: " + e.getMessage());
+        }
+    }
+
+    public void loadMembers() {
+        try {
+            executor.execute(MembersScripts.insertMembersIfNotExists(appProperties.getSchema()));  
+        } catch (Exception e) {
+            System.out.println("Error loading jurisdictions: " + e.getMessage());
         }
     }
 }

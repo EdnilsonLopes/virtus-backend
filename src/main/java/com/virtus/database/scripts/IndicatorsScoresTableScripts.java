@@ -2,7 +2,7 @@ package com.virtus.database.scripts;
 
 import java.util.Locale;
 
-public class NotasIndicadoresTableScripts {
+public class IndicatorsScoresTableScripts {
         // Table NOTAS_INDICADORES
         public static String createNotasIndicadoresTable(String schema) {
                 String sql = String.format(

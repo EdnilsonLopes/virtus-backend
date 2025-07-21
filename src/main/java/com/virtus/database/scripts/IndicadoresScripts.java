@@ -1,6 +1,6 @@
 package com.virtus.database.scripts;
 
-public class IndicadoresTableScripts {
+public class IndicadoresScripts {
 
         // Table INDICADORES
         public static String createIndicadoresTable(String schema) {
@@ -84,19 +84,24 @@ public class IndicadoresTableScripts {
                                 new IndicadorConformidade(14, "IDTE", "Indicador IDTE",
                                                 "Indicador de Acompanhamento de Déficit Técnico a Equacionar"),
                                 new IndicadorConformidade(15, "VADU", "Indicador VADU", "Variação da Duration"),
-                                new IndicadorConformidade(16, "PEDE", "Indicador PEDE", "Pendência de Déficit a Equacionar"),
-                                new IndicadorConformidade(17, "IDP", "Indicador IDP", "Indicador de Dependência do Patrocinador"),
+                                new IndicadorConformidade(16, "PEDE", "Indicador PEDE",
+                                                "Pendência de Déficit a Equacionar"),
+                                new IndicadorConformidade(17, "IDP", "Indicador IDP",
+                                                "Indicador de Dependência do Patrocinador"),
                                 new IndicadorConformidade(18, "IPTM", "Indicador IPTM",
                                                 "Indicador de Acompanhamento da Premissa de Tábua de Mortalidade Geral"),
                                 new IndicadorConformidade(19, "IRA", "Indicador IRA", "Índice de Risco Atuarial"),
                                 new IndicadorConformidade(20, "IADE", "Indicador IADE",
                                                 "Indicador de Acompanhamento de Déficit Equacionado"),
-                                new IndicadorConformidade(21, "IASL", "Indicador IASL", "Indicador de Ativos Sem Liquidez"),
+                                new IndicadorConformidade(21, "IASL", "Indicador IASL",
+                                                "Indicador de Ativos Sem Liquidez"),
                                 new IndicadorConformidade(22, "RAPOD", "Indicador RAPOD",
                                                 "Representatividade de Atrasos, Ativos de Emissão do Patrocinador, Outros e Depósitos Judiciais"),
-                                new IndicadorConformidade(23, "RESC", "Indicador RESC", "Redução de Saldo de Contratos"),
+                                new IndicadorConformidade(23, "RESC", "Indicador RESC",
+                                                "Redução de Saldo de Contratos"),
                                 new IndicadorConformidade(24, "ATAR", "Indicador ATAR", "Atrasos na Arrecadação"),
-                                new IndicadorConformidade(25, "IAP", "Indicador IAP", "Indicador de Acompanhamento da Performance"),
+                                new IndicadorConformidade(25, "IAP", "Indicador IAP",
+                                                "Indicador de Acompanhamento da Performance"),
                                 new IndicadorConformidade(26, "IAR", "Indicador IAR",
                                                 "Indicador de Acompanhamento da Rentabilidade"),
                                 new IndicadorConformidade(27, "IPTJ", "Indicador IPTJ",
@@ -105,10 +110,12 @@ public class IndicadoresTableScripts {
                                 new IndicadorConformidade(29, "RITA", "Indicador RITA",
                                                 "Risco de Insolvência por Desajuste da Taxa Atuarial"),
                                 new IndicadorConformidade(30, "IRJ", "Indicador IRJ", "Indicador de Risco Jurídico"),
-                                new IndicadorConformidade(31, "IFP", "Indicador IFP", "Indicador de Fundos Previdenciais"),
+                                new IndicadorConformidade(31, "IFP", "Indicador IFP",
+                                                "Indicador de Fundos Previdenciais"),
                                 new IndicadorConformidade(32, "IOGA", "Indicador IOGA",
                                                 "Indicador de Outros Valores da Gestão Administrativa"),
-                                new IndicadorConformidade(33, "IARD", "Indicador IARD", "Acompanhamento de Receitas e Despesas"),
+                                new IndicadorConformidade(33, "IARD", "Indicador IARD",
+                                                "Acompanhamento de Receitas e Despesas"),
                                 new IndicadorConformidade(34, "ILA_ILR", "Indicador ILA_ILR",
                                                 "Indicador que mede o grau de exposição do Plano de Benefícios ao risco de liquidez"),
                                 new IndicadorConformidade(35, "ILA", "Indicador ILA", "Índice de Liquidez Ampla"),
@@ -127,10 +134,12 @@ public class IndicadoresTableScripts {
                 StringBuilder sb = new StringBuilder();
                 for (IndicadorConformidade ind : indicadores) {
                         sb.append(String.format(
-                                        "IF NOT EXISTS (SELECT 1 FROM %s.indicadores WHERE sigla_indicador = '%%s')\n" +
-                                                        "INSERT INTO %s.indicadores ([id_indicador], [sigla_indicador], [nome_indicador], [descricao_indicador], [criado_em], [id_author])\n"
+                                        "IF NOT EXISTS (SELECT 1 FROM %s.indicadores WHERE sigla_indicador = '%s')\n" +
+                                                        "BEGIN\n" +
+                                                        "    INSERT INTO %s.indicadores ([id_indicador], [sigla_indicador], [nome_indicador], [descricao_indicador], [criado_em], [id_author])\n"
                                                         +
-                                                        "VALUES (%%d, '%%s', '%%s', '%%s', GETDATE(), 1);\n\n",
+                                                        "    VALUES (%d, '%s', '%s', '%s', GETDATE(), 1);\n" +
+                                                        "END;\n\n",
                                         schema, ind.sigla,
                                         schema, ind.id, ind.sigla, ind.nome, ind.descricao));
                 }
