@@ -67,6 +67,8 @@ public class CycleService extends BaseService<Cycle, CycleRepository, CycleReque
         CycleResponseDTO response = new CycleResponseDTO();
         response.setId(entity.getId());
         response.setName(entity.getName());
+        response.setAuthor(parseToUserResponseDTO(entity.getAuthor()));
+        response.setCreatedAt(entity.getCreatedAt());        
         response.setReference(entity.getReference());
         response.setOrdination(entity.getOrdination());
         response.setDescription(entity.getDescription());
