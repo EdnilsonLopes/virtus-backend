@@ -129,7 +129,6 @@ public class MembersScripts {
                 new Membro("wellington.pereira", "ERMG")
         };
 
-        List<String> sqlCommands = new ArrayList<>();
         String insertTemplate = "INSERT INTO %s.membros (id_membro, id_usuario, id_escritorio) " +
                 "SELECT %d, a.id_user, b.id_escritorio FROM %s.users a, %s.escritorios b " +
                 "WHERE b.abreviatura = '%s' AND a.username = '%s' AND " +

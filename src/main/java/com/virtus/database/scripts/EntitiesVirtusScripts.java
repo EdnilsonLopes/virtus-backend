@@ -1343,11 +1343,11 @@ public class EntitiesVirtusScripts {
                                                         "BEGIN\n" +
                                                         "    INSERT INTO %s.entidades (id_entidade, nome, codigo, sigla, situacao, esi, municipio, sigla_uf, id_author, criado_em, id_status)\n"
                                                         +
-                                                        "    VALUES (%d, '%s', '%s', '%s', '%s', %d, '%s', '%s', 1, GETDATE(), 0);\n"
+                                                        "    VALUES ((SELECT MAX(id_entidade) + 1 FROM %s.entidades), '%s', '%s', '%s', '%s', %d, '%s', '%s', 1, GETDATE(), 0);\n"
                                                         +
                                                         "END;\n\n",
                                         schema, entidade.codigo.replace("'", "''"),
-                                        schema, id++,
+                                        schema, schema,
                                         entidade.nome.replace("'", "''"),
                                         entidade.codigo.replace("'", "''"),
                                         entidade.sigla.replace("'", "''"),

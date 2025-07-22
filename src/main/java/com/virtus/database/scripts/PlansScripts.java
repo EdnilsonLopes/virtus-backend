@@ -2958,7 +2958,7 @@ public class PlansScripts {
                                                         "    INSERT INTO %s.planos (id_plano, id_entidade, cnpb, id_modalidade, situacao, legislacao, recurso_garantidor)\n"
                                                         +
                                                         "    SELECT\n" +
-                                                        "        %d,\n" +
+                                                        "        (SELECT MAX(id_plano)+1 FROM %s.planos),\n" +
                                                         "        (SELECT id_entidade FROM %s.entidades WHERE sigla = '%s'),\n"
                                                         +
                                                         "        '%s',\n" +
@@ -2969,8 +2969,7 @@ public class PlansScripts {
                                                         "END;\n\n",
 
                                         schema, plano.cnpb,
-                                        schema, id++,
-                                        schema, plano.siglaEntidade.replace("'", "''"),
+                                        schema, schema, schema, plano.siglaEntidade.replace("'", "''"),
                                         plano.cnpb,
                                         plano.modalidade,
                                         plano.situacao.replace("'", "''"),

@@ -28,6 +28,8 @@ public class DatabaseInitializer {
         schemaCreator.loadJurisdictions(); 
         schemaCreator.loadMembers(); 
         schemaCreator.loadIndicators();
+        schemaCreator.loadFKs();
+        schemaCreator.loadUniqueKeys();
         // schemaCreator.loadIndicatorScores();
         System.out.println("Database initialization completed.");
     }

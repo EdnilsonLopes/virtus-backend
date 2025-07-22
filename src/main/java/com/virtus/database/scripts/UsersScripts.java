@@ -338,16 +338,16 @@ public class UsersScripts {
                                                         "BEGIN\n" +
                                                         "    INSERT INTO %s.users (id_user, username, password, email, mobile, name, id_role, id_author, criado_em)\n"
                                                         +
-                                                        "    VALUES (%d, '%s', '%s', '%s', '%s', '%s', %d, 1, GETDATE());\n"
+                                                        "    VALUES ((SELECT MAX(id_user)+1 FROM %s.users), '%s', '%s', '%s', '%s', '%s', %d, 1, GETDATE());\n"
                                                         +
                                                         "END;\n\n",
                                         schema, user.username.replace("'", "''"),
-                                        schema, id++,
+                                        schema, schema,
                                         user.username.replace("'", "''"),
                                         user.password.replace("'", "''"),
                                         user.email.replace("'", "''"),
                                         user.mobile.replace("'", "''"),
-                                        user.name.replace("'", "''"),
+                                        user.name.replace("'", "`"),
                                         user.idRole));
                 }
 

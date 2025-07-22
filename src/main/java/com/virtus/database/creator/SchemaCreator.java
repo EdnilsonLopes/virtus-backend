@@ -6,6 +6,7 @@ import com.virtus.config.AppProperties;
 import com.virtus.database.executor.SqlExecutor;
 import com.virtus.database.scripts.EntitiesVirtusScripts;
 import com.virtus.database.scripts.FeaturesScripts;
+import com.virtus.database.scripts.ForeignKeysScripts;
 import com.virtus.database.scripts.HistoryTableScripts;
 import com.virtus.database.scripts.IndicadoresScripts;
 import com.virtus.database.scripts.IndicatorsScoresTableScripts;
@@ -17,6 +18,7 @@ import com.virtus.database.scripts.ProductTableScripts;
 import com.virtus.database.scripts.RolesScripts;
 import com.virtus.database.scripts.SchemaScript;
 import com.virtus.database.scripts.TableScripts;
+import com.virtus.database.scripts.UniqueKeysScripts;
 import com.virtus.database.scripts.UsersScripts;
 import com.virtus.database.scripts.WorkflowTableScripts;
 
@@ -101,12 +103,12 @@ public class SchemaCreator {
     }
 
     public void loadIndicators() {
-        executor.execute(IndicadoresScripts.insertIndicadoresIfNotExists(appProperties.getSchema()));  
+        executor.execute(IndicadoresScripts.insertIndicadoresIfNotExists(appProperties.getSchema()));
     }
-    
+
     public void loadIndicatorScores() {
         try {
-            executor.execute(IndicatorsScoresTableScripts.insertNotasIndicadoresIfNotExists(appProperties.getSchema()));  
+            executor.execute(IndicatorsScoresTableScripts.insertNotasIndicadoresIfNotExists(appProperties.getSchema()));
         } catch (Exception e) {
             System.out.println("Error loading indicator scores: " + e.getMessage());
         }
@@ -114,7 +116,7 @@ public class SchemaCreator {
 
     public void loadFeatures() {
         try {
-            executor.execute(FeaturesScripts.insertFeaturesIfNotExists(appProperties.getSchema()));  
+            executor.execute(FeaturesScripts.insertFeaturesIfNotExists(appProperties.getSchema()));
         } catch (Exception e) {
             System.out.println("Error loading features: " + e.getMessage());
         }
@@ -122,8 +124,8 @@ public class SchemaCreator {
 
     public void loadRoles() {
         try {
-            executor.execute(RolesScripts.insertRolesIfNotExists(appProperties.getSchema()));  
-            executor.execute(RolesScripts.insertRoleFeatures(appProperties.getSchema()));  
+            executor.execute(RolesScripts.insertRolesIfNotExists(appProperties.getSchema()));
+            executor.execute(RolesScripts.insertRoleFeatures(appProperties.getSchema()));
         } catch (Exception e) {
             System.out.println("Error loading roles: " + e.getMessage());
         }
@@ -131,7 +133,7 @@ public class SchemaCreator {
 
     public void loadEntities() {
         try {
-            executor.execute(EntitiesVirtusScripts.insertEntidadesIfNotExists(appProperties.getSchema()));  
+            executor.execute(EntitiesVirtusScripts.insertEntidadesIfNotExists(appProperties.getSchema()));
         } catch (Exception e) {
             System.out.println("Error loading entitites: " + e.getMessage());
         }
@@ -139,7 +141,7 @@ public class SchemaCreator {
 
     public void loadOffices() {
         try {
-            executor.execute(OfficesScripts.insertEscritoriosIfNotExists(appProperties.getSchema()));  
+            executor.execute(OfficesScripts.insertEscritoriosIfNotExists(appProperties.getSchema()));
         } catch (Exception e) {
             System.out.println("Error loading entitites: " + e.getMessage());
         }
@@ -147,7 +149,7 @@ public class SchemaCreator {
 
     public void loadPlans() {
         try {
-            executor.execute(PlansScripts.insertPlanosIfNotExists(appProperties.getSchema()));  
+            executor.execute(PlansScripts.insertPlanosIfNotExists(appProperties.getSchema()));
         } catch (Exception e) {
             System.out.println("Error loading plans: " + e.getMessage());
         }
@@ -155,7 +157,7 @@ public class SchemaCreator {
 
     public void loadUsers() {
         try {
-            executor.execute(UsersScripts.insertUsersIfNotExists(appProperties.getSchema()));  
+            executor.execute(UsersScripts.insertUsersIfNotExists(appProperties.getSchema()));
         } catch (Exception e) {
             System.out.println("Error loading users: " + e.getMessage());
         }
@@ -163,7 +165,7 @@ public class SchemaCreator {
 
     public void loadJurisdictions() {
         try {
-            executor.execute(JurisdictionsScripts.insertJurisdictionIfNotExists(appProperties.getSchema()));  
+            executor.execute(JurisdictionsScripts.insertJurisdictionIfNotExists(appProperties.getSchema()));
         } catch (Exception e) {
             System.out.println("Error loading jurisdictions: " + e.getMessage());
         }
@@ -171,9 +173,17 @@ public class SchemaCreator {
 
     public void loadMembers() {
         try {
-            executor.execute(MembersScripts.insertMembersIfNotExists(appProperties.getSchema()));  
+            executor.execute(MembersScripts.insertMembersIfNotExists(appProperties.getSchema()));
         } catch (Exception e) {
             System.out.println("Error loading jurisdictions: " + e.getMessage());
         }
+    }
+
+    public void loadFKs() {
+        executor.execute(ForeignKeysScripts.createFKsIfNotExists(appProperties.getSchema()));
+    }
+
+    public void loadUniqueKeys() {
+        executor.execute(UniqueKeysScripts.createUniqueKeysIfNotExists(appProperties.getSchema()));
     }
 }
