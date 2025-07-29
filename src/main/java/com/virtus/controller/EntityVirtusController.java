@@ -30,4 +30,9 @@ public class EntityVirtusController extends BaseController<EntityVirtus, EntityV
         return ResponseEntity.ok(getService().findCyclesEntitiesByEntityId(currentUser, entityId));
     }
 
+    @GetMapping("/jurisdiction/available")
+    public ResponseEntity<List<EntityVirtusResponseDTO>> getAvailable(@LoggedUser CurrentUser currentUser) {
+        return ResponseEntity.ok((List<EntityVirtusResponseDTO>) getService().findAvailableEntities());
+    }
+
 }

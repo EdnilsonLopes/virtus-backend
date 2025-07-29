@@ -3,6 +3,9 @@ package com.virtus.persistence;
 import com.virtus.common.BaseRepository;
 import com.virtus.domain.entity.EntityVirtus;
 import com.virtus.domain.model.Team;
+
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,4 +25,11 @@ public interface EntityVirtusRepository extends BaseRepository<EntityVirtus> {
             "inner join CycleEntity d on d.entity = b.entity " +
             "where a.boss.id = :bossId")
     Page<Team> findByEntitiesByUserBoss(int bossId, Pageable pageable);
+
+    @Query("SELECT e FROM EntityVirtus e " +
+           "WHERE NOT EXISTS (" +
+           "  SELECT 1 FROM Jurisdiction j " +
+           "  WHERE j.entity = e" +
+           ")")
+    List<EntityVirtus> findAvailableEntities();
 }

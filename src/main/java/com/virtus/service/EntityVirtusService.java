@@ -31,23 +31,26 @@ import com.virtus.persistence.UserRepository;
 import com.virtus.translate.Translator;
 
 @Service
-public class EntityVirtusService extends BaseService<EntityVirtus, EntityVirtusRepository, EntityVirtusRequestDTO, EntityVirtusResponseDTO> {
+public class EntityVirtusService
+        extends BaseService<EntityVirtus, EntityVirtusRepository, EntityVirtusRequestDTO, EntityVirtusResponseDTO> {
 
     private final CycleRepository cycleRepository;
     private final CycleEntityRepository cycleEntityRepository;
     private final PlanRepository planRepository;
-
+    private final EntityVirtusRepository entityVirtusRepository;
     private final CycleService cycleService;
 
     public EntityVirtusService(EntityVirtusRepository repository,
-                               UserRepository userRepository,
-                               EntityManagerFactory entityManagerFactory,
-                               CycleRepository cycleRepository,
-                               CycleEntityRepository cycleEntityRepository,
-                               PlanRepository planRepository, CycleService cycleService) {
+            UserRepository userRepository,
+            EntityManagerFactory entityManagerFactory,
+            CycleRepository cycleRepository,
+            CycleEntityRepository cycleEntityRepository,
+            EntityVirtusRepository entityVirtusRepository,
+            PlanRepository planRepository, CycleService cycleService) {
         super(repository, userRepository, entityManagerFactory);
         this.cycleRepository = cycleRepository;
         this.cycleEntityRepository = cycleEntityRepository;
+        this.entityVirtusRepository = entityVirtusRepository;
         this.planRepository = planRepository;
         this.cycleService = cycleService;
     }
@@ -128,7 +131,7 @@ public class EntityVirtusService extends BaseService<EntityVirtus, EntityVirtusR
         CycleEntityResponseDTO response = new CycleEntityResponseDTO();
         response.setId(cycleEntity.getId());
         response.setCycle(parseToCycleResponse(cycleEntity.getCycle()));
-        //response.setEntity(parseToResponseDTO(cycleEntity.getEntity(), false));
+        // response.setEntity(parseToResponseDTO(cycleEntity.getEntity(), false));
         response.setAverageType(parseToAverageTypeEnumResponseDTO(cycleEntity.getAverageType()));
         response.setSupervisor(parseToUserResponseDTO(cycleEntity.getSupervisor()));
         response.setAuthor(parseToUserResponseDTO(cycleEntity.getAuthor()));
@@ -149,7 +152,8 @@ public class EntityVirtusService extends BaseService<EntityVirtus, EntityVirtusR
 
     @Override
     protected EntityVirtus parseToEntity(EntityVirtusRequestDTO body) {
-        EntityVirtus entity = body.getId() != null ? getRepository().findById(body.getId()).orElse(new EntityVirtus()) : new EntityVirtus();
+        EntityVirtus entity = body.getId() != null ? getRepository().findById(body.getId()).orElse(new EntityVirtus())
+                : new EntityVirtus();
         entity.setDescription(body.getDescription());
         entity.setUf(body.getUf());
         entity.setName(body.getName());
@@ -175,7 +179,8 @@ public class EntityVirtusService extends BaseService<EntityVirtus, EntityVirtusR
     private Plan parseToPlan(PlanRequestDTO request, EntityVirtus entity) {
         Plan plan;
         if (!CollectionUtils.isEmpty(entity.getPlans())) {
-            plan = entity.getPlans().stream().filter(plan1 -> plan1.getId().equals(request.getId())).findFirst().orElse(new Plan());
+            plan = entity.getPlans().stream().filter(plan1 -> plan1.getId().equals(request.getId())).findFirst()
+                    .orElse(new Plan());
         } else {
             plan = new Plan();
         }
@@ -200,7 +205,8 @@ public class EntityVirtusService extends BaseService<EntityVirtus, EntityVirtusR
     private CycleEntity parseToCycleEntity(CycleEntityRequestDTO cycle, EntityVirtus entity) {
         CycleEntity cycleEntity;
         if (!CollectionUtils.isEmpty(entity.getCycleEntities())) {
-            cycleEntity = entity.getCycleEntities().stream().filter(c -> c.getId().equals(cycle.getId())).findFirst().orElse(new CycleEntity());
+            cycleEntity = entity.getCycleEntities().stream().filter(c -> c.getId().equals(cycle.getId())).findFirst()
+                    .orElse(new CycleEntity());
         } else {
             cycleEntity = new CycleEntity();
         }
@@ -251,6 +257,42 @@ public class EntityVirtusService extends BaseService<EntityVirtus, EntityVirtusR
             return new ArrayList<>();
         }
         return result.stream().map(this::parseToCycleEntityResponse).collect(Collectors.toList());
+    }
+
+    public List<EntityVirtusResponseDTO> findAvailableEntities() {
+        List<EntityVirtus> availableEntities = entityVirtusRepository.findAvailableEntities();
+        if (CollectionUtils.isEmpty(availableEntities)) {
+            return new ArrayList<>();
+        }
+        return availableEntities.stream().map(this::parseToEntityVirtusResponse).collect(Collectors.toList());
+    }
+
+    private EntityVirtusResponseDTO parseToEntityVirtusResponse(EntityVirtus entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        return EntityVirtusResponseDTO.builder()
+                .id(entity.getId())
+                .name(entity.getName())
+                .acronym(entity.getAcronym())
+                .code(entity.getCode())
+                .description(entity.getDescription())
+                .situation(entity.getSituation())
+                .esi(entity.getEsi())
+                .city(entity.getCity())
+                .uf(entity.getUf())
+                .cyclesEntity(entity.getCycleEntities() != null
+                        ? entity.getCycleEntities().stream()
+                                .map(this::parseToCycleEntityResponse)
+                                .collect(Collectors.toList())
+                        : new ArrayList<>())
+                .plans(entity.getPlans() != null
+                        ? entity.getPlans().stream()
+                                .map(this::parseToPlanResponse)
+                                .collect(Collectors.toList())
+                        : new ArrayList<>())
+                .build();
     }
 
 }

@@ -3,6 +3,7 @@ package com.virtus.service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityManagerFactory;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.SystemPropertyUtils;
 
 import com.virtus.common.BaseService;
 import com.virtus.domain.dto.request.JurisdictionRequestDTO;
@@ -42,6 +44,7 @@ public class OfficeService extends BaseService<Office, OfficeRepository, OfficeR
     private final JurisdictionRepository jurisdictionRepository;
     private final EntityVirtusRepository entityVirtusRepository;
     private final MemberRepository memberRepository;
+    private final AtomicReference<Integer> maxIdJurisdiction = new AtomicReference<>(0);
 
     public OfficeService(OfficeRepository repository, UserRepository userRepository, EntityManagerFactory entityManagerFactory,
                          JurisdictionRepository jurisdictionRepository,
@@ -112,13 +115,27 @@ public class OfficeService extends BaseService<Office, OfficeRepository, OfficeR
         if (CollectionUtils.isEmpty(officeRequest.getMembers())) {
             return new ArrayList<>();
         }
-        return officeRequest.getMembers().stream().map(request -> parseToMemberEntity(office, request)).collect(Collectors.toList());
+        List<Member> members = officeRequest.getMembers().stream().map(request -> parseToMemberEntity(office, request)).collect(Collectors.toList());
+        if (!CollectionUtils.isEmpty(officeRequest.getMembers())) {
+            AtomicReference<Integer> maxId = new AtomicReference<>(memberRepository.findMaxId());
+            members.forEach(member -> {
+                if (member.getId() == null) {
+                    member.setId(maxId.updateAndGet(v -> v + 1));
+                }
+            });
+        }        
+        return members;
     }
 
     private Jurisdiction parseToJurisdictionEntity(Office office, JurisdictionRequestDTO request) {
         Jurisdiction jurisdiction = new Jurisdiction();
         jurisdiction.setOffice(office);
-        jurisdiction.setId(request.getId());
+        AtomicReference<Integer> maxIdJurisdiction = new AtomicReference<>(jurisdictionRepository.findMaxId());
+        if (request.getId() == null) {
+            jurisdiction.setId(maxIdJurisdiction.updateAndGet(v -> v + 1));
+        } else {
+            jurisdiction.setId(request.getId());
+        }
 
         jurisdiction.setStartsAt(request.getStartsAt());
         jurisdiction.setEndsAt(request.getEndsAt());
@@ -135,6 +152,7 @@ public class OfficeService extends BaseService<Office, OfficeRepository, OfficeR
     }
 
     private Member parseToMemberEntity(Office office, MemberRequestDTO request) {
+        System.out.println("Parsing Member Entity: " + request.getUser().getId() +" - "+ request.getUser().getName());
         Member member = new Member();
         member.setOffice(office);
         member.setId(request.getId());

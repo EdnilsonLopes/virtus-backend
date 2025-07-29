@@ -1,5 +1,6 @@
 package com.virtus.domain.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -38,13 +39,13 @@ public class Component extends BaseConfigurationEntity {
     private Boolean pga;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "component", orphanRemoval = true)
-    private List<ElementComponent> elementComponents;
+    private List<ElementComponent> elementComponents = new ArrayList<>();
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "component", orphanRemoval = true)
-    private List<GradeTypeComponent> gradeTypeComponents;
+    private List<GradeTypeComponent> gradeTypeComponents = new ArrayList<>();
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "component", orphanRemoval = true)
-    private List<IndicatorComponent> indicatorComponents;
+    private List<IndicatorComponent> indicatorComponents = new ArrayList<>();
 
     public Component(Integer id) {
         setId(id);

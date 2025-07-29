@@ -30,7 +30,7 @@ public interface JurisdictionRepository extends BaseRepository<Jurisdiction> {
             "LEFT JOIN virtus.entidades d ON d.id_entidade = b.id_entidade " +
             "LEFT JOIN virtus.users u ON u.id_user = c.id_usuario " +
             "INNER JOIN virtus.ciclos_entidades e ON e.id_entidade = b.id_entidade " +
-            "WHERE ((c.id_usuario = ?1 AND u.id_role in (3,4)) OR (a.id_chefe = ?1))" +
+            "WHERE ((c.id_usuario = ?1 AND u.id_role = 3 AND e.id_supervisor = ?1) OR (a.id_chefe = ?1))" +
             "AND b.termina_em is null " +
             "AND e.id_supervisor IS NOT NULL " +
             "AND e.termina_em > GETDATE()")

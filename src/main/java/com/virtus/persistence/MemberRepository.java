@@ -1,20 +1,19 @@
 package com.virtus.persistence;
 
-import com.virtus.common.BaseRepository;
-import com.virtus.domain.entity.Member;
-import com.virtus.domain.entity.Office;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.Query;
-
 import java.util.List;
 
-public interface MemberRepository extends BaseRepository<Member> {
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
-    @Override
-    @Query("select m from Member m where m.user.name LIKE %:filter%")
-    Page<Member> findAllByFilter(String filter, PageRequest pageRequest);
+import com.virtus.domain.entity.Member;
+import com.virtus.domain.entity.Office;
+
+public interface MemberRepository extends JpaRepository<Member, Integer> {
+
+    @Query("SELECT COALESCE(MAX(m.id), 0) FROM Member m")
+    Integer findMaxId();
 
     @Query(nativeQuery = true,
             value = "WITH subordinacoes AS (    " +

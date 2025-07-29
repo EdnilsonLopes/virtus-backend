@@ -144,6 +144,7 @@ public class DistributeActivitiesService {
         return AuditorDTO.builder()
                 .userId(user.getId())
                 .name(user.getName())
+                .roleName(user.getRole().getName())
                 .build();
     }
 

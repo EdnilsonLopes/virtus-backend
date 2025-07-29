@@ -45,13 +45,14 @@ public class CycleService extends BaseService<Cycle, CycleRepository, CycleReque
     private EntityManager entityManager;
     private final EntityVirtusRepository entityVirtusRepository;
 
-    public CycleService(CycleRepository repository, UserRepository userRepository, EntityManagerFactory entityManagerFactory,
-                        CycleEntityRepository cycleEntityRepository,
-                        ProductCycleRepository productCycleRepository,
-                        ProductPillarRepository productPillarRepository,
-                        PillarCycleRepository pillarCycleRepository,
-                        ProductComponentRepository productComponentRepository,
-                        EntityVirtusRepository entityVirtusRepository) {
+    public CycleService(CycleRepository repository, UserRepository userRepository,
+            EntityManagerFactory entityManagerFactory,
+            CycleEntityRepository cycleEntityRepository,
+            ProductCycleRepository productCycleRepository,
+            ProductPillarRepository productPillarRepository,
+            PillarCycleRepository pillarCycleRepository,
+            ProductComponentRepository productComponentRepository,
+            EntityVirtusRepository entityVirtusRepository) {
         super(repository, userRepository, entityManagerFactory);
         this.entityManagerFactory = entityManagerFactory;
         this.cycleEntityRepository = cycleEntityRepository;
@@ -68,7 +69,7 @@ public class CycleService extends BaseService<Cycle, CycleRepository, CycleReque
         response.setId(entity.getId());
         response.setName(entity.getName());
         response.setAuthor(parseToUserResponseDTO(entity.getAuthor()));
-        response.setCreatedAt(entity.getCreatedAt());        
+        response.setCreatedAt(entity.getCreatedAt());
         response.setReference(entity.getReference());
         response.setOrdination(entity.getOrdination());
         response.setDescription(entity.getDescription());
@@ -83,7 +84,8 @@ public class CycleService extends BaseService<Cycle, CycleRepository, CycleReque
         if (CollectionUtils.isEmpty(cycleEntities)) {
             return new ArrayList<>();
         }
-        return cycleEntities.stream().map(ce -> parseToEntityVirtusResponse(ce.getEntity())).collect(Collectors.toList());
+        return cycleEntities.stream().map(ce -> parseToEntityVirtusResponse(ce.getEntity()))
+                .collect(Collectors.toList());
     }
 
     private EntityVirtusResponseDTO parseToEntityVirtusResponse(EntityVirtus entity) {
@@ -141,7 +143,9 @@ public class CycleService extends BaseService<Cycle, CycleRepository, CycleReque
     }
 
     private PillarCycle parseToCyclePillar(CyclePillarRequestDTO dto, Cycle cycle) {
-        PillarCycle pillarCycle = dto.getId() != null ? pillarCycleRepository.findById(dto.getId()).orElse(new PillarCycle()) : new PillarCycle();
+        PillarCycle pillarCycle = dto.getId() != null
+                ? pillarCycleRepository.findById(dto.getId()).orElse(new PillarCycle())
+                : new PillarCycle();
         pillarCycle.setAuthor(getLoggedUser());
         pillarCycle.setAverageType(dto.getAverageType().getValue());
         pillarCycle.setStandardWeight(dto.getStandardWeight());
@@ -162,7 +166,8 @@ public class CycleService extends BaseService<Cycle, CycleRepository, CycleReque
             user = findUserById(currentUser.getId());
         }
         setLoggedUser(user);
-        Cycle cycle = getRepository().findById(body.getCycle().getId()).orElseThrow(() -> new VirtusException(Translator.translate("cycle.not.found")));
+        Cycle cycle = getRepository().findById(body.getCycle().getId())
+                .orElseThrow(() -> new VirtusException(Translator.translate("cycle.not.found")));
         cycle.setName(body.getCycle().getName());
         cycle.setDescription(body.getCycle().getDescription());
         cycle.setUpdatedAt(LocalDateTime.now());
@@ -180,9 +185,9 @@ public class CycleService extends BaseService<Cycle, CycleRepository, CycleReque
         });
         cycleEntityRepository.saveAll(cycleEntities);
         final User current = user;
-        removeProductCycles(cycle);
-        removeProductPillar(cycle);
-        removeProductComponent(cycle);
+        // removeProductCycles(cycle);
+        // removeProductPillar(cycle);
+        // removeProductComponent(cycle);
         for (CycleEntity cycleEntity : cycleEntities) {
             createProductCycle(current, cycleEntity.getEntity(), cycle);
             createProductPillar(current, cycleEntity.getEntity(), cycle);
@@ -201,9 +206,9 @@ public class CycleService extends BaseService<Cycle, CycleRepository, CycleReque
 
         final User current = user;
         for (CycleEntity cycleEntity : cycleEntities) {
-            removeProductCycles(cycleEntity.getCycle());
+            /*removeProductCycles(cycleEntity.getCycle());
             removeProductPillar(cycleEntity.getCycle());
-            removeProductComponent(cycleEntity.getCycle());
+            removeProductComponent(cycleEntity.getCycle());*/
             createProductCycle(current, cycleEntity.getEntity(), cycleEntity.getCycle());
             createProductPillar(current, cycleEntity.getEntity(), cycleEntity.getCycle());
             createProductComponent(current, cycleEntity.getEntity(), cycleEntity.getCycle());
@@ -239,47 +244,53 @@ public class CycleService extends BaseService<Cycle, CycleRepository, CycleReque
 
     private void removeProductCycles(Cycle cycle) {
         if (!CollectionUtils.isEmpty(cycle.getProductsCycles())) {
-            productCycleRepository.deleteAllByIdInBatch(cycle.getProductsCycles().stream().map(p -> p.getId()).collect(Collectors.toList()));
+            productCycleRepository.deleteAllByIdInBatch(
+                    cycle.getProductsCycles().stream().map(p -> p.getId()).collect(Collectors.toList()));
         }
     }
 
     private void removeProductPillar(Cycle cycle) {
         if (!CollectionUtils.isEmpty(cycle.getProductsPillars())) {
-            productPillarRepository.deleteAllByIdInBatch(cycle.getProductsPillars().stream().map(p -> p.getId()).collect(Collectors.toList()));
+            productPillarRepository.deleteAllByIdInBatch(
+                    cycle.getProductsPillars().stream().map(p -> p.getId()).collect(Collectors.toList()));
         }
     }
 
     private void removeProductComponent(Cycle cycle) {
         if (!CollectionUtils.isEmpty(cycle.getProductsComponents())) {
-            productComponentRepository.deleteAllByIdInBatch(cycle.getProductsComponents().stream().map(p -> p.getId()).collect(Collectors.toList()));
+            productComponentRepository.deleteAllByIdInBatch(
+                    cycle.getProductsComponents().stream().map(p -> p.getId()).collect(Collectors.toList()));
         }
     }
 
     private void createProductCycle(User user, EntityVirtus entity, Cycle cycle) {
-        String query = "INSERT INTO virtus.produtos_ciclos ( " +
-                " id_entidade, " +
-                " id_ciclo, " +
-                " nota, " +
-                " id_tipo_pontuacao, " +
-                " id_author, " +
-                " criado_em ) " +
-                " OUTPUT INSERTED.id_produto_ciclo " +
-                " SELECT :entidadeId, " +
-                ":cicloId, " +
-                " 0 as nota, " +
-                " :gradeTypeId, " +
-                " :currentUserId, " +
-                " GETDATE() " +
-                " FROM virtus.ciclos_entidades a " +
-                " WHERE NOT EXISTS " +
-                "  (SELECT 1 " +
-                "   FROM virtus.produtos_ciclos b " +
-                "   WHERE b.id_entidade = a.id_entidade " +
-                "     AND b.id_ciclo = a.id_ciclo) ";
+        Integer entidadeId = entity != null ? entity.getId() : null;
+        Integer cicloId = cycle != null ? cycle.getId() : null;
 
-        entityManager.createNativeQuery(query)
-                .setParameter("entidadeId", entity != null ? entity.getId() : null)
-                .setParameter("cicloId", cycle != null ? cycle.getId() : null)
+        if (entidadeId == null || cicloId == null)
+            return;
+
+        Long count = entityManager.createQuery(
+                "SELECT COUNT(pc) FROM ProductCycle pc " +
+                        "WHERE pc.entity.id = :entidadeId AND pc.cycle.id = :cicloId",
+                Long.class)
+                .setParameter("entidadeId", entidadeId)
+                .setParameter("cicloId", cicloId)
+                .getSingleResult();
+
+        if (count > 0) {
+            return; // Já existe
+        }
+
+        // Faz o insert
+        String insertQuery = "INSERT INTO virtus.produtos_ciclos ( " +
+                " id_entidade, id_ciclo, nota, id_tipo_pontuacao, id_author, criado_em ) " +
+                "OUTPUT INSERTED.id_produto_ciclo " +
+                "VALUES (:entidadeId, :cicloId, 0, :gradeTypeId, :currentUserId, GETDATE())";
+
+        entityManager.createNativeQuery(insertQuery)
+                .setParameter("entidadeId", entidadeId)
+                .setParameter("cicloId", cicloId)
                 .setParameter("gradeTypeId", null)
                 .setParameter("currentUserId", user != null ? user.getId() : null)
                 .getResultList();
@@ -287,60 +298,85 @@ public class CycleService extends BaseService<Cycle, CycleRepository, CycleReque
 
     @Transactional
     public void createProductComponent(User current, EntityVirtus entity, Cycle cycle) {
-        String jpql =
-                "INSERT INTO virtus.produtos_componentes (id_entidade, id_ciclo, id_pilar, id_componente, peso, nota, id_tipo_pontuacao, id_author, criado_em) " +
-                        "SELECT :entidadeId, :cicloId, a.id_pilar, b.id_componente, " +
-                        "CASE WHEN c.peso_padrao <> 0 THEN ROUND(AVG(c.peso_padrao), 2) ELSE 1 END, 0, :gradeTypeId, :currentUser, :date " +
-                        "FROM virtus.pilares_ciclos a " +
-                        "LEFT JOIN virtus.componentes_pilares b ON a.id_pilar = b.id_pilar " +
-                        "LEFT JOIN virtus.elementos_componentes c ON b.id_componente = c.id_componente " +
-                        "WHERE a.id_ciclo = :cicloId " +
-                        "AND NOT EXISTS " +
-                        "(SELECT 1 FROM virtus.produtos_componentes pc WHERE pc.id_entidade = :entidadeId AND pc.id_ciclo = a.id_ciclo AND pc.id_pilar = a.id_pilar AND pc.id_componente = b.id_componente) " +
-                        "GROUP BY a.id_ciclo, a.id_pilar, b.id_componente, c.peso_padrao ORDER BY 1, 2, 3, 4";
+        Integer entidadeId = entity != null ? entity.getId() : null;
+        Integer cicloId = cycle != null ? cycle.getId() : null;
 
-        entityManager.createNativeQuery(jpql)
-                .setParameter("entidadeId", entity != null ? entity.getId() : null)
-                .setParameter("cicloId", cycle != null ? cycle.getId() : null)
+        if (entidadeId == null || cicloId == null)
+            return;
+
+        // Verifica se já existem componentes criados
+        String existsQuery = "SELECT COUNT(*) FROM virtus.produtos_componentes " +
+                "WHERE id_entidade = :entidadeId AND id_ciclo = :cicloId";
+
+        Number count = (Number) entityManager.createNativeQuery(existsQuery)
+                .setParameter("entidadeId", entidadeId)
+                .setParameter("cicloId", cicloId)
+                .getSingleResult();
+
+        if (count.longValue() > 0) {
+            return; // Já existem registros para essa entidade/ciclo
+        }
+
+        // Faz o insert
+        String insertQuery = "INSERT INTO virtus.produtos_componentes " +
+                "(id_entidade, id_ciclo, id_pilar, id_componente, peso, nota, id_tipo_pontuacao, id_author, criado_em) "
+                +
+                "SELECT :entidadeId, :cicloId, a.id_pilar, b.id_componente, " +
+                "CASE WHEN b.peso_padrao <> 0 THEN ROUND(AVG(b.peso_padrao), 2) ELSE 1 END, " +
+                "0, :gradeTypeId, :currentUser, :date " +
+                "FROM virtus.pilares_ciclos a " +
+                "LEFT JOIN virtus.componentes_pilares b ON a.id_pilar = b.id_pilar " +
+                "WHERE a.id_ciclo = :cicloId " +
+                "GROUP BY a.id_ciclo, a.id_pilar, b.id_componente, b.peso_padrao";
+
+        entityManager.createNativeQuery(insertQuery)
+                .setParameter("entidadeId", entidadeId)
+                .setParameter("cicloId", cicloId)
                 .setParameter("gradeTypeId", null)
                 .setParameter("currentUser", current != null ? current.getId() : null)
                 .setParameter("date", LocalDateTime.now())
                 .executeUpdate();
     }
 
+    @Transactional
     private void createProductPillar(User current, EntityVirtus entity, Cycle cycle) {
-        String query = "INSERT INTO virtus.produtos_pilares " +
-                " (id_entidade, id_ciclo, id_pilar, peso, nota, id_tipo_pontuacao, id_author, criado_em) " +
-                " OUTPUT INSERTED.id_produto_pilar " +
-                " SELECT " +
-                ":entidadeId, " +
-                ":cicloId, " +
-                " a.id_pilar, " +
-                " 0 as peso, " +
-                " 0 as nota, " +
-                " :gradeTypeId, " +
-                " :currentUser, " +
-                " GETDATE() " +
-                " FROM virtus.pilares_ciclos a " +
-                " WHERE NOT EXISTS " +
-                "  (SELECT 1 " +
-                "   FROM virtus.produtos_pilares b " +
-                "   WHERE b.id_entidade = :entidadeId "+
-                "     AND b.id_ciclo = a.id_ciclo " +
-                "     AND b.id_pilar = a.id_pilar)" +
-                " AND a.id_ciclo = :cicloId";
+        Integer entidadeId = entity != null ? entity.getId() : null;
+        Integer cicloId = cycle != null ? cycle.getId() : null;
 
+        if (entidadeId == null || cicloId == null)
+            return;
 
-        entityManager.createNativeQuery(query)
-                .setParameter("entidadeId", entity != null ? entity.getId() : null)
-                .setParameter("cicloId", cycle != null ? cycle.getId() : null)
+        // Verifica se já existem pilares criados
+        String existsQuery = "SELECT COUNT(*) FROM virtus.produtos_pilares " +
+                "WHERE id_entidade = :entidadeId AND id_ciclo = :cicloId";
+
+        Number count = (Number) entityManager.createNativeQuery(existsQuery)
+                .setParameter("entidadeId", entidadeId)
+                .setParameter("cicloId", cicloId)
+                .getSingleResult();
+
+        if (count.longValue() > 0) {
+            return; // Já existem registros para essa entidade/ciclo
+        }
+
+        // Faz o insert
+        String insertQuery = "INSERT INTO virtus.produtos_pilares " +
+                "(id_entidade, id_ciclo, id_pilar, peso, nota, id_tipo_pontuacao, id_author, criado_em) " +
+                "OUTPUT INSERTED.id_produto_pilar " +
+                "SELECT :entidadeId, :cicloId, a.id_pilar, 0, 0, :gradeTypeId, :currentUser, GETDATE() " +
+                "FROM virtus.pilares_ciclos a " +
+                "WHERE a.id_ciclo = :cicloId";
+
+        entityManager.createNativeQuery(insertQuery)
+                .setParameter("entidadeId", entidadeId)
+                .setParameter("cicloId", cicloId)
                 .setParameter("gradeTypeId", null)
                 .setParameter("currentUser", current != null ? current.getId() : null)
                 .getResultList();
     }
 
-
-    private CycleEntity parseToCycleEntity(EntityVirtusResponseDTO entityVirtus, Cycle cycle, LocalDate startsAt, LocalDate endsAt) {
+    private CycleEntity parseToCycleEntity(EntityVirtusResponseDTO entityVirtus, Cycle cycle, LocalDate startsAt,
+            LocalDate endsAt) {
         CycleEntity cycleEntity = cycle.getCycleEntities()
                 .stream()
                 .filter(ce -> entityVirtus.getId().equals(ce.getEntity().getId()))
@@ -361,12 +397,14 @@ public class CycleService extends BaseService<Cycle, CycleRepository, CycleReque
         return cycleEntity;
     }
 
+    public PageableResponseDTO<CycleResponseDTO> findCycleByEntityId(CurrentUser currentUser, Integer entityId,
+            int page, int size) {
 
-    public PageableResponseDTO<CycleResponseDTO> findCycleByEntityId(CurrentUser currentUser, Integer entityId, int page, int size) {
+        Page<Cycle> cyclePage = getRepository().findValidCyclesByEntityId(entityId, LocalDate.now(),
+                PageRequest.of(page, size));
 
-        Page<Cycle> cyclePage = getRepository().findValidCyclesByEntityId(entityId, LocalDate.now(), PageRequest.of(page, size));
-
-        List<CycleResponseDTO> content = cyclePage.getContent().stream().map(c -> parseToResponseDTO(c, false)).collect(Collectors.toList());
+        List<CycleResponseDTO> content = cyclePage.getContent().stream().map(c -> parseToResponseDTO(c, false))
+                .collect(Collectors.toList());
 
         return new PageableResponseDTO<>(
                 content,

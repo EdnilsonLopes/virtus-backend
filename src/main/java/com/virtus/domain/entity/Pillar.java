@@ -1,5 +1,6 @@
 package com.virtus.domain.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -35,7 +36,7 @@ public class Pillar extends BaseConfigurationEntity {
     private int ordination;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "pillar", orphanRemoval = true)
-    private List<ComponentPillar> componentPillars;
+    private List<ComponentPillar> componentPillars = new ArrayList<>();
 
     public Pillar(Integer id) {
         setId(id);
