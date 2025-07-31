@@ -29,7 +29,7 @@ public class ProductComponentHistoryController {
             @RequestParam Long pilarId,
             @RequestParam Long componenteId) {
 
-        List<ProductComponentHistoryDTO> historyList = service.find(entidadeId, cicloId, pilarId, componenteId);
+            List<ProductComponentHistoryDTO> historyList = service.find(entidadeId, cicloId, pilarId, componenteId);
         return ResponseEntity.ok(historyList);
     }
 

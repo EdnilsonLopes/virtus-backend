@@ -652,16 +652,12 @@ public class EvaluatePlansRepository {
         }
 
         public String updatePillarWeight(ProductPillarRequestDTO dto, CurrentUser currentUser) {
-                String sqlUpdate = "UPDATE virtus.produtos_pilares SET peso = ?, motivacao_peso = ?, " +
-                                " id_tipo_pontuacao = (SELECT case when b.id_supervisor = ? " +
-                                " then 3 else 2 end FROM virtus.produtos_ciclos b where id_produto_ciclo = b.id_produto_ciclo) "
-                                +
+                String sqlUpdate = "UPDATE virtus.produtos_pilares SET peso = ?, motivacao_peso = ? " +
                                 "WHERE id_entidade = ? AND id_ciclo = ? AND id_pilar = ?";
 
                 jdbcTemplate.update(sqlUpdate,
                                 dto.getNovoPeso(),
                                 dto.getMotivacao(),
-                                dto.getSupervisorId(),
                                 dto.getEntidadeId(),
                                 dto.getCicloId(),
                                 dto.getPilarId());

@@ -30,6 +30,7 @@ public class DatabaseInitializer {
         schemaCreator.loadIndicators();
         schemaCreator.loadFKs();
         schemaCreator.loadUniqueKeys();
+        schemaCreator.loadIndexes();
         // schemaCreator.loadIndicatorScores();
         System.out.println("Database initialization completed.");
     }

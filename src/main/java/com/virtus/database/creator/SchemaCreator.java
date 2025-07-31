@@ -8,6 +8,7 @@ import com.virtus.database.scripts.EntitiesVirtusScripts;
 import com.virtus.database.scripts.FeaturesScripts;
 import com.virtus.database.scripts.ForeignKeysScripts;
 import com.virtus.database.scripts.HistoryTableScripts;
+import com.virtus.database.scripts.IndexesScripts;
 import com.virtus.database.scripts.IndicadoresScripts;
 import com.virtus.database.scripts.IndicatorsScoresTableScripts;
 import com.virtus.database.scripts.JurisdictionsScripts;
@@ -185,5 +186,9 @@ public class SchemaCreator {
 
     public void loadUniqueKeys() {
         executor.execute(UniqueKeysScripts.createUniqueKeysIfNotExists(appProperties.getSchema()));
+    }
+
+    public void loadIndexes() {
+        executor.execute(IndexesScripts.createIndexesIfNotExists(appProperties.getSchema()));
     }
 }
