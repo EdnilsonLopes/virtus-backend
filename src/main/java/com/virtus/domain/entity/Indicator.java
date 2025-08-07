@@ -1,10 +1,15 @@
 package com.virtus.domain.entity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.virtus.common.domain.entity.BaseEntity;
@@ -35,6 +40,9 @@ public class Indicator extends BaseEntity {
 
     @Column(name = "criado_em")
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @OneToMany(mappedBy = "indicator", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<IndicatorComponent> indicatorComponents = new ArrayList<>();
 
     public Indicator(Integer id) {
         this.id = id;

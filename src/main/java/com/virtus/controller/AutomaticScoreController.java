@@ -1,5 +1,12 @@
 package com.virtus.controller;
 
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,5 +23,18 @@ public class AutomaticScoreController extends
 
     public AutomaticScoreController(AutomaticScoreService service) {
         super(service);
+    }
+
+    @GetMapping("/last-reference")
+    public ResponseEntity<Map<String, String>> getLastReferenceFromConformity() {
+        String lastReference = getService().getLastReferenceFromIndicatorsScores();
+        return ResponseEntity.ok(Map.of("referenceDate", lastReference));
+    }
+
+    @PostMapping("/calculate")
+    public ResponseEntity<Void> calculateScores(@RequestBody Map<String, String> payload) {
+        String referenceDate = payload.get("referenceDate");
+        getService().calcularNotasAutomaticas(List.of(referenceDate));
+        return ResponseEntity.ok().build();
     }
 }

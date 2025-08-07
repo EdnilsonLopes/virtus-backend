@@ -14,7 +14,6 @@ public class IndicatorsScoresTableScripts {
                                                 "data_referencia varchar(6) NULL, " +
                                                 "id_indicador integer NOT NULL, " +
                                                 "sigla_indicador varchar(25) NULL, " +
-                                                "tx_componente varchar(25) NOT NULL, " +
                                                 "nota float NOT NULL, " +
                                                 "criado_em datetime NOT NULL) END ",
                                 schema, schema);
@@ -39,9 +38,9 @@ public class IndicatorsScoresTableScripts {
                                                         +
                                                         "BEGIN\n" +
                                                         "    INSERT INTO %s.notas_indicadores " +
-                                                        "(id_nota_indicador, cnpb, data_referencia, id_indicador, sigla_indicador, tx_componente, nota, criado_em)\n"
+                                                        "(id_nota_indicador, cnpb, data_referencia, id_indicador, sigla_indicador, nota, criado_em)\n"
                                                         +
-                                                        "    VALUES (%d, '%s', '%s', %d, '%s', '%s', %.1f, CONVERT(datetime, '%s', 121));\n" +
+                                                        "    VALUES (%d, '%s', '%s', %d, '%s', %.1f, CONVERT(datetime, '%s', 121));\n" +
                                                         "END;\n\n",
                                         schema, id, schema, id,
                                         row[0], row[1], row[2], row[3], row[4], row[5], row[6]));

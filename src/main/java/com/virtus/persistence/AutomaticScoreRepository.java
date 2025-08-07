@@ -1,17 +1,16 @@
 package com.virtus.persistence;
 
-import com.virtus.common.BaseRepository;
-import com.virtus.domain.entity.AutomaticScore;
+import java.math.BigDecimal;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.math.BigDecimal;
-import java.util.List;
+import com.virtus.common.BaseRepository;
+import com.virtus.domain.entity.AutomaticScore;
 
 @Repository
 public interface AutomaticScoreRepository extends BaseRepository<AutomaticScore> {

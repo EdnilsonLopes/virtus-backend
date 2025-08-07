@@ -1,6 +1,8 @@
 package com.virtus.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnit;
@@ -10,11 +12,12 @@ import org.springframework.stereotype.Service;
 
 import com.virtus.client.VirtusApiClient;
 import com.virtus.client.dto.ExternalIndicatorDTO;
-import com.virtus.client.dto.LastReferenceDTO;
 import com.virtus.common.BaseService;
 import com.virtus.domain.dto.request.IndicatorRequestDTO;
 import com.virtus.domain.dto.response.IndicatorResponseDTO;
+import com.virtus.domain.entity.Component;
 import com.virtus.domain.entity.Indicator;
+import com.virtus.domain.entity.IndicatorComponent;
 import com.virtus.persistence.IndicatorRepository;
 import com.virtus.persistence.UserRepository;
 import com.virtus.translate.Translator;
@@ -67,6 +70,22 @@ public class IndicatorService
 
             getRepository().save(indicator);
         }
+    }
+
+    public Map<Integer, String> getFirstComponentNameByIndicator() {
+        List<Indicator> indicators = getRepository().findAll();
+        Map<Integer, String> result = new HashMap<>();
+
+        for (Indicator indicator : indicators) {
+            if (indicator.getIndicatorComponents() != null && !((List<?>) indicator.getIndicatorComponents()).isEmpty()) {
+                Component component = ((List<IndicatorComponent>) indicator.getIndicatorComponents()).get(0).getComponent();
+                if (component != null) {
+                    result.put(indicator.getId(), component.getName());
+                }
+            }
+        }
+
+        return result;
     }
 
 }

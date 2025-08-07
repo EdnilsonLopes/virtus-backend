@@ -22,7 +22,6 @@ public class IndicatorScoreResponseDTO extends BaseResponseDTO {
     private String referenceDate;
     private Integer indicatorId;
     private String indicatorSigla;
-    private String componentText;
     private BigDecimal score;
     private String authorName;
     private java.time.LocalDateTime createdAt;

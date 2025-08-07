@@ -34,9 +34,6 @@ public class IndicatorScore extends BaseEntity {
     @Column(name = "sigla_indicador", length = 25)
     private String indicatorSigla;
 
-    @Column(name = "tx_componente", nullable = false, length = 25)
-    private String componentText;
-
     @Column(name = "nota", nullable = false)
     private BigDecimal score;
 

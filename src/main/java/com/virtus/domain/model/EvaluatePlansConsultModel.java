@@ -66,8 +66,8 @@ public class EvaluatePlansConsultModel {
     private BigDecimal planoPeso;
     private BigDecimal planoNota;
 
-    private LocalDateTime iniciaEm;
-    private LocalDateTime terminaEm;
+    private String iniciaEm;
+    private String terminaEm;
 
     private String cStatus;
     private Integer statusId;

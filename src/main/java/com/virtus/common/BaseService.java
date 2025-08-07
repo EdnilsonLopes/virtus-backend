@@ -287,7 +287,7 @@ public abstract class BaseService<T extends BaseEntity, R extends BaseRepository
         dto.setIndicatorName(entity.getIndicatorName());
         dto.setIndicatorDescription(entity.getIndicatorDescription());
         dto.setCreatedAt(entity.getCreatedAt());
-        if (entity.getAuthor() != null) {
+        if (entity.getAuthor() != null && entity.getAuthor().getId() != 0) {
             dto.setAuthorName(entity.getAuthor().getName());
         }
         dto.setUpdatedAt(entity.getUpdatedAt());
@@ -299,7 +299,6 @@ public abstract class BaseService<T extends BaseEntity, R extends BaseRepository
         dto.setId(entity.getId());
         dto.setCnpb(entity.getCnpb());
         dto.setReferenceDate(entity.getReferenceDate());
-        dto.setComponentText(entity.getComponentText());
         dto.setScore(entity.getScore());
         dto.setIndicatorId(entity.getIndicatorId());
         dto.setIndicatorSigla(entity.getIndicatorSigla());

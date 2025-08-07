@@ -240,7 +240,7 @@ public class TableScripts {
         return sql;
     }
 
-        // Table INDICADORES_COMPONENTES
+    // Table INDICADORES_COMPONENTES
     public static String createIndicadoresComponentesTable(String schema) {
         String sql = String.format(
                 "IF NOT EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'%s.indicadores_componentes') " +

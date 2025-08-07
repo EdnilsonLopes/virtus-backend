@@ -6,7 +6,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -29,6 +31,8 @@ public class EvaluatePlansTreeNode {
     private BigDecimal grade;
     private Boolean periodoPermitido;
     private Boolean periodoCiclo;
+    private String iniciaEm;
+    private String terminaEm;
     private Boolean cicloAnalisado;
     private Boolean pilarAnalisado;
     private Boolean componenteAnalisado;

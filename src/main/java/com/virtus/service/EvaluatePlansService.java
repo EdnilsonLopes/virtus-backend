@@ -182,6 +182,8 @@ public class EvaluatePlansService {
                                                                 .auditorId(plan.getAuditorId())
                                                                 .periodoPermitido(plan.getPeriodoPermitido())
                                                                 .periodoCiclo(plan.getPeriodoCiclo())
+                                                                .iniciaEm(plan.getIniciaEm())
+                                                                .terminaEm(plan.getTerminaEm())
                                                                 .cicloAnalisado(plan.getCicloAnalisado())
                                                                 .pilarAnalisado(plan.getPilarAnalisado())
                                                                 .componenteAnalisado(plan.getComponenteAnalisado())

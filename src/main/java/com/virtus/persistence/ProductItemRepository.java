@@ -1,6 +1,9 @@
 package com.virtus.persistence;
 
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -13,7 +16,8 @@ public class ProductItemRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public void inserirProdutosItens(Integer cicloId, Integer entidadeId, Integer pilarId, Integer componenteId, Integer planoId, Integer authorId) {
+    public void inserirProdutosItens(Integer cicloId, Integer entidadeId, Integer pilarId, Integer componenteId,
+            Integer planoId, Integer authorId) {
         String sql = "INSERT INTO virtus.produtos_itens ( " +
                 " id_entidade, " +
                 " id_ciclo, " +
@@ -62,7 +66,7 @@ public class ProductItemRepository {
             Long tipoNotaId, Long elementoId, Long itemId) {
         String sql = "SELECT analise FROM virtus.produtos_itens " +
                 " WHERE id_entidade = ? AND id_ciclo = ? AND id_pilar = ? " +
-                " AND id_componente = ? AND id_plano = ? AND id_tipo_nota = ? "+
+                " AND id_componente = ? AND id_plano = ? AND id_tipo_nota = ? " +
                 " AND id_elemento = ? AND id_item = ? ";
         try {
             return jdbcTemplate.queryForObject(sql,

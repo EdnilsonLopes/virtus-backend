@@ -1,5 +1,24 @@
 package com.virtus.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceUnit;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+
 import com.virtus.common.BaseService;
 import com.virtus.domain.dto.request.CyclePillarRequestDTO;
 import com.virtus.domain.dto.request.CycleRequestDTO;
@@ -8,27 +27,24 @@ import com.virtus.domain.dto.response.CyclePillarResponseDTO;
 import com.virtus.domain.dto.response.CycleResponseDTO;
 import com.virtus.domain.dto.response.EntityVirtusResponseDTO;
 import com.virtus.domain.dto.response.PageableResponseDTO;
-import com.virtus.domain.entity.*;
+import com.virtus.domain.entity.Cycle;
+import com.virtus.domain.entity.CycleEntity;
+import com.virtus.domain.entity.EntityVirtus;
+import com.virtus.domain.entity.Pillar;
+import com.virtus.domain.entity.PillarCycle;
+import com.virtus.domain.entity.User;
 import com.virtus.domain.model.CurrentUser;
 import com.virtus.exception.VirtusException;
-import com.virtus.persistence.*;
+import com.virtus.persistence.CycleEntityRepository;
+import com.virtus.persistence.CycleRepository;
+import com.virtus.persistence.EntityVirtusRepository;
+import com.virtus.persistence.PillarCycleRepository;
+import com.virtus.persistence.ProductComponentRepository;
+import com.virtus.persistence.ProductCycleRepository;
+import com.virtus.persistence.ProductPillarRepository;
+import com.virtus.persistence.ProductPurgeRepository;
+import com.virtus.persistence.UserRepository;
 import com.virtus.translate.Translator;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceUnit;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 @Service
 public class CycleService extends BaseService<Cycle, CycleRepository, CycleRequestDTO, CycleResponseDTO> {
@@ -40,6 +56,7 @@ public class CycleService extends BaseService<Cycle, CycleRepository, CycleReque
     private final ProductPillarRepository productPillarRepository;
     private final PillarCycleRepository pillarCycleRepository;
     private final ProductComponentRepository productComponentRepository;
+    private final ProductPurgeRepository purgeRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -52,6 +69,7 @@ public class CycleService extends BaseService<Cycle, CycleRepository, CycleReque
             ProductPillarRepository productPillarRepository,
             PillarCycleRepository pillarCycleRepository,
             ProductComponentRepository productComponentRepository,
+            ProductPurgeRepository purgeRepository,
             EntityVirtusRepository entityVirtusRepository) {
         super(repository, userRepository, entityManagerFactory);
         this.entityManagerFactory = entityManagerFactory;
@@ -61,6 +79,7 @@ public class CycleService extends BaseService<Cycle, CycleRepository, CycleReque
         this.pillarCycleRepository = pillarCycleRepository;
         this.productComponentRepository = productComponentRepository;
         this.entityVirtusRepository = entityVirtusRepository;
+        this.purgeRepository = purgeRepository;
     }
 
     @Override
@@ -206,9 +225,11 @@ public class CycleService extends BaseService<Cycle, CycleRepository, CycleReque
 
         final User current = user;
         for (CycleEntity cycleEntity : cycleEntities) {
-            /*removeProductCycles(cycleEntity.getCycle());
-            removeProductPillar(cycleEntity.getCycle());
-            removeProductComponent(cycleEntity.getCycle());*/
+            /*
+             * removeProductCycles(cycleEntity.getCycle());
+             * removeProductPillar(cycleEntity.getCycle());
+             * removeProductComponent(cycleEntity.getCycle());
+             */
             createProductCycle(current, cycleEntity.getEntity(), cycleEntity.getCycle());
             createProductPillar(current, cycleEntity.getEntity(), cycleEntity.getCycle());
             createProductComponent(current, cycleEntity.getEntity(), cycleEntity.getCycle());
@@ -413,4 +434,44 @@ public class CycleService extends BaseService<Cycle, CycleRepository, CycleReque
                 cyclePage.getTotalPages(),
                 cyclePage.getTotalElements());
     }
+
+    @Transactional
+    public void removeCycleProducts(CurrentUser currentUser, StartCycleRequestDTO dto) {
+        Integer cycleId = dto.getCycle().getId();
+
+        // 1. Coleta todos os IDs de entidades atualmente vinculadas ao ciclo
+        List<Integer> allEntityIds = cycleEntityRepository.findEntityIdsByCycleId(cycleId);
+
+        // 2. Coleta os IDs de entidades que devem ser preservadas (vieram no DTO)
+        List<Integer> preservedIds = Optional.ofNullable(dto.getEntities())
+                .orElse(List.of())
+                .stream()
+                .map(e -> e.getId())
+                .collect(Collectors.toList());
+
+        // 3. Calcula quais entidades devem ser removidas (não vieram no DTO)
+        List<Integer> toRemoveIds = allEntityIds.stream()
+                .filter(id -> !preservedIds.contains(id))
+                .collect(Collectors.toList());
+
+        // 4. Executa a purga para cada entidade a ser removida
+        for (Integer entityId : toRemoveIds) {
+            purgeRepository.deleteProdutosItens(entityId, cycleId);
+            purgeRepository.deleteProdutosElementos(entityId, cycleId);
+            purgeRepository.deleteProdutosTiposNotas(entityId, cycleId);
+            purgeRepository.deleteProdutosPlanos(entityId, cycleId);
+            purgeRepository.deleteProdutosComponentes(entityId, cycleId);
+            purgeRepository.deleteProdutosPilares(entityId, cycleId);
+            purgeRepository.deleteProdutosCiclos(entityId, cycleId);
+            purgeRepository.deleteCiclosEntidades(entityId, cycleId);
+            purgeRepository.deleteProdutosItensHistoricos(entityId, cycleId);
+            purgeRepository.deleteProdutosElementosHistoricos(entityId, cycleId);
+            purgeRepository.deleteProdutosPlanosHistoricos(entityId, cycleId);
+            purgeRepository.deleteProdutosComponentesHistoricos(entityId, cycleId);
+            purgeRepository.deleteProdutosPilaresHistoricos(entityId, cycleId);
+            purgeRepository.deleteProdutosCiclosHistoricos(entityId, cycleId);
+            purgeRepository.deleteIntegrantes(entityId, cycleId);
+        }
+    }
+
 }

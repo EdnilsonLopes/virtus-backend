@@ -21,8 +21,17 @@ public class CycleController extends BaseController<Cycle, CycleService, CycleRe
     }
 
     @PostMapping("/start-cycle")
-    public ResponseEntity<Void> startCycle(@LoggedUser CurrentUser currentUser, @RequestBody StartCycleRequestDTO body) {
+    public ResponseEntity<Void> startCycle(@LoggedUser CurrentUser currentUser,
+            @RequestBody StartCycleRequestDTO body) {
         getService().startCycle(currentUser, body);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/remove-cycle-products")
+    public ResponseEntity<Void> removeCycleProducts(
+            @LoggedUser CurrentUser currentUser,
+            @RequestBody StartCycleRequestDTO body) {
+        getService().removeCycleProducts(currentUser, body);
         return ResponseEntity.ok().build();
     }
 

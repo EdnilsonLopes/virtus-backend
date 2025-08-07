@@ -17,7 +17,6 @@ public class IndicatorScoreMapper {
                 .referenceDate(entity.getReferenceDate())
                 .indicatorId(entity.getIndicatorId())
                 .indicatorSigla(entity.getIndicatorSigla())
-                .componentText(entity.getComponentText())
                 .score(entity.getScore())
                 .createdAt(entity.getCreatedAt())
                 .build();
