@@ -74,7 +74,15 @@ public class AutomaticScoreService extends
         referencias.forEach(inClause::add);
         String clausulaIN = inClause.toString();
 
-        String sql = "INSERT INTO VIRTUS.NOTAS_AUTOMATICAS (CNPB, DATA_REFERENCIA, ID_COMPONENTE, NOTA, CRIADO_EM) " +
+        String sql = "WITH NotasUnicas AS ( " +
+                "    SELECT * FROM ( " +
+                "        SELECT *, " +
+                "               ROW_NUMBER() OVER (PARTITION BY CNPB, DATA_REFERENCIA, ID_INDICADOR ORDER BY CRIADO_EM DESC) AS rn "
+                +
+                "        FROM VIRTUS.NOTAS_INDICADORES " +
+                "    ) t WHERE rn = 1 " +
+                ") " +
+                "INSERT INTO VIRTUS.NOTAS_AUTOMATICAS (CNPB, DATA_REFERENCIA, ID_COMPONENTE, NOTA, CRIADO_EM) " +
                 "SELECT " +
                 "    ni.CNPB, " +
                 "    ni.DATA_REFERENCIA, " +
@@ -82,7 +90,7 @@ public class AutomaticScoreService extends
                 "    SUM(ni.NOTA * ISNULL(ic.PESO_PADRAO, 1)) / NULLIF(SUM(ISNULL(ic.PESO_PADRAO, 1)), 0) AS NOTA_COMPONENTE, "
                 +
                 "    GETDATE() AS CRIADO_EM " +
-                "FROM VIRTUS.NOTAS_INDICADORES ni " +
+                "FROM NotasUnicas ni " +
                 "INNER JOIN VIRTUS.INDICADORES_COMPONENTES ic " +
                 "    ON ni.ID_INDICADOR = ic.ID_INDICADOR " +
                 "WHERE ni.NOTA <> 0 " +
@@ -125,6 +133,14 @@ public class AutomaticScoreService extends
             throw new RuntimeException("Erro ao buscar a última referência: " + e.getMessage(), e);
         } finally {
             em.close();
+        }
+    }
+
+    public void calculateAll() {
+        List<String> referencias = getRepository().findDistinctReferenceDates();
+        for (String referencia : referencias) {
+            // Reaproveita o método existente, se já tiver
+            calcularNotasAutomaticas(List.of(referencia));
         }
     }
 

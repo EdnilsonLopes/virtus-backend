@@ -17,6 +17,7 @@ import com.virtus.domain.dto.CurrentValuesDTO;
 import com.virtus.domain.dto.request.ProductElementItemRequestDTO;
 import com.virtus.domain.dto.request.ProductElementRequestDTO;
 import com.virtus.domain.dto.request.ProductPillarRequestDTO;
+import com.virtus.domain.dto.request.ProductPlanRequestDTO;
 import com.virtus.domain.dto.response.EntityVirtusResponseDTO;
 import com.virtus.domain.dto.response.EvaluatePlansTreeNode;
 import com.virtus.domain.model.CurrentUser;
@@ -151,6 +152,27 @@ public class EvaluatePlansController {
             @RequestParam("objectType") String objectType) {
         service.updateAnalysis(objectType, dto, currentUser);
         return ResponseEntity.ok(null);
+    }
+
+    @PutMapping("/ratifyNote")
+    public ResponseEntity<CurrentValuesDTO> ratifyNote(
+            @LoggedUser CurrentUser currentUser,
+            @RequestBody ProductElementRequestDTO requestDTO) {
+
+        // Chama o serviço para ratificar a nota
+        CurrentValuesDTO valoresAtuais = service.ratifyNote(requestDTO, currentUser);
+        return ResponseEntity.ok(valoresAtuais);
+    }
+
+    // Método para retificar a nota
+    @PutMapping("/rectifyNote")
+    public ResponseEntity<CurrentValuesDTO> rectifyNote(
+            @LoggedUser CurrentUser currentUser,
+            @RequestBody ProductElementRequestDTO requestDTO) {
+
+        // Chama o serviço para retificar a nota
+        CurrentValuesDTO valoresAtuais = service.rectifyNote(requestDTO, currentUser);
+        return ResponseEntity.ok(valoresAtuais);
     }
 
 }

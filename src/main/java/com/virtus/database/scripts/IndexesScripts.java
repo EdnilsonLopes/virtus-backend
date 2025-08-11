@@ -18,7 +18,20 @@ public class IndexesScripts {
                 new IndexDefinition("IX_produtos_tipos_notas_lookup", "produtos_tipos_notas", "id_entidade, id_ciclo, id_pilar, id_componente, id_plano"),
                 new IndexDefinition("IX_produtos_elementos_lookup", "produtos_elementos", "id_entidade, id_ciclo, id_pilar, id_componente, id_plano, id_tipo_nota"),
                 new IndexDefinition("IX_produtos_itens_lookup", "produtos_itens", "id_entidade, id_ciclo, id_pilar, id_componente, id_plano, id_tipo_nota, id_elemento"),
-                new IndexDefinition("IX_planos_recurso", "planos", "id_plano, recurso_garantidor DESC")
+                new IndexDefinition("IX_planos_recurso", "planos", "id_plano, recurso_garantidor DESC"),
+                // Índices para a tabela notas_indicadores
+                new IndexDefinition("IX_notas_indicadores_cnpb", "notas_indicadores", "cnpb"),
+                new IndexDefinition("IX_notas_indicadores_data_referencia", "notas_indicadores", "data_referencia"),
+                new IndexDefinition("IX_notas_indicadores_id_indicador", "notas_indicadores", "id_indicador"),
+                new IndexDefinition("IX_notas_indicadores_sigla_indicador", "notas_indicadores", "sigla_indicador"),
+                new IndexDefinition("IX_notas_indicadores_criado_em", "notas_indicadores", "criado_em"),
+                new IndexDefinition("IX_notas_indicadores_id_author", "notas_indicadores", "id_author"),
+                new IndexDefinition("IX_notas_indicadores_tx_componente", "notas_indicadores", "tx_componente"),
+                new IndexDefinition("IX_notas_indicadores_cnpb_data", "notas_indicadores", "cnpb, data_referencia"),
+                new IndexDefinition("IX_notas_indicadores_indicador_data", "notas_indicadores", "id_indicador, data_referencia"),
+                new IndexDefinition("IX_notas_indicadores_data_cnpb_indicador_covering", "notas_indicadores", "data_referencia, cnpb, id_indicador"),
+                new IndexDefinition("IX_notas_indicadores_nota_not_null", "notas_indicadores", "nota"),
+                new IndexDefinition("IX_notas_indicadores_recent_data", "notas_indicadores", "data_referencia")
         };
 
         StringBuilder sqlBuilder = new StringBuilder();

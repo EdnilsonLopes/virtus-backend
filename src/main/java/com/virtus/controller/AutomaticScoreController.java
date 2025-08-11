@@ -37,4 +37,11 @@ public class AutomaticScoreController extends
         getService().calcularNotasAutomaticas(List.of(referenceDate));
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/calculateAll")
+    public ResponseEntity<Void> calculateAllScores() {
+        getService().calculateAll();
+        return ResponseEntity.ok().build();
+    }
+
 }

@@ -2,6 +2,7 @@ package com.virtus.persistence;
 
 import static com.virtus.persistence.bigqueries.EvaluatePlansTreeQuery.EVALUATE_PLANS_TREE_QUERY;
 
+import java.sql.Types;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -15,6 +16,7 @@ import com.virtus.domain.dto.CurrentWeightsDTO;
 import com.virtus.domain.dto.request.ProductElementItemRequestDTO;
 import com.virtus.domain.dto.request.ProductElementRequestDTO;
 import com.virtus.domain.dto.request.ProductPillarRequestDTO;
+import com.virtus.domain.dto.request.ProductPlanRequestDTO;
 import com.virtus.domain.model.CurrentUser;
 import com.virtus.domain.model.EvaluatePlansConsultModel;
 
@@ -285,12 +287,12 @@ public class EvaluatePlansRepository {
                                 "             T1.id_plano, T1.id_tipo_nota, T1.peso_tn, T2.soma_pesos_tipos_notas " +
                                 "), " +
                                 "T4 AS ( " +
-                                "    SELECT T3.id_entidade, T3.id_ciclo, T3.id_pilar, T3.id_componente, T3.id_plano, " +
+                                "    SELECT p.id_entidade, p.id_ciclo, p.id_pilar, p.id_componente, p.id_plano, " +
                                 "           ponderacao_tipo, peso_tn, soma_pesos_tipos_notas, " +
                                 "           ponderacao_tipo * peso_tn / 100 AS peso_plano, " +
                                 "           p.peso / 100 AS ponderacao_plano " +
                                 "    FROM T3 " +
-                                "    INNER JOIN virtus.produtos_planos p ON p.id_entidade = T3.id_entidade " +
+                                "    RIGHT JOIN virtus.produtos_planos p ON p.id_entidade = T3.id_entidade " +
                                 "                                       AND p.id_ciclo = T3.id_ciclo " +
                                 "                                       AND p.id_pilar = T3.id_pilar " +
                                 "                                       AND p.id_componente = T3.id_componente " +
@@ -298,7 +300,7 @@ public class EvaluatePlansRepository {
                                 "), " +
                                 "T5 AS ( " +
                                 "    SELECT T4.id_entidade, T4.id_ciclo, T4.id_pilar, T4.id_componente, " +
-                                "           SUM(peso_plano * ponderacao_plano) AS peso_componente " +
+                                "           COALESCE(SUM(peso_plano * ponderacao_plano),1) AS peso_componente " +
                                 "    FROM T4 " +
                                 "    GROUP BY T4.id_entidade, T4.id_ciclo, T4.id_pilar, T4.id_componente " +
                                 ") " +
@@ -325,13 +327,12 @@ public class EvaluatePlansRepository {
 
         public CurrentWeightsDTO loadCurrentWeights(ProductElementRequestDTO dto) {
                 String sql = "SELECT " +
-                                "  COALESCE(FORMAT(a.nota, 'N2'), '.00') AS tipo_nota, " +
-                                "  COALESCE(FORMAT(b.nota, 'N2'), '.00') AS plano, " +
-                                "  COALESCE(FORMAT(c.nota, 'N2'), '.00') AS componente, " +
-                                "  COALESCE(FORMAT(d.nota, 'N2'), '.00') AS pilar, " +
-                                "  COALESCE(FORMAT(e.nota, 'N2'), '.00') AS ciclo " +
-                                "FROM virtus.produtos_tipos_notas a " +
-                                "JOIN virtus.produtos_planos b ON a.id_entidade = b.id_entidade " +
+                                "  COALESCE(FORMAT(a.peso, 'N2'), '0.00') AS plano, " +
+                                "  COALESCE(FORMAT(b.peso, 'N2'), '0.00') AS tipo_nota, " +
+                                "  COALESCE(FORMAT(c.peso, 'N2'), '0.00') AS componente, " +
+                                "  COALESCE(FORMAT(d.peso, 'N2'), '0.00') AS pilar " +
+                                "FROM virtus.produtos_planos a " +
+                                "LEFT JOIN virtus.produtos_tipos_notas b ON a.id_entidade = b.id_entidade " +
                                 " AND a.id_ciclo = b.id_ciclo AND a.id_pilar = b.id_pilar " +
                                 " AND a.id_componente = b.id_componente AND a.id_plano = b.id_plano " +
                                 "JOIN virtus.produtos_componentes c ON a.id_entidade = c.id_entidade " +
@@ -346,7 +347,7 @@ public class EvaluatePlansRepository {
                                 " AND a.id_pilar = ? " +
                                 " AND a.id_componente = ? " +
                                 " AND a.id_plano = ? " +
-                                " AND a.id_tipo_nota = ? ";
+                                " AND (b.id_tipo_nota = ? OR b.id_tipo_nota IS NULL)";
 
                 return jdbcTemplate.query(sql, ps -> {
                         ps.setLong(1, dto.getEntidadeId());
@@ -354,7 +355,11 @@ public class EvaluatePlansRepository {
                         ps.setLong(3, dto.getPilarId());
                         ps.setLong(4, dto.getComponenteId());
                         ps.setLong(5, dto.getPlanoId());
-                        ps.setLong(6, dto.getTipoNotaId());
+                        if (dto.getTipoNotaId() != null) {
+                                ps.setLong(6, dto.getTipoNotaId()); // Se tipoNotaId não for null, passamos o valor.
+                        } else {
+                                ps.setNull(6, Types.NULL); // Caso tipoNotaId seja null, passamos NULL.
+                        }
                 }, rs -> {
                         if (rs.next()) {
                                 return CurrentWeightsDTO.builder()
@@ -483,42 +488,42 @@ public class EvaluatePlansRepository {
                                 "           T1.id_plano, T1.id_tipo_nota, T1.peso_tn, T2.soma_pesos_tipos_notas " +
                                 "), " +
                                 "T4 AS ( " +
-                                "  SELECT T3.id_entidade, T3.id_ciclo, T3.id_pilar, T3.id_componente, T3.id_plano, " +
+                                "  SELECT p.id_entidade, p.id_ciclo, p.id_pilar, p.id_componente, p.id_plano, " +
                                 "         SUM(ponderacao_tipo * peso_tn / 100) AS total_peso_plano " +
                                 "  FROM T3 " +
-                                "  INNER JOIN virtus.produtos_planos p ON p.id_entidade = T3.id_entidade " +
+                                "  RIGHT JOIN virtus.produtos_planos p ON p.id_entidade = T3.id_entidade " +
                                 "                                     AND p.id_ciclo = T3.id_ciclo " +
                                 "                                     AND p.id_pilar = T3.id_pilar " +
                                 "                                     AND p.id_componente = T3.id_componente " +
                                 "                                     AND p.id_plano = T3.id_plano " +
-                                "  GROUP BY T3.id_entidade, T3.id_ciclo, T3.id_pilar, T3.id_componente, T3.id_plano " +
+                                "  GROUP BY p.id_entidade, p.id_ciclo, p.id_pilar, p.id_componente, p.id_plano " +
                                 "), " +
                                 "T5 AS ( " +
-                                "  SELECT T4.id_entidade, T4.id_ciclo, T4.id_pilar, T4.id_componente, T4.id_plano, p.peso / 100 AS ponderacao_plano "
+                                "  SELECT p.id_entidade, p.id_ciclo, p.id_pilar, p.id_componente, p.id_plano, p.peso / 100 AS ponderacao_plano "
                                 +
                                 "  FROM virtus.produtos_planos p " +
-                                "  INNER JOIN T4 ON T4.id_entidade = p.id_entidade " +
+                                "  LEFT JOIN T4 ON T4.id_entidade = p.id_entidade " +
                                 "               AND T4.id_ciclo = p.id_ciclo " +
                                 "               AND T4.id_pilar = p.id_pilar " +
                                 "               AND T4.id_componente = p.id_componente " +
                                 "               AND T4.id_plano = p.id_plano " +
-                                "  GROUP BY T4.id_entidade, T4.id_ciclo, T4.id_pilar, T4.id_componente, T4.id_plano, p.peso "
+                                "  GROUP BY p.id_entidade, p.id_ciclo, p.id_pilar, p.id_componente, p.id_plano, p.peso "
                                 +
                                 "), " +
                                 "T6 AS ( " +
-                                "  SELECT T4.id_entidade, T4.id_ciclo, T4.id_pilar, T4.id_componente, " +
-                                "         SUM(T4.total_peso_plano * T5.ponderacao_plano) AS denominador " +
+                                "  SELECT T5.id_entidade, T5.id_ciclo, T5.id_pilar, T5.id_componente, " +
+                                "         SUM(COALESCE(T4.total_peso_plano,1) * T5.ponderacao_plano) AS denominador " +
                                 "  FROM T4 " +
-                                "  INNER JOIN T5 ON T4.id_entidade = T5.id_entidade " +
+                                "  LEFT JOIN T5 ON T4.id_entidade = T5.id_entidade " +
                                 "               AND T4.id_ciclo = T5.id_ciclo " +
                                 "               AND T4.id_pilar = T5.id_pilar " +
                                 "               AND T4.id_componente = T5.id_componente " +
                                 "               AND T4.id_plano = T5.id_plano " +
-                                "  GROUP BY T4.id_entidade, T4.id_ciclo, T4.id_pilar, T4.id_componente " +
+                                "  GROUP BY T5.id_entidade, T5.id_ciclo, T5.id_pilar, T5.id_componente " +
                                 "), " +
                                 "T7 AS ( " +
                                 "  SELECT p.id_entidade, p.id_ciclo, p.id_pilar, p.id_componente, " +
-                                "         SUM(p.nota * T4.total_peso_plano * T5.ponderacao_plano) / T6.denominador AS nota_componente "
+                                "         SUM(p.nota * COALESCE(T4.total_peso_plano,1) * T5.ponderacao_plano) / T6.denominador AS nota_componente "
                                 +
                                 "  FROM virtus.produtos_planos p " +
                                 "  INNER JOIN T4 ON T4.id_entidade = p.id_entidade " +
@@ -563,7 +568,7 @@ public class EvaluatePlansRepository {
         public void updatePillarGrade(ProductElementRequestDTO dto) {
                 String sql = "UPDATE virtus.produtos_pilares " +
                                 "SET nota = ( " +
-                                "  SELECT ROUND(SUM(nota * peso) / SUM(peso), 2) AS media " +
+                                "  SELECT ROUND(SUM(b.nota * b.peso) / SUM(b.peso), 2) AS media " +
                                 "  FROM virtus.produtos_componentes b " +
                                 "  WHERE produtos_pilares.id_entidade = b.id_entidade " +
                                 "    AND produtos_pilares.id_ciclo = b.id_ciclo " +
@@ -603,13 +608,13 @@ public class EvaluatePlansRepository {
 
         public CurrentGradesDTO loadCurrentGrades(ProductElementRequestDTO dto) {
                 String sql = "SELECT " +
-                                "  COALESCE(FORMAT(a.nota, 'N2'), '.00') AS tipo_nota, " +
-                                "  COALESCE(FORMAT(b.nota, 'N2'), '.00') AS plano, " +
-                                "  COALESCE(FORMAT(c.nota, 'N2'), '.00') AS componente, " +
-                                "  COALESCE(FORMAT(d.nota, 'N2'), '.00') AS pilar, " +
-                                "  COALESCE(FORMAT(e.nota, 'N2'), '.00') AS ciclo " +
-                                "FROM virtus.produtos_tipos_notas a " +
-                                "JOIN virtus.produtos_planos b ON a.id_entidade = b.id_entidade " +
+                                "  COALESCE(FORMAT(a.nota, 'N2'), '0.00') AS plano, " +
+                                "  COALESCE(FORMAT(b.nota, 'N2'), '0.00') AS tipo_nota, " +
+                                "  COALESCE(FORMAT(c.nota, 'N2'), '0.00') AS componente, " +
+                                "  COALESCE(FORMAT(d.nota, 'N2'), '0.00') AS pilar, " +
+                                "  COALESCE(FORMAT(e.nota, 'N2'), '0.00') AS ciclo " +
+                                "FROM virtus.produtos_planos a " +
+                                "LEFT JOIN virtus.produtos_tipos_notas b ON a.id_entidade = b.id_entidade " +
                                 " AND a.id_ciclo = b.id_ciclo " +
                                 " AND a.id_pilar = b.id_pilar " +
                                 " AND a.id_componente = b.id_componente " +
@@ -628,7 +633,7 @@ public class EvaluatePlansRepository {
                                 "  AND a.id_pilar = ? " +
                                 "  AND a.id_componente = ? " +
                                 "  AND a.id_plano = ? " +
-                                "  AND a.id_tipo_nota = ?";
+                                "  AND (b.id_tipo_nota = ? OR b.id_tipo_nota IS NULL)";
 
                 return jdbcTemplate.query(sql, ps -> {
                         ps.setLong(1, dto.getEntidadeId());
@@ -636,7 +641,11 @@ public class EvaluatePlansRepository {
                         ps.setLong(3, dto.getPilarId());
                         ps.setLong(4, dto.getComponenteId());
                         ps.setLong(5, dto.getPlanoId());
-                        ps.setLong(6, dto.getTipoNotaId());
+                        if (dto.getTipoNotaId() != null) {
+                                ps.setLong(6, dto.getTipoNotaId()); // Se tipoNotaId não for null, passamos o valor.
+                        } else {
+                                ps.setNull(6, Types.NULL); // Caso tipoNotaId seja null, passamos NULL.
+                        }
                 }, rs -> {
                         if (rs.next()) {
                                 return CurrentGradesDTO.builder()
@@ -776,6 +785,61 @@ public class EvaluatePlansRepository {
                                         dto.getElementoId(),
                                         dto.getItemId());
                 }
+        }
+
+        public void updateRatifyNote(ProductElementRequestDTO requestDTO, CurrentUser currentUser) {
+                // Query SQL para atualizar a nota e motivação
+                String sql = "UPDATE virtus.produtos_planos SET nota = ?, motivacao_nota = ? " +
+                                "WHERE id_entidade = ? AND id_ciclo = ? AND id_pilar = ? AND id_plano = ? AND id_componente = ?";
+
+                // Executando a query com os parâmetros preenchidos
+                jdbcTemplate.update(sql,
+                                requestDTO.getNota(), // Preenchendo a nota
+                                requestDTO.getMotivacao(), // Preenchendo a motivação
+                                requestDTO.getEntidadeId(), // Preenchendo o id_entidade na cláusula WHERE
+                                requestDTO.getCicloId(), // Preenchendo o id_ciclo
+                                requestDTO.getPilarId(), // Preenchendo o id_pilar
+                                requestDTO.getPlanoId(), // Preenchendo o id_plano
+                                requestDTO.getComponenteId()); // Preenchendo o id_componente na cláusula WHERE
+        }
+
+        // Método para retificar a nota
+        public void updateRectifyNote(ProductElementRequestDTO requestDTO, CurrentUser currentUser) {
+                String sql = "UPDATE virtus.produtos_planos SET nota = ?, motivacao_nota = ? " +
+                                "WHERE id_entidade = ? AND id_ciclo = ? AND id_pilar = ? AND id_plano = ? AND id_componente = ?";
+
+                jdbcTemplate.update(sql,
+                                requestDTO.getNota(),
+                                requestDTO.getMotivacao(),
+                                requestDTO.getEntidadeId(),
+                                requestDTO.getCicloId(),
+                                requestDTO.getPilarId(),
+                                requestDTO.getPlanoId(),
+                                requestDTO.getComponenteId());
+        }
+
+        public void registerHistory(ProductElementRequestDTO requestDTO, String tipoAlteracao,
+                        CurrentUser currentUser) {
+                // Query SQL para registrar o histórico da alteração
+                String sql = "INSERT INTO virtus.produtos_planos_historicos(" +
+                                "id_entidade, id_ciclo, id_pilar, id_plano, id_componente, " +
+                                "id_tipo_pontuacao, peso, nota, tipo_alteracao, motivacao_nota, " +
+                                "id_author, criado_em, id_versao_origem, id_status) " +
+                                "SELECT id_entidade, id_ciclo, id_pilar, id_plano, id_componente, " +
+                                "id_tipo_pontuacao, peso, nota, ?, motivacao_nota, " +
+                                "? , GETDATE(), id_author, id_status " +
+                                "FROM virtus.produtos_planos " +
+                                "WHERE id_entidade = ? AND id_ciclo = ? AND id_pilar = ? " +
+                                "AND id_plano = ? AND id_componente = ?";
+
+                jdbcTemplate.update(sql,
+                                tipoAlteracao,
+                                currentUser.getId(),
+                                requestDTO.getEntidadeId(),
+                                requestDTO.getCicloId(),
+                                requestDTO.getPilarId(),
+                                requestDTO.getPlanoId(),
+                                requestDTO.getComponenteId());
         }
 
 }

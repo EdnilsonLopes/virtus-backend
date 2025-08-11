@@ -129,7 +129,7 @@ public class IndicatorScoreService
 
                 List<IndicatorScore> allSaved = getRepository().saveAll(scores);
                 getRepository().flush();
-                System.out.println("Salvos na página " + page + ": " + allSaved.size() + " registros.");
+                System.out.println(referenceDate + " - página " + page + ": " + allSaved.size() + " registros salvos.");
                 page++;
 
             } catch (Exception e) {

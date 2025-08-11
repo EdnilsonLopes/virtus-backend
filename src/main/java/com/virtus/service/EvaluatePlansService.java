@@ -16,6 +16,7 @@ import com.virtus.domain.dto.CurrentWeightsDTO;
 import com.virtus.domain.dto.request.ProductElementItemRequestDTO;
 import com.virtus.domain.dto.request.ProductElementRequestDTO;
 import com.virtus.domain.dto.request.ProductPillarRequestDTO;
+import com.virtus.domain.dto.request.ProductPlanRequestDTO;
 import com.virtus.domain.dto.response.ComponentResponseDTO;
 import com.virtus.domain.dto.response.CycleEntityResponseDTO;
 import com.virtus.domain.dto.response.CycleResponseDTO;
@@ -225,47 +226,89 @@ public class EvaluatePlansService {
                                         });
 
                         // Nível 6: Tipo Nota
-                        EvaluatePlansTreeNode tipoNotaNode = planoNode.getChildren().stream()
-                                        .filter(node -> node.getId().equals(plan.getTipoNotaId()))
-                                        .findFirst()
-                                        .orElseGet(() -> {
-                                                EvaluatePlansTreeNode node = EvaluatePlansTreeNode.builder()
-                                                                .id(plan.getTipoNotaId())
-                                                                .name(plan.getTipoNotaNome())
-                                                                .type("Tipo Nota")
-                                                                .grade(plan.getTipoNotaNota())
-                                                                .weight(plan.getTipoNotaPeso())
-                                                                .periodoPermitido(plan.getPeriodoPermitido())
-                                                                .periodoCiclo(plan.getPeriodoCiclo())
-                                                                .cicloAnalisado(plan.getCicloAnalisado())
-                                                                .pilarAnalisado(plan.getPilarAnalisado())
-                                                                .componenteAnalisado(plan.getComponenteAnalisado())
-                                                                .planoAnalisado(plan.getPlanoAnalisado())
-                                                                .tipoNotaAnalisado(plan.getTipoNotaAnalisado())
-                                                                .cicloDescrito(plan.getCicloDescrito())
-                                                                .pilarDescrito(plan.getPilarDescrito())
-                                                                .componenteDescrito(plan.getComponenteDescrito())
-                                                                .planoDescrito(plan.getPlanoDescrito())
-                                                                .tipoNotaDescrito(plan.getTipoNotaDescrito())
-                                                                .children(new ArrayList<>())
-                                                                .build();
-                                                planoNode.addChild(node);
-                                                return node;
-                                        });
+                        if (plan.getTipoNotaId() != 0) {
+                                EvaluatePlansTreeNode tipoNotaNode = planoNode.getChildren().stream()
+                                                .filter(node -> node.getId().equals(plan.getTipoNotaId()))
+                                                .findFirst()
+                                                .orElseGet(() -> {
 
-                        // Nível 7: Elemento
-                        EvaluatePlansTreeNode elementoNode = tipoNotaNode.getChildren().stream()
-                                        .filter(node -> node.getId().equals(plan.getElementoId()))
-                                        .findFirst()
-                                        .orElseGet(() -> {
-                                                EvaluatePlansTreeNode node = EvaluatePlansTreeNode.builder()
-                                                                .id(plan.getElementoId())
-                                                                .name(plan.getElementoNome())
-                                                                .type("Elemento")
-                                                                .grade(plan.getElementoNota())
-                                                                .weight(plan.getElementoPeso())
-                                                                .auditorId(plan.getAuditorId())
-                                                                .supervisorId(plan.getSupervisorId())
+                                                        EvaluatePlansTreeNode node = EvaluatePlansTreeNode.builder()
+                                                                        .id(plan.getTipoNotaId())
+                                                                        .name(plan.getTipoNotaNome())
+                                                                        .type("Tipo Nota")
+                                                                        .grade(plan.getTipoNotaNota())
+                                                                        .weight(plan.getTipoNotaPeso())
+                                                                        .periodoPermitido(plan.getPeriodoPermitido())
+                                                                        .periodoCiclo(plan.getPeriodoCiclo())
+                                                                        .cicloAnalisado(plan.getCicloAnalisado())
+                                                                        .pilarAnalisado(plan.getPilarAnalisado())
+                                                                        .componenteAnalisado(
+                                                                                        plan.getComponenteAnalisado())
+                                                                        .planoAnalisado(plan.getPlanoAnalisado())
+                                                                        .tipoNotaAnalisado(plan.getTipoNotaAnalisado())
+                                                                        .cicloDescrito(plan.getCicloDescrito())
+                                                                        .pilarDescrito(plan.getPilarDescrito())
+                                                                        .componenteDescrito(
+                                                                                        plan.getComponenteDescrito())
+                                                                        .planoDescrito(plan.getPlanoDescrito())
+                                                                        .tipoNotaDescrito(plan.getTipoNotaDescrito())
+                                                                        .children(new ArrayList<>())
+                                                                        .build();
+                                                        planoNode.addChild(node);
+                                                        return node;
+                                                });
+
+                                // Nível 7: Elemento
+                                if (plan.getElementoId() != 0) {
+                                        EvaluatePlansTreeNode elementoNode = tipoNotaNode.getChildren().stream()
+                                                        .filter(node -> node.getId().equals(plan.getElementoId()))
+                                                        .findFirst()
+                                                        .orElseGet(() -> {
+                                                                EvaluatePlansTreeNode node = EvaluatePlansTreeNode
+                                                                                .builder()
+                                                                                .id(plan.getElementoId())
+                                                                                .name(plan.getElementoNome())
+                                                                                .type("Elemento")
+                                                                                .grade(plan.getElementoNota())
+                                                                                .weight(plan.getElementoPeso())
+                                                                                .auditorId(plan.getAuditorId())
+                                                                                .supervisorId(plan.getSupervisorId())
+                                                                                .periodoPermitido(plan
+                                                                                                .getPeriodoPermitido())
+                                                                                .periodoCiclo(plan.getPeriodoCiclo())
+                                                                                .cicloAnalisado(plan
+                                                                                                .getCicloAnalisado())
+                                                                                .pilarAnalisado(plan
+                                                                                                .getPilarAnalisado())
+                                                                                .componenteAnalisado(plan
+                                                                                                .getComponenteAnalisado())
+                                                                                .planoAnalisado(plan
+                                                                                                .getPlanoAnalisado())
+                                                                                .tipoNotaAnalisado(plan
+                                                                                                .getTipoNotaAnalisado())
+                                                                                .elementoAnalisado(plan
+                                                                                                .getElementoAnalisado())
+                                                                                .cicloDescrito(plan.getCicloDescrito())
+                                                                                .pilarDescrito(plan.getPilarDescrito())
+                                                                                .componenteDescrito(plan
+                                                                                                .getComponenteDescrito())
+                                                                                .planoDescrito(plan.getPlanoDescrito())
+                                                                                .tipoNotaDescrito(plan
+                                                                                                .getTipoNotaDescrito())
+                                                                                .elementoDescrito(plan
+                                                                                                .getElementoDescrito())
+                                                                                .gradeTypeId(plan.getTipoPontuacaoId())
+                                                                                .children(new ArrayList<>())
+                                                                                .build();
+                                                                tipoNotaNode.addChild(node);
+                                                                return node;
+                                                        });
+                                        // Nível 8: Item (se o item tiver um ID válido)
+                                        if (plan.getItemId() != 0) {
+                                                EvaluatePlansTreeNode itemNode = EvaluatePlansTreeNode.builder()
+                                                                .id(plan.getItemId())
+                                                                .name(plan.getItemNome())
+                                                                .type("Item")
                                                                 .periodoPermitido(plan.getPeriodoPermitido())
                                                                 .periodoCiclo(plan.getPeriodoCiclo())
                                                                 .cicloAnalisado(plan.getCicloAnalisado())
@@ -274,44 +317,19 @@ public class EvaluatePlansService {
                                                                 .planoAnalisado(plan.getPlanoAnalisado())
                                                                 .tipoNotaAnalisado(plan.getTipoNotaAnalisado())
                                                                 .elementoAnalisado(plan.getElementoAnalisado())
+                                                                .itemAnalisado(plan.getItemAnalisado())
                                                                 .cicloDescrito(plan.getCicloDescrito())
                                                                 .pilarDescrito(plan.getPilarDescrito())
                                                                 .componenteDescrito(plan.getComponenteDescrito())
                                                                 .planoDescrito(plan.getPlanoDescrito())
                                                                 .tipoNotaDescrito(plan.getTipoNotaDescrito())
                                                                 .elementoDescrito(plan.getElementoDescrito())
-                                                                .gradeTypeId(plan.getTipoPontuacaoId())
+                                                                .itemDescrito(plan.getItemDescrito())
                                                                 .children(new ArrayList<>())
                                                                 .build();
-                                                tipoNotaNode.addChild(node);
-                                                return node;
-                                        });
-
-                        // Nível 8: Item (se o item tiver um ID válido)
-                        if (plan.getItemId() != 0) {
-                                EvaluatePlansTreeNode itemNode = EvaluatePlansTreeNode.builder()
-                                                .id(plan.getItemId())
-                                                .name(plan.getItemNome())
-                                                .type("Item")
-                                                .periodoPermitido(plan.getPeriodoPermitido())
-                                                .periodoCiclo(plan.getPeriodoCiclo())
-                                                .cicloAnalisado(plan.getCicloAnalisado())
-                                                .pilarAnalisado(plan.getPilarAnalisado())
-                                                .componenteAnalisado(plan.getComponenteAnalisado())
-                                                .planoAnalisado(plan.getPlanoAnalisado())
-                                                .tipoNotaAnalisado(plan.getTipoNotaAnalisado())
-                                                .elementoAnalisado(plan.getElementoAnalisado())
-                                                .itemAnalisado(plan.getItemAnalisado())
-                                                .cicloDescrito(plan.getCicloDescrito())
-                                                .pilarDescrito(plan.getPilarDescrito())
-                                                .componenteDescrito(plan.getComponenteDescrito())
-                                                .planoDescrito(plan.getPlanoDescrito())
-                                                .tipoNotaDescrito(plan.getTipoNotaDescrito())
-                                                .elementoDescrito(plan.getElementoDescrito())
-                                                .itemDescrito(plan.getItemDescrito())
-                                                .children(new ArrayList<>())
-                                                .build();
-                                elementoNode.addChild(itemNode);
+                                                elementoNode.addChild(itemNode);
+                                        }
+                                }
                         }
                 }
 
@@ -492,4 +510,29 @@ public class EvaluatePlansService {
                                 gradeTypeId, elementId, itemId);
         }
 
+        public CurrentValuesDTO  ratifyNote(ProductElementRequestDTO requestDTO, CurrentUser currentUser) {
+                evaluatePlansRepository.updateRatifyNote(requestDTO, currentUser);
+                evaluatePlansRepository.registerHistory(requestDTO, "RA", currentUser  );
+                evaluatePlansRepository.updateComponentWeights(requestDTO, currentUser);
+                CurrentWeightsDTO currentWeights = evaluatePlansRepository.loadCurrentWeights(requestDTO);
+
+                evaluatePlansRepository.updateComponentGrade(requestDTO);
+                evaluatePlansRepository.updatePillarGrade(requestDTO);
+                evaluatePlansRepository.updateCycleGrade(requestDTO);
+                CurrentGradesDTO currentGrades = evaluatePlansRepository.loadCurrentGrades(requestDTO);
+                return buildCurrentValues(currentWeights, currentGrades);
+        }
+
+        public CurrentValuesDTO rectifyNote(ProductElementRequestDTO requestDTO, CurrentUser currentUser) {
+                evaluatePlansRepository.updateRectifyNote(requestDTO, currentUser);
+                evaluatePlansRepository.registerHistory(requestDTO, "RE", currentUser);
+                evaluatePlansRepository.updateComponentWeights(requestDTO, currentUser);
+                CurrentWeightsDTO currentWeights = evaluatePlansRepository.loadCurrentWeights(requestDTO);
+
+                evaluatePlansRepository.updateComponentGrade(requestDTO);
+                evaluatePlansRepository.updatePillarGrade(requestDTO);
+                evaluatePlansRepository.updateCycleGrade(requestDTO);
+                CurrentGradesDTO currentGrades = evaluatePlansRepository.loadCurrentGrades(requestDTO);
+                return buildCurrentValues(currentWeights, currentGrades);
+        }
 }

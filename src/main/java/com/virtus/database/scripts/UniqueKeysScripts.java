@@ -63,7 +63,9 @@ public class UniqueKeysScripts {
                 new UniqueKeyDefinition("produtos_elementos_unique_key", "produtos_elementos",
                         "id_entidade, id_ciclo, id_pilar, id_componente, id_plano, id_tipo_nota, id_elemento"),
                 new UniqueKeyDefinition("produtos_itens_unique_key", "produtos_itens",
-                        "id_entidade, id_ciclo, id_pilar, id_componente, id_plano, id_tipo_nota, id_elemento, id_item")
+                        "id_entidade, id_ciclo, id_pilar, id_componente, id_plano, id_tipo_nota, id_elemento, id_item"),
+                new UniqueKeyDefinition("notas_indicadores_ref_ind_cnpb_unique_key", "notas_indicadores",
+                        "data_referencia, id_indicador, cnpb")
         };
 
         StringBuilder sqlBuilder = new StringBuilder();
