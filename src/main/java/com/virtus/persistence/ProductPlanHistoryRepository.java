@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import com.virtus.domain.dto.response.HistoricalSeriesDTO;
 import com.virtus.domain.dto.response.ProductPlanHistoryDTO;
 
 @Repository
@@ -58,6 +59,29 @@ public class ProductPlanHistoryRepository {
                     dto.setAuthorName(rs.getString("author_name"));
                     dto.setAlteradoEm(rs.getString("alterado_em"));
                     dto.setMotivacao(rs.getString("motivacao"));
+                    return dto;
+                });
+    }
+
+    public List<HistoricalSeriesDTO> findHistoricalSeries(Long entidadeId, Long cicloId, Long pilarId,
+            Long componenteId, Long planoId) {
+        String sql = "SELECT " +
+                "COALESCE(na.nota, 0) AS nota, " +
+                "COALESCE(na.data_referencia, '') AS dataReferencia, " +
+                "COALESCE(FORMAT(na.criado_em, 'dd/MM/yyyy HH:mm:ss'), '') AS criadoEm " +
+                "FROM virtus.notas_automaticas na JOIN virtus.planos p ON na.cnpb = p.cnpb " +
+                "WHERE na.id_componente = ? " +
+                "AND p.id_plano = ? " +
+                "ORDER BY data_referencia DESC";
+
+        // Executa a consulta SQL e mapeia o resultado para uma lista de
+        // HistoricalSeriesDTO
+        return jdbcTemplate.query(sql, new Object[] { componenteId, planoId },
+                (rs, rowNum) -> {
+                    HistoricalSeriesDTO dto = new HistoricalSeriesDTO();
+                    dto.setNota(rs.getDouble("nota"));
+                    dto.setDataReferencia(rs.getString("dataReferencia"));
+                    dto.setCriadoEm(rs.getString("criadoEm"));
                     return dto;
                 });
     }

@@ -9,9 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.virtus.domain.dto.response.ProductPillarHistoryDTO;
+import com.virtus.domain.dto.response.HistoricalSeriesDTO;
 import com.virtus.domain.dto.response.ProductPlanHistoryDTO;
-import com.virtus.service.ProductPillarHistoryService;
 import com.virtus.service.ProductPlanHistoryService;
 
 @RestController
@@ -31,6 +30,18 @@ public class ProductPlanHistoryController {
 
         List<ProductPlanHistoryDTO> historyList = service.find(entidadeId, cicloId, pilarId, componenteId, planoId);
         return ResponseEntity.ok(historyList);
+    }
+
+    @GetMapping("/historical-series")
+    public ResponseEntity<List<HistoricalSeriesDTO>> getHistoricalSeries(
+            @RequestParam Long entidadeId,
+            @RequestParam Long cicloId,
+            @RequestParam Long pilarId,
+            @RequestParam Long componenteId,
+            @RequestParam Long planoId) {
+
+        List<HistoricalSeriesDTO> historicalSeries = service.findHistoricalSeries(entidadeId, cicloId, pilarId, componenteId, planoId);
+        return ResponseEntity.ok(historicalSeries);
     }
 
 }

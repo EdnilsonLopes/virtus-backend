@@ -309,6 +309,8 @@ public class EvaluatePlansService {
                                                                 .id(plan.getItemId())
                                                                 .name(plan.getItemNome())
                                                                 .type("Item")
+                                                                .auditorId(plan.getAuditorId())
+                                                                .supervisorId(plan.getSupervisorId())                                                                
                                                                 .periodoPermitido(plan.getPeriodoPermitido())
                                                                 .periodoCiclo(plan.getPeriodoCiclo())
                                                                 .cicloAnalisado(plan.getCicloAnalisado())
